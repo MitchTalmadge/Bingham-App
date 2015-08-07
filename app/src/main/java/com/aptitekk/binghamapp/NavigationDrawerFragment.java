@@ -44,6 +44,8 @@ public class NavigationDrawerFragment extends Fragment {
     public void setUp(int fragmentID, DrawerLayout drawerLayout, Toolbar toolbar) {
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
+        this.drawerList.setDivider(null);
+        this.drawerList.setDividerHeight(0);
         this.drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
 
         // Set the adapter for the list view
