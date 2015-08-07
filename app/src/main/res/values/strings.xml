@@ -1,9 +1,17 @@
 <resources>
     <string name="app_name">Bingham App</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string-array name="drawer_list_strings">
+        <item>Main</item>
+        <item>School News</item>
+        <item>Bell Schedules</item>
+        <item>Lunch Menus</item>
+        <item>School Map</item>
+        <item>Upcoming Events</item>
+        <item>Skyward Access</item>
+    </string-array>
 </resources>
