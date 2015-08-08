@@ -110,6 +110,7 @@ public class NavigationDrawerFragment extends Fragment {
             case 4: //School Map
                 break;
             case 5: //Upcoming Events
+                newFragment = new UpcomingEventsFragment();
                 break;
             case 6: //Skyward Access
                 newFragment = new WebViewFragment();
