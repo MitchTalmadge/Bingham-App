@@ -106,6 +106,7 @@ public class NavigationDrawerFragment extends Fragment {
             case 2: //Bell Schedules
                 break;
             case 3: //Lunch Menus
+                newFragment = new LunchMenuFragment();
                 break;
             case 4: //School Map
                 break;

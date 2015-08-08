@@ -8,10 +8,10 @@
     <string-array name="drawer_list_strings">
         <item>0_Main</item>
         <item>1_School News</item>
+        <item>5_Upcoming Events</item>
         <item>2_Bell Schedules</item>
         <item>3_Lunch Menus</item>
         <item>4_School Map</item>
-        <item>5_Upcoming Events</item>
         <item>6_Skyward Access</item>
     </string-array>
 
