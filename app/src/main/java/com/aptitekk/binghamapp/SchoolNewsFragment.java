@@ -5,13 +5,13 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.RSSNewsFeed.RSSNewsFeed;
 
 import java.util.concurrent.Callable;
 
@@ -39,10 +39,11 @@ public class SchoolNewsFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        //Show Loading Fragment
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         LoadingFragment loadingFragment = new LoadingFragment();
         fragmentTransaction.replace(R.id.fragmentSpace, loadingFragment);
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.commit();
 
         if (isNetworkConnected()) {
@@ -56,9 +57,11 @@ public class SchoolNewsFragment extends Fragment {
             args.putString("description", "Could not download news!");
             messageCardFragment.setArguments(args);
 
-            fragmentTransaction = fragmentManager.beginTransaction();
+            //Show No Internet Fragment
+            fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, messageCardFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.addToBackStack("NoInternet");
             fragmentTransaction.commit();
         }
     }
@@ -71,10 +74,13 @@ public class SchoolNewsFragment extends Fragment {
     public void populateNewsFeed() {
         final Callable<Void> refresh = new Callable<Void>() {
             public Void call() {
+
+                //Show News List Fragment
                 NewsListFragment newsListFragment = new NewsListFragment();
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.addToBackStack("NewsList");
                 fragmentTransaction.commit();
                 return null;
             }

@@ -6,12 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.aptitekk.binghamapp.rssnewsfeed.NewsArticle;
+import com.aptitekk.binghamapp.RSSNewsFeed.NewsArticle;
 
 import java.util.List;
 
