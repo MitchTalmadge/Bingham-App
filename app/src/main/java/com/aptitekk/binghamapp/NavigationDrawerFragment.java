@@ -3,7 +3,8 @@ package com.aptitekk.binghamapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -23,7 +24,6 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
-    private String[] drawerListStrings;
 
     public NavigationDrawerFragment() {
         // Required empty public constructor
@@ -41,18 +41,34 @@ public class NavigationDrawerFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
-    public void setUp(int fragmentID, DrawerLayout drawerLayout, Toolbar toolbar) {
+    public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
+
+        switchFragment(0);
+
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
         this.drawerList.setDivider(null);
         this.drawerList.setDividerHeight(0);
-        this.drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
+        String[] drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
+        final int[] drawerListPositions = new int[drawerListStrings.length];
+
+        for (int i = 0; i < drawerListStrings.length; i++) {
+            String[] split = drawerListStrings[i].split("_");
+            drawerListPositions[i] = Integer.parseInt(split[0]);
+            drawerListStrings[i] = split[1];
+        }
 
         // Set the adapter for the list view
         drawerList.setAdapter(new ArrayAdapter<>(getActivity(),
                 R.layout.navigation_drawer_list_item, drawerListStrings));
         // Set the list's click listener
-        //drawerList.setOnItemClickListener(new DrawerItemClickListener());
+        drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object listItem = drawerList.getItemAtPosition(position);
+                switchFragment(drawerListPositions[position]);
+            }
+        });
 
 
         this.drawerLayout = drawerLayout;
@@ -78,39 +94,39 @@ public class NavigationDrawerFragment extends Fragment {
         });
     }
 
-    /*private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectItem(position);
+    private void switchFragment(int fragmentID) {
+        Fragment newFragment = null;
+        switch (fragmentID) {
+            case 0: //Main
+                newFragment = new MainFragment();
+                break;
+            case 1: //School News
+                newFragment = new SchoolNewsFragment();
+                break;
+            case 2: //Bell Schedules
+                break;
+            case 3: //Lunch Menus
+                break;
+            case 4: //School Map
+                break;
+            case 5: //Upcoming Events
+                break;
+            case 6: //Skyward Access
+                newFragment = new WebViewFragment();
+                break;
+            default:
+                break;
+        }
+        if (newFragment != null) {
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }
+        if (this.drawerLayout != null && this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.drawerLayout.closeDrawer(GravityCompat.START);
         }
     }
-
-    *//**
-     * Swaps fragments in the main content view
-     *//*
-    private void selectItem(int position) {
-        // Create a new fragment and specify the planet to show based on position
-        Fragment fragment = new PlanetFragment();
-        Bundle args = new Bundle();
-        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-        fragment.setArguments(args);
-
-        // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
-
-        // Highlight the selected item, update the title, and close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mPlanetTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
-    }
-
-    @Override
-    public void setTitle(CharSequence title) {
-        mTitle = title;
-        getActionBar().setTitle(mTitle);
-    }*/
 
 }

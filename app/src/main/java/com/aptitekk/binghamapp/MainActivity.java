@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String LOG_NAME = "BinghamApp";
     private Toolbar toolbar;
 
     @Override
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         NavigationDrawerFragment drawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
+        drawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
     }
 
     @Override
