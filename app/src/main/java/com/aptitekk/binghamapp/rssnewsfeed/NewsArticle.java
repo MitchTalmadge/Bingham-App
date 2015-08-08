@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp.RSSNewsFeed;
+package com.aptitekk.binghamapp.rssNewsFeed;
 
 public class NewsArticle {
 	

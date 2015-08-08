@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp.RSSNewsFeed;
+package com.aptitekk.binghamapp.rssNewsFeed;
 
 import android.os.AsyncTask;
 import android.util.Log;
