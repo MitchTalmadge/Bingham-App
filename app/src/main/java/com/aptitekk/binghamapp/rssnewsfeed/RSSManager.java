@@ -50,6 +50,10 @@ public class RSSManager {
             e.printStackTrace();
         }
 
+        if(doc == null) {
+            return;
+        }
+
     }
 
     public ArrayList<NewsArticle> getNewsArticles() {
