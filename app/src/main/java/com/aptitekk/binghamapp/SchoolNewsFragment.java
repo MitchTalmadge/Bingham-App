@@ -59,13 +59,6 @@ public class SchoolNewsFragment extends Fragment {
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentTransaction.commit();
 
-            /*frag = new SingleNotifCard();
-            args = new Bundle();
-            args.putString("title", "Bingham High School");
-            args.putString("description", "News and Announcments");
-            frag.setArguments(args);
-            fragmentTransaction.add(R.id.fragment_container, frag);*/
-
         } else {
             MessageCardFragment messageCardFragment = new MessageCardFragment();
             Bundle args = new Bundle();

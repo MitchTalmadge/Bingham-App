@@ -58,10 +58,7 @@ public class NewsListFragment extends Fragment {
     }
 
     public void onArticleClick(String URL) {
-        //FIXME
-        /*Intent i = new Intent(this, WebViewFragment.class);
-        i.putExtra("URL", URL);
-        startActivity(i);*/
+
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NewsArticleViewHolder> {
