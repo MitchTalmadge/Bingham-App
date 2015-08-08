@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SchoolNewsFragment extends Fragment {
+public class SchoolNewsFragment extends Fragment implements NewsListFragment.NewsListListener {
 
     public static RSSNewsFeed feed;
 
@@ -72,11 +72,13 @@ public class SchoolNewsFragment extends Fragment {
     }
 
     public void populateNewsFeed() {
+        final SchoolNewsFragment currentFragment = this;
         final Callable<Void> refresh = new Callable<Void>() {
             public Void call() {
 
                 //Show News List Fragment
                 NewsListFragment newsListFragment = new NewsListFragment();
+                newsListFragment.addNewsListListener(currentFragment);
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -89,4 +91,16 @@ public class SchoolNewsFragment extends Fragment {
         feed = new RSSNewsFeed(refresh);
     }
 
+    @Override
+    public void articleClicked(String URL) {
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        WebViewFragment webViewFragment = new WebViewFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("URL", URL);
+        webViewFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragmentSpace, webViewFragment);
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
 }

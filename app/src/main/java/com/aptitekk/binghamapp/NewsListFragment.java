@@ -3,10 +3,10 @@ package com.aptitekk.binghamapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.aptitekk.binghamapp.RSSNewsFeed.NewsArticle;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,10 +23,13 @@ import java.util.List;
  */
 public class NewsListFragment extends Fragment {
 
+    private RecyclerView recyclerView;
+
+    private ArrayList<NewsListListener> listeners = new ArrayList<>();
+
     public NewsListFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,17 +42,25 @@ public class NewsListFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        final RecyclerView rv = (RecyclerView) getView().findViewById(R.id.rv);
-        rv.setHasFixedSize(true);
+        recyclerView = (RecyclerView) getView().findViewById(R.id.rv);
+        recyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        rv.setLayoutManager(llm);
+        recyclerView.setLayoutManager(llm);
 
         RVAdapter adapter = new RVAdapter(SchoolNewsFragment.feed.getRssManager().getNewsArticles());
-        rv.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
+    }
+
+    public void addNewsListListener(NewsListListener listener)
+    {
+        listeners.add(listener);
     }
 
     public void onArticleClick(String URL) {
-
+        for(NewsListListener listener : listeners)
+        {
+            listener.articleClicked(URL);
+        }
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NewsArticleViewHolder> {
@@ -102,7 +114,10 @@ public class NewsListFragment extends Fragment {
             newsarticleViewHolder.pubDate.setText(articles.get(i).getPubDate());
             newsarticleViewHolder.url = articles.get(i).getLink();
         }
-
-
     }
+
+    public interface NewsListListener {
+        void articleClicked(String URL);
+    }
+
 }
