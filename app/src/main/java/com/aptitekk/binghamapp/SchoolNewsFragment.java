@@ -7,18 +7,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.aptitekk.binghamapp.rssnewsfeed.NewsArticle;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 
 
@@ -27,7 +21,7 @@ import java.util.concurrent.Callable;
  */
 public class SchoolNewsFragment extends Fragment {
 
-    public RSSNewsFeed feed;
+    public static RSSNewsFeed feed;
 
     public SchoolNewsFragment() {
         // Required empty public constructor
@@ -51,13 +45,9 @@ public class SchoolNewsFragment extends Fragment {
         fragmentTransaction.replace(R.id.fragmentSpace, loadingFragment);
         fragmentTransaction.commit();
 
-
         if (isNetworkConnected()) {
-            NewsListFragment newsListFragment = new NewsListFragment();
-            fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.commit();
+
+            populateNewsFeed();
 
         } else {
             MessageCardFragment messageCardFragment = new MessageCardFragment();
@@ -76,6 +66,21 @@ public class SchoolNewsFragment extends Fragment {
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         return (cm.getActiveNetworkInfo() != null);
+    }
+
+    public void populateNewsFeed() {
+        final Callable<Void> refresh = new Callable<Void>() {
+            public Void call() {
+                NewsListFragment newsListFragment = new NewsListFragment();
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
+                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.commit();
+                return null;
+            }
+        };
+
+        feed = new RSSNewsFeed(refresh);
     }
 
 }

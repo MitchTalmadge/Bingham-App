@@ -12,18 +12,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.aptitekk.binghamapp.rssnewsfeed.NewsArticle;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class NewsListFragment extends Fragment {
-
-    private RSSNewsFeed feed;
 
     public NewsListFragment() {
         // Required empty public constructor
@@ -46,15 +42,8 @@ public class NewsListFragment extends Fragment {
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(llm);
 
-        final Callable<Void> refresh = new Callable<Void>() {
-            public Void call() {
-                RVAdapter adapter = new RVAdapter(feed.getRssManager().getNewsArticles());
-                rv.setAdapter(adapter);
-                return null;
-            }
-        };
-
-        feed = new RSSNewsFeed(refresh);
+        RVAdapter adapter = new RVAdapter(SchoolNewsFragment.feed.getRssManager().getNewsArticles());
+        rv.setAdapter(adapter);
     }
 
     public void onArticleClick(String URL) {
