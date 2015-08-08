@@ -75,15 +75,32 @@ public class SchoolNewsFragment extends Fragment implements NewsListFragment.New
         final Callable<Void> refresh = new Callable<Void>() {
             public Void call() {
 
-                //Show News List Fragment
-                NewsListFragment newsListFragment = new NewsListFragment();
-                newsListFragment.addNewsListListener(currentFragment);
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-                return null;
+                if(feed.getRssManager().getNewsArticles().isEmpty()) {
+                    MessageCardFragment messageCardFragment = new MessageCardFragment();
+                    Bundle args = new Bundle();
+                    args.putString("title", "Unable to retrieve news!");
+                    args.putString("description", "Could not download news! Is the website down?");
+                    messageCardFragment.setArguments(args);
+
+                    //Show No Internet Fragment
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragmentSpace, messageCardFragment);
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                    return null;
+                } else {
+
+                    //Show News List Fragment
+                    NewsListFragment newsListFragment = new NewsListFragment();
+                    newsListFragment.addNewsListListener(currentFragment);
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                    return null;
+                }
             }
         };
 
