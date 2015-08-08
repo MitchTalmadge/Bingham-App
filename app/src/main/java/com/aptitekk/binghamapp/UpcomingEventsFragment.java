@@ -5,7 +5,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +15,7 @@ import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import java.util.concurrent.Callable;
 
 
-/**
- * Created by kevint on 8/8/2015.
- */
-public class UpcomingEventsFragment extends Fragment{
+public class UpcomingEventsFragment extends Fragment {
 
     public static CalendarDog feed;
 
@@ -39,8 +35,7 @@ public class UpcomingEventsFragment extends Fragment{
     public void onStart() {
         super.onStart();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         LoadingFragment loadingFragment = new LoadingFragment();
         fragmentTransaction.replace(R.id.fragmentSpace, loadingFragment);
         fragmentTransaction.commit();
@@ -53,12 +48,13 @@ public class UpcomingEventsFragment extends Fragment{
             MessageCardFragment messageCardFragment = new MessageCardFragment();
             Bundle args = new Bundle();
             args.putString("title", "No Internet Connection!");
-            args.putString("description", "Could not download news!");
+            args.putString("description", "Could not download events!");
             messageCardFragment.setArguments(args);
 
-            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, messageCardFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
     }
@@ -75,6 +71,7 @@ public class UpcomingEventsFragment extends Fragment{
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 return null;
             }

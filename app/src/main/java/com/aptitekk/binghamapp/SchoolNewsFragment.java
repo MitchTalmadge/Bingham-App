@@ -61,7 +61,7 @@ public class SchoolNewsFragment extends Fragment implements NewsListFragment.New
             fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, messageCardFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.addToBackStack("NoInternet");
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
     }
@@ -82,7 +82,7 @@ public class SchoolNewsFragment extends Fragment implements NewsListFragment.New
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.addToBackStack("NewsList");
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 return null;
             }

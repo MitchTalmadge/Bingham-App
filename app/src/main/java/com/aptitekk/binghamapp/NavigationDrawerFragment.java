@@ -43,7 +43,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
 
-        switchFragment(0);
+        switchFragment(0, false);
 
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
@@ -66,7 +66,7 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listItem = drawerList.getItemAtPosition(position);
-                switchFragment(drawerListPositions[position]);
+                switchFragment(drawerListPositions[position], true);
             }
         });
 
@@ -94,7 +94,7 @@ public class NavigationDrawerFragment extends Fragment {
         });
     }
 
-    private void switchFragment(int fragmentID) {
+    private void switchFragment(int fragmentID, boolean addToBackStack) {
         Fragment newFragment = null;
         switch (fragmentID) {
             case 0: //Main
@@ -113,7 +113,6 @@ public class NavigationDrawerFragment extends Fragment {
                 newFragment = new UpcomingEventsFragment();
                 break;
             case 6: //Skyward Access
-                newFragment = new WebViewFragment();
                 break;
             default:
                 break;
@@ -122,7 +121,8 @@ public class NavigationDrawerFragment extends Fragment {
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.addToBackStack(null);
+            if (addToBackStack)
+                fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
         if (this.drawerLayout != null && this.drawerLayout.isDrawerOpen(GravityCompat.START)) {

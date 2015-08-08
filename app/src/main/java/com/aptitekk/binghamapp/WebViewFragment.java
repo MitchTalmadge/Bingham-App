@@ -1,9 +1,11 @@
 package com.aptitekk.binghamapp;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 
 
@@ -14,15 +16,20 @@ public class WebViewFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_web, container, false);
+    }
 
-        //FIXME Kevin (I don't know what to do here.)
-        /*Intent parent = getIntent();
-        String URL = parent.getStringExtra("URL");
+    @Override
+    public void onStart() {
+        super.onStart();
 
-        WebView browser = (WebView) findViewById(R.id.webView);
-        browser.loadUrl(URL);*/
+        String URL = getArguments().getString("URL");
+
+        WebView browser = (WebView) getView().findViewById(R.id.webView);
+        browser.loadUrl(URL);
     }
 
     @Override
