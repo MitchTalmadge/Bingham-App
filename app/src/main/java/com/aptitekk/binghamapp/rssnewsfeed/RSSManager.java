@@ -36,6 +36,8 @@ public class RSSManager {
     Logger log = Logger.getLogger("RSSNewsFeed");
 
     Callable<Void> refresh;
+    
+    final boolean verbose = false;
 
     public RSSManager(String rssURL, Callable<Void> refresh) {
         Log.i(MainActivity.LOG_NAME, "Populating Articles...\n");
@@ -53,6 +55,12 @@ public class RSSManager {
     public ArrayList<NewsArticle> getNewsArticles() {
         Log.i(MainActivity.LOG_NAME, "\nThere are " + this.articles.size() + " articles in feed");
         return this.articles;
+    }
+    
+    private void logInfo(String msg) {
+        if(verbose) {
+            Log.i(MainActivity.LOG_NAME, msg);
+        }
     }
 
     private class DownloadRSSFeedTask extends AsyncTask<String, Void, Document> {
@@ -79,29 +87,29 @@ public class RSSManager {
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
 
-            Log.i(MainActivity.LOG_NAME, "Root element :" + doc.getDocumentElement().getNodeName());
+            logInfo("Root element :" + doc.getDocumentElement().getNodeName());
 
-            Log.i(MainActivity.LOG_NAME, "Title : " + doc.getElementsByTagName("title").item(0).getTextContent());
+            logInfo("Title : " + doc.getElementsByTagName("title").item(0).getTextContent());
 
             NodeList nList = doc.getElementsByTagName("item");
 
-            Log.i(MainActivity.LOG_NAME, "----------------------------");
+            logInfo("----------------------------");
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
 
                 Node nNode = nList.item(temp);
 
-                Log.i(MainActivity.LOG_NAME, "Current Element : " + nNode.getNodeName());
+                logInfo("Current Element : " + nNode.getNodeName());
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
                     Element eElement = (Element) nNode;
 
-                    Log.i(MainActivity.LOG_NAME, "Title : " + eElement.getElementsByTagName("title").item(0).getTextContent());
-                    Log.i(MainActivity.LOG_NAME, "Link : " + eElement.getElementsByTagName("link").item(0).getTextContent());
-                    Log.i(MainActivity.LOG_NAME, "guid  : " + eElement.getElementsByTagName("guid").item(0).getTextContent());
-                    Log.i(MainActivity.LOG_NAME, "Description : " + eElement.getElementsByTagName("description").item(0).getTextContent());
-                    Log.i(MainActivity.LOG_NAME, "pubDate : " + eElement.getElementsByTagName("pubDate").item(0).getTextContent() + "\n");
+                    logInfo("Title : " + eElement.getElementsByTagName("title").item(0).getTextContent());
+                    logInfo("Link : " + eElement.getElementsByTagName("link").item(0).getTextContent());
+                    logInfo("guid  : " + eElement.getElementsByTagName("guid").item(0).getTextContent());
+                    logInfo("Description : " + eElement.getElementsByTagName("description").item(0).getTextContent());
+                    logInfo("pubDate : " + eElement.getElementsByTagName("pubDate").item(0).getTextContent() + "\n");
 
                     articles.add(new NewsArticle(eElement.getElementsByTagName("title").item(0).getTextContent(),
                             eElement.getElementsByTagName("link").item(0).getTextContent(),
