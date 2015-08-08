@@ -3,7 +3,6 @@ package com.aptitekk.binghamapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,14 +34,14 @@ public class NewsListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_news_list, container, false);
+        return inflater.inflate(R.layout.fragment_recycler, container, false);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        recyclerView = (RecyclerView) getView().findViewById(R.id.rv);
+        recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
@@ -51,14 +50,12 @@ public class NewsListFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
-    public void addNewsListListener(NewsListListener listener)
-    {
+    public void addNewsListListener(NewsListListener listener) {
         listeners.add(listener);
     }
 
     public void onArticleClick(String URL) {
-        for(NewsListListener listener : listeners)
-        {
+        for (NewsListListener listener : listeners) {
             listener.articleClicked(URL);
         }
     }
@@ -85,7 +82,6 @@ public class NewsListFragment extends Fragment {
                             onArticleClick(url);
                     }
                 });
-                ;
             }
         }
 
@@ -103,8 +99,7 @@ public class NewsListFragment extends Fragment {
         @Override
         public NewsArticleViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.news_article, viewGroup, false);
-            NewsArticleViewHolder navh = new NewsArticleViewHolder(v);
-            return navh;
+            return new NewsArticleViewHolder(v);
         }
 
         @Override

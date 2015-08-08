@@ -14,9 +14,6 @@ import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
 import java.util.List;
 
-/**
- * Created by kevint on 8/8/2015.
- */
 public class CalendarListFragment extends Fragment {
 
     public CalendarListFragment() {
@@ -28,14 +25,14 @@ public class CalendarListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_upcoming_events, container, false);
+        return inflater.inflate(R.layout.fragment_recycler, container, false);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        final RecyclerView rv = (RecyclerView) getView().findViewById(R.id.CalendarRV);
+        final RecyclerView rv = (RecyclerView) getView().findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(llm);
@@ -84,8 +81,7 @@ public class CalendarListFragment extends Fragment {
         @Override
         public CalendarEventViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.news_article, viewGroup, false);
-            CalendarEventViewHolder navh = new CalendarEventViewHolder(v);
-            return navh;
+            return new CalendarEventViewHolder(v);
         }
 
         @Override
