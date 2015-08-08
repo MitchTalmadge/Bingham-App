@@ -121,7 +121,7 @@ public class NavigationDrawerFragment extends Fragment {
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.addToBackStack("Navigation");
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
         if (this.drawerLayout != null && this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
