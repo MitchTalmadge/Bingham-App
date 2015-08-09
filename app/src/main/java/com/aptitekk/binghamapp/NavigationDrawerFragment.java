@@ -1,6 +1,8 @@
 package com.aptitekk.binghamapp;
 
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,12 +11,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 
 /**
@@ -25,6 +29,10 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+
+    private int currentFragmentID;
+    private NavigationDrawerAdapter adapter;
+    private int[] drawerListPositions;
 
     public NavigationDrawerFragment() {
         // Required empty public constructor
@@ -42,16 +50,12 @@ public class NavigationDrawerFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
-    public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
-
-        switchFragment(0, false);
+    public void setUp(final DrawerLayout drawerLayout, Toolbar toolbar) {
 
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
-        this.drawerList.setDivider(null);
-        this.drawerList.setDividerHeight(0);
         String[] drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
-        final int[] drawerListPositions = new int[drawerListStrings.length];
+        this.drawerListPositions = new int[drawerListStrings.length];
 
         for (int i = 0; i < drawerListStrings.length; i++) {
             String[] split = drawerListStrings[i].split("_");
@@ -60,14 +64,17 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         // Set the adapter for the list view
-        drawerList.setAdapter(new ArrayAdapter<>(getActivity(),
-                R.layout.navigation_drawer_list_item, drawerListStrings));
+        this.adapter = new NavigationDrawerAdapter(getActivity(), R.layout.navigation_drawer_list_item, drawerListStrings);
+        drawerList.setAdapter(adapter);
+
+        //Switch to Main Fragment
+        selectItem(0, false);
+
         // Set the list's click listener
         drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object listItem = drawerList.getItemAtPosition(position);
-                switchFragment(drawerListPositions[position], true);
+                selectItem(position, true);
             }
         });
 
@@ -95,8 +102,11 @@ public class NavigationDrawerFragment extends Fragment {
         });
     }
 
-    private void switchFragment(int fragmentID, boolean addToBackStack) {
+    private void selectItem(int position, boolean addToBackStack) {
         Fragment newFragment = null;
+
+        int fragmentID = drawerListPositions[position];
+
         switch (fragmentID) {
             case 0: //Main
                 newFragment = new MainFragment();
@@ -123,6 +133,8 @@ public class NavigationDrawerFragment extends Fragment {
                 break;
         }
         if (newFragment != null) {
+            adapter.setSelectedItem(position);
+            adapter.notifyDataSetChanged();
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -132,6 +144,41 @@ public class NavigationDrawerFragment extends Fragment {
         }
         if (this.drawerLayout != null && this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             this.drawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
+
+    public class NavigationDrawerAdapter extends ArrayAdapter {
+
+        private int selectedItem;
+
+        public NavigationDrawerAdapter(Context context, int resource, Object[] objects) {
+            super(context, resource, objects);
+        }
+
+        public int getSelectedItem() {
+            return selectedItem;
+        }
+
+        public void setSelectedItem(int selectedItem) {
+            this.selectedItem = selectedItem;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            TextView view = (TextView) super.getView(position, convertView, parent);
+
+            view.setText((String) getItem(position));
+
+            if (position == selectedItem) {
+                view.setTextColor(getContext().getResources().getColor(R.color.primary));
+                view.setTypeface(Typeface.DEFAULT_BOLD);
+            } else {
+                view.setTextColor(getContext().getResources().getColor(R.color.primary_text));
+                view.setTypeface(Typeface.DEFAULT);
+            }
+
+            return view;
         }
     }
 

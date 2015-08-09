@@ -6,6 +6,6 @@
     android:text="List Item Title"
     android:textAppearance="?android:attr/textAppearanceLarge"
     android:paddingLeft="16dp"
-    android:textSize="14sp"
+    android:textSize="16sp"
     android:height="48dp"
     android:gravity="center_vertical" />
