@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp.rssNewsFeed;
+package com.aptitekk.binghamapp.rssnewsfeed;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -50,10 +50,6 @@ public class RSSManager {
             e.printStackTrace();
         }
 
-        if(doc == null) {
-            return;
-        }
-
     }
 
     public ArrayList<NewsArticle> getNewsArticles() {
@@ -87,6 +83,16 @@ public class RSSManager {
         // Once the image is downloaded, associates it to the imageView
         protected void onPostExecute(Document docu) {
             doc = docu;
+
+            if(doc == null) {
+                try {
+                    refresh.call();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
