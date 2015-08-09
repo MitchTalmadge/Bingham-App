@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.aptitekk.binghamapp.rssNewsFeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
 import java.util.concurrent.Callable;
 
