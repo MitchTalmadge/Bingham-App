@@ -28,7 +28,5 @@ public class MainFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        getFragmentManager().popBackStack(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 }

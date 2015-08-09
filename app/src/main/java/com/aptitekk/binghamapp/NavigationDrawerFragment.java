@@ -3,6 +3,7 @@ package com.aptitekk.binghamapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -99,6 +100,9 @@ public class NavigationDrawerFragment extends Fragment {
         switch (fragmentID) {
             case 0: //Main
                 newFragment = new MainFragment();
+
+                //Remove all entries from back stack (so that pressing back will close the app)
+                getFragmentManager().popBackStack(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
             case 1: //School News
                 newFragment = new SchoolNewsFragment();
