@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 public class CalendarListFragment extends Fragment {
@@ -42,6 +44,9 @@ public class CalendarListFragment extends Fragment {
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
+
+        SimpleDateFormat headerFormat = new SimpleDateFormat("EEE MMM dd, yyyy hh:mm");
+        SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mm zzz");
 
         public class CalendarEventViewHolder extends RecyclerView.ViewHolder {
             CardView cv;
@@ -87,7 +92,10 @@ public class CalendarListFragment extends Fragment {
         @Override
         public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, int i) {
             calendareventViewHolder.title.setText(events.get(i).getTitle());
-            calendareventViewHolder.description.setText(events.get(i).getDate().toString());
+            calendareventViewHolder.description.setText(
+                    headerFormat.format(events.get(i).getDate()) +
+                    " - " +
+                    footerFormat.format(events.get(i).getEndTime()));
             calendareventViewHolder.pubDate.setText(events.get(i).getLocation());
             calendareventViewHolder.url = events.get(i).getLink();
         }

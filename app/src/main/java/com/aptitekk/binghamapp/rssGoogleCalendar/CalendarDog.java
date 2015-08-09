@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -126,16 +127,29 @@ public class CalendarDog {
 
                         String where = splitSummary[2].replace("Where: ", ""); // We dont need [1] cus the Who is always public....and we dont need that
 
+                        if(where.contains("Who")) {
+                            where = splitSummary[3].replace("Where: ", "");
+                        }
+
+
                         logInfo("where: " + where);
 
                         String link = ((Element) nNode.getChildNodes().item(8)).getAttribute("href");
-
-                        DateFormat format = new SimpleDateFormat("EEE MMM dd, yyyy hh:mmaa zzz");
-                        DateFormat endTimeFormat = new SimpleDateFormat("hh:mmaa  zzz");
+                        DateFormat format;
+                        DateFormat endTimeFormat;
+                        if(rawStartDate.contains(":")) {
+                            format = new SimpleDateFormat("EEE MMM dd, yyyy hh:mmaa zzz");
+                            endTimeFormat = new SimpleDateFormat("hh:mmaa  zzz");
+                        } else {
+                            format = new SimpleDateFormat("EEE MMM dd, yyyy hhaa zzz");
+                            endTimeFormat = new SimpleDateFormat("hhaa  zzz");
+                        }
+                        Calendar date = Calendar.getInstance();
+                        Calendar endTime = Calendar.getInstance();
                         try {
-                            Date date = format.parse(rawStartDate + rawTimeZone);
-                            Date endTime = endTimeFormat.parse(rawEndTimeAndTimeZone.replace("\n", " ").replace("\"", ""));
-
+                            date.setTime(format.parse(rawStartDate + rawTimeZone));
+                            endTime.setTime(endTimeFormat.parse(rawEndTimeAndTimeZone.replace("\n", " ").replace("\"", "").substring(1)));
+                            endTime.set(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
                             events.add(new CalendarEvent(eElement.getElementsByTagName("title").item(0).getTextContent(),
                                     date,
                                     endTime,
