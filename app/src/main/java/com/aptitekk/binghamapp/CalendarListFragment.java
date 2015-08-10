@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-public class CalendarListFragment extends Fragment implements OnDateChangedListener {
+public class CalendarListFragment extends Fragment implements OnDateChangedListener, MainActivity.BackButtonListener {
 
 
     public CalendarListFragment() {
@@ -68,6 +68,8 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
     @Override
     public void onStart() {
         super.onStart();
+
+        ((MainActivity) getActivity()).setBackButtonListener(this);
     }
 
     @Override
@@ -78,6 +80,12 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
                         calendarDay.getCalendar())));
         rv.swapAdapter(adapter, false);
         ((TextView) getView().findViewById(R.id.selectedDate)).setText(SimpleDateFormat.getDateInstance().format(calendarDay.getDate()));
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        getFragmentManager().popBackStack();
+        return true;
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
@@ -127,7 +135,7 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
         }
 
         private String formatDate(CalendarEvent event) {
-            return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM","pm").replace("AM", "am");
+            return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
         }
 
         @Override
@@ -137,7 +145,6 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
             calendareventViewHolder.location.setText(events.get(i).getLocation());
             calendareventViewHolder.url = events.get(i).getLink();
         }
-
 
     }
 }

@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 
 import java.util.concurrent.Callable;
@@ -29,35 +28,40 @@ public class UpcomingEventsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_replaceable, container, false);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
+        View view = inflater.inflate(R.layout.fragment_replaceable, container, false);
+        //Show Loading Fragment
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         LoadingFragment loadingFragment = new LoadingFragment();
-        fragmentTransaction.replace(R.id.fragmentSpace, loadingFragment);
+        fragmentTransaction.add(R.id.fragmentSpace, loadingFragment);
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
         if (isNetworkConnected()) {
-
             populateCalendar();
-
         } else {
+            //Show No Internet Fragment
             MessageCardFragment messageCardFragment = new MessageCardFragment();
             Bundle args = new Bundle();
             args.putString("title", "No Internet Connection!");
             args.putString("description", "Could not download events!");
             messageCardFragment.setArguments(args);
 
+            getFragmentManager().popBackStack(); //Remove Loading Fragment
             fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentSpace, messageCardFragment);
+            fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+
     }
 
     private boolean isNetworkConnected() {
@@ -68,9 +72,12 @@ public class UpcomingEventsFragment extends Fragment {
     public void populateCalendar() {
         final Callable<Void> refresh = new Callable<Void>() {
             public Void call() {
+                //Show Calendar List Fragment
                 CalendarListFragment newsListFragment = new CalendarListFragment();
+
+                getFragmentManager().popBackStack(); //Remove Loading Fragment
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragmentSpace, newsListFragment);
+                fragmentTransaction.add(R.id.fragmentSpace, newsListFragment);
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
