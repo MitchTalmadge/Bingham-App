@@ -4,6 +4,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.aptitekk.binghamapp.MainActivity;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +39,7 @@ public class CalendarDog {
 
     Callable<Void> refresh;
 
-    final boolean verbose = true;
+    final boolean verbose = false;
 
     public CalendarDog(String rssURL, Callable<Void> refresh) {
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
@@ -52,7 +55,6 @@ public class CalendarDog {
     }
 
     public ArrayList<CalendarEvent> getEvents() {
-        Log.i(MainActivity.LOG_NAME, "\nThere are " + this.events.size() + " events in feed");
         return this.events;
     }
 
@@ -98,7 +100,7 @@ public class CalendarDog {
 
                 Node nNode = nList.item(temp);
 
-                logInfo("Current Element : " + nNode.getNodeName());
+                logInfo("Current Element : " + nNode.getNodeName() + " --------------------");
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
@@ -115,15 +117,16 @@ public class CalendarDog {
                         String[] splitSummary = rawSummary.split("<br>");
                         String rawStartDate = splitSummary[0].replace("When: ", "").split("to")[0];
 
-                        logInfo("rawStartDate: " + rawStartDate);
+                        //logInfo("rawStartDate: " + rawStartDate);
 
                         String rawEndTimeAndTimeZone = splitSummary[0].replace("When: ", "").split("to")[1];
 
-                        logInfo("rawEndTimeAndTimeZone: " + rawEndTimeAndTimeZone);
+                        //logInfo("rawEndTimeAndTimeZone: " + rawEndTimeAndTimeZone.replace("\n",""));
 
                         String rawTimeZone = rawEndTimeAndTimeZone.split("\n")[1];
+                        String rawEndTime = rawEndTimeAndTimeZone.split("\n")[0];
 
-                        logInfo("rawTimeZone: " + rawTimeZone);
+                        //logInfo("rawTimeZone: " + rawTimeZone);
 
                         String where = splitSummary[2].replace("Where: ", ""); // We dont need [1] cus the Who is always public....and we dont need that
 
@@ -132,24 +135,28 @@ public class CalendarDog {
                         }
 
 
-                        logInfo("where: " + where);
+                        //logInfo("where: " + where);
 
                         String link = ((Element) nNode.getChildNodes().item(8)).getAttribute("href");
                         DateFormat format;
                         DateFormat endTimeFormat;
                         if(rawStartDate.contains(":")) {
                             format = new SimpleDateFormat("EEE MMM dd, yyyy hh:mmaa zzz");
-                            endTimeFormat = new SimpleDateFormat("hh:mmaa  zzz");
+                            endTimeFormat = new SimpleDateFormat(" hh:mmaa ");
                         } else {
                             format = new SimpleDateFormat("EEE MMM dd, yyyy hhaa zzz");
-                            endTimeFormat = new SimpleDateFormat("hhaa  zzz");
+                            endTimeFormat = new SimpleDateFormat(" hhaa ");
                         }
                         Calendar date = Calendar.getInstance();
                         Calendar endTime = Calendar.getInstance();
                         try {
+                            logInfo("Start time pre-parse: \"" + rawStartDate + rawTimeZone + "\"");
+                            logInfo("End time pre-parse: \"" + rawEndTime +"\"");
                             date.setTime(format.parse(rawStartDate + rawTimeZone));
-                            endTime.setTime(endTimeFormat.parse(rawEndTimeAndTimeZone.replace("\n", " ").replace("\"", "").substring(1)));
+                            endTime.setTime(endTimeFormat.parse(rawEndTime));
                             endTime.set(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
+                            logInfo("Start time post-parse: \"" + format.format(date.getTime())+"\"");
+                            logInfo("End time post-parse: \""+format.format(endTime.getTime())+"\'");
                             events.add(new CalendarEvent(eElement.getElementsByTagName("title").item(0).getTextContent(),
                                     date,
                                     endTime,

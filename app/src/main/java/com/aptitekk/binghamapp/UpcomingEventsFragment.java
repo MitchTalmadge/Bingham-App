@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 
 import java.util.concurrent.Callable;
