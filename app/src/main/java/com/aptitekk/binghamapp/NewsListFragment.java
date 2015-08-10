@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class NewsListFragment extends Fragment {
+public class NewsListFragment extends Fragment implements MainActivity.BackButtonListener {
 
     private RecyclerView recyclerView;
 
@@ -34,20 +35,23 @@ public class NewsListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recycler, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_recycler, container, false);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
 
         RVAdapter adapter = new RVAdapter(SchoolNewsFragment.feed.getRssManager().getNewsArticles());
         recyclerView.setAdapter(adapter);
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        ((MainActivity) getActivity()).setBackButtonListener(this);
     }
 
     public void addNewsListListener(NewsListListener listener) {
@@ -58,6 +62,12 @@ public class NewsListFragment extends Fragment {
         for (NewsListListener listener : listeners) {
             listener.articleClicked(URL);
         }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        getFragmentManager().popBackStack();
+        return true;
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NewsArticleViewHolder> {

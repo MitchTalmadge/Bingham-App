@@ -8,11 +8,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 
-public class WebViewFragment extends Fragment {
+public class WebViewFragment extends Fragment implements MainActivity.BackButtonListener {
 
     private boolean mAlreadyLoaded;
+    private WebView webView;
 
     public WebViewFragment() {
         // Required empty public constructor
@@ -24,12 +26,12 @@ public class WebViewFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_web, container, false);
 
+        ((MainActivity) getActivity()).setBackButtonListener(this);
+
         if (savedInstanceState == null && !mAlreadyLoaded) {
             mAlreadyLoaded = true;
             // Do this code only first time, not after rotation or reuse fragment from backstack
-        }
-        else if(mAlreadyLoaded)
-        {
+        } else if (mAlreadyLoaded) {
             view.findViewById(R.id.webView).setVisibility(View.INVISIBLE);
             getFragmentManager().popBackStack();
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -45,11 +47,16 @@ public class WebViewFragment extends Fragment {
 
         String URL = getArguments().getString("URL");
         boolean useJavaScript = getArguments().getBoolean("useJavaScript");
+        String POSTData = getArguments().getString("POSTData");
 
-        WebView browser = (WebView) getView().findViewById(R.id.webView);
-        if(useJavaScript)
-            browser.getSettings().setJavaScriptEnabled(true);
-        browser.loadUrl(URL);
+        this.webView = (WebView) getView().findViewById(R.id.webView);
+        webView.setWebViewClient(new CustomWebViewClient());
+        if (useJavaScript)
+            webView.getSettings().setJavaScriptEnabled(true);
+        if (POSTData != null)
+            webView.postUrl("https://skystu.jordan.k12.ut.us/scripts/wsisa.dll/WService=wsEAplus/mobilelogin.w", POSTData.getBytes());
+        else
+            webView.loadUrl(URL);
     }
 
     @Override
@@ -66,4 +73,33 @@ public class WebViewFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public boolean onBackPressed() {
+        if (this.webView.canGoBack()) {
+            this.webView.goBack();
+            return false;
+        } else
+            return true;
+    }
+
+    private class CustomWebViewClient extends WebViewClient {
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            //TODO: Show progress wheel while loading and dispose of it here
+            super.onPageFinished(view, url);
+        }
+    }
+
 }

@@ -1,28 +1,34 @@
 package com.aptitekk.binghamapp;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_NAME = "BinghamApp";
     private Toolbar toolbar;
+    private BackButtonListener backButtonListener;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         NavigationDrawerFragment drawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
+        this.drawer = drawerFragment.getDrawerLayout();
     }
 
     @Override
@@ -47,5 +53,48 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void setBackButtonListener(BackButtonListener listener) {
+        this.backButtonListener = listener;
+    }
 
+    @Override
+    public void onBackPressed() {
+        if (!closeDrawer(this.drawer)) {
+            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && ((Fragment) this.backButtonListener).isResumed()) {
+                if (this.backButtonListener.onBackPressed()) {
+                    super.onBackPressed();
+                }
+            } else {
+                super.onBackPressed();
+            }
+        }
+    }
+
+    /**
+     * Closes the drawer if it is open
+     *
+     * @return true if the drawer was closed, false if it was not.
+     */
+    public static boolean closeDrawer(DrawerLayout drawer) {
+        if (drawer != null) {
+            if (drawer.isDrawerVisible(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            } else
+                return false;
+        }
+        return false;
+    }
+
+    public static void popToMainMenu(FragmentManager fragmentManager) {
+        fragmentManager.popBackStackImmediate(1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    public interface BackButtonListener {
+
+        /**
+         * @return true if super.onBackPressed() should be called in MainActivity, false if not
+         */
+        boolean onBackPressed();
+    }
 }

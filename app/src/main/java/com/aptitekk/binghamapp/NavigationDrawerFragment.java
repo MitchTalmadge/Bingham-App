@@ -5,13 +5,11 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +28,8 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout drawerLayout;
     private ListView drawerList;
 
-    private int currentFragmentID;
+    private Fragment currentFragment;
+
     private NavigationDrawerAdapter adapter;
     private int[] drawerListPositions;
 
@@ -68,13 +67,13 @@ public class NavigationDrawerFragment extends Fragment {
         drawerList.setAdapter(adapter);
 
         //Switch to Main Fragment
-        selectItem(0, false);
+        selectItem(0);
 
         // Set the list's click listener
         drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position, true);
+                selectItem(position);
             }
         });
 
@@ -102,17 +101,15 @@ public class NavigationDrawerFragment extends Fragment {
         });
     }
 
-    private void selectItem(int position, boolean addToBackStack) {
+    private void selectItem(int position) {
         Fragment newFragment = null;
-
+        Bundle bundle = null;
+        boolean addToBackStack = true;
         int fragmentID = drawerListPositions[position];
 
         switch (fragmentID) {
             case 0: //Main
                 newFragment = new MainFragment();
-
-                //Remove all entries from back stack (so that pressing back will close the app)
-                getFragmentManager().popBackStack(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
             case 1: //School News
                 newFragment = new SchoolNewsFragment();
@@ -120,7 +117,11 @@ public class NavigationDrawerFragment extends Fragment {
             case 2: //Bell Schedules
                 break;
             case 3: //Lunch Menus
-                newFragment = new LunchMenuFragment();
+                newFragment = new WebViewFragment();
+                bundle = new Bundle();
+                bundle.putString("URL", "http://jordandistrict.nutrislice.com/mobile/");
+                bundle.putBoolean("useJavaScript", true);
+                newFragment.setArguments(bundle);
                 break;
             case 4: //School Map
                 break;
@@ -128,6 +129,11 @@ public class NavigationDrawerFragment extends Fragment {
                 newFragment = new UpcomingEventsFragment();
                 break;
             case 6: //Skyward Access
+                newFragment = new WebViewFragment();
+                bundle = new Bundle();
+                bundle.putString("URL", "https://skystu.jordan.k12.ut.us/scripts/wsisa.dll/WService=wsEAplus/mobilelogin.w");
+                bundle.putBoolean("useJavaScript", true);
+                newFragment.setArguments(bundle);
                 break;
             default:
                 break;
@@ -135,16 +141,24 @@ public class NavigationDrawerFragment extends Fragment {
         if (newFragment != null) {
             adapter.setSelectedItem(position);
             adapter.notifyDataSetChanged();
+            MainActivity.popToMainMenu(this.getFragmentManager()); //popBackStack to the 1st backStack entry (adding of MainFragment). This allows you to always get back to main menu after pushing back from another menu item.
+
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            if (addToBackStack)
+            if (fragmentID == 0) { //If the fragment id is 0 (MainFragment), we only add the fragment (So that pushing back on it will close the app)
+                fragmentTransaction.add(R.id.fragmentSpace, newFragment);
+            } else //Otherwise we replace the fragment (So that pushing back will add the MainFragment again)
+            {
+                fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
                 fragmentTransaction.addToBackStack(null);
+            }
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentTransaction.commit();
         }
-        if (this.drawerLayout != null && this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            this.drawerLayout.closeDrawer(GravityCompat.START);
-        }
+        MainActivity.closeDrawer(this.drawerLayout);
+    }
+
+    public DrawerLayout getDrawerLayout() {
+        return drawerLayout;
     }
 
     public class NavigationDrawerAdapter extends ArrayAdapter {
