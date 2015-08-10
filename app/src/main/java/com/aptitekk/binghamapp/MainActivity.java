@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void popToMainMenu(FragmentManager fragmentManager) {
-        fragmentManager.popBackStackImmediate(1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.popBackStackImmediate(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public interface BackButtonListener {

@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +27,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout drawerLayout;
     private ListView drawerList;
 
-    private Fragment currentFragment;
+    boolean mainLoaded = false;
 
     private NavigationDrawerAdapter adapter;
     private int[] drawerListPositions;
@@ -143,16 +142,19 @@ public class NavigationDrawerFragment extends Fragment {
             adapter.notifyDataSetChanged();
             MainActivity.popToMainMenu(this.getFragmentManager()); //popBackStack to the 1st backStack entry (adding of MainFragment). This allows you to always get back to main menu after pushing back from another menu item.
 
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            if (fragmentID == 0) { //If the fragment id is 0 (MainFragment), we only add the fragment (So that pushing back on it will close the app)
-                fragmentTransaction.add(R.id.fragmentSpace, newFragment);
-            } else //Otherwise we replace the fragment (So that pushing back will add the MainFragment again)
-            {
-                fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
-                fragmentTransaction.addToBackStack(null);
+            if (!(fragmentID == 0 && mainLoaded)) { //We only ever want to load MainFragment once.
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                if (fragmentID == 0) { //If the fragment id is 0 (MainFragment), we only add the fragment (So that pushing back on it will close the app)
+                    mainLoaded = true;
+                    fragmentTransaction.add(R.id.fragmentSpace, newFragment);
+                } else //Otherwise we replace the fragment (So that pushing back will add the MainFragment again)
+                {
+                    fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
+                    fragmentTransaction.addToBackStack(null);
+                }
+                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.commit();
             }
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.commit();
         }
         MainActivity.closeDrawer(this.drawerLayout);
     }

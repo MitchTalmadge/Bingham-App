@@ -103,8 +103,8 @@
     <orderEntry type="library" exported="" name="cardview-v7-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-jackson2-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="google-oauth-client-java6-1.20.0" level="project" />
-    <orderEntry type="library" exported="" name="google-api-client-android-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />
+    <orderEntry type="library" exported="" name="google-api-client-android-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="material-calendarview-0.7.0" level="project" />
     <orderEntry type="library" exported="" name="servlet-api-2.5-20081211" level="project" />
     <orderEntry type="library" exported="" name="jetty-6.1.26" level="project" />
