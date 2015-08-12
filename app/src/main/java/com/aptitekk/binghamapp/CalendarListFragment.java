@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-public class CalendarListFragment extends Fragment implements OnDateChangedListener, MainActivity.BackButtonListener {
+public class CalendarListFragment extends Fragment implements MainActivity.BackButtonListener {
 
 
     public CalendarListFragment() {
@@ -33,8 +33,8 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mainView = inflater.inflate(R.layout.fragment_calendar, container, false);
-        MaterialCalendarView calendarView = (MaterialCalendarView) mainView.findViewById(R.id.calendarView);
+        View mainView = inflater.inflate(R.layout.fragment_recycler, container, false);
+        /*MaterialCalendarView calendarView = (MaterialCalendarView) mainView.findViewById(R.id.calendarView);
 
         calendarView.setOnDateChangedListener(this);
         calendarView.setShowOtherDates(true);
@@ -46,7 +46,7 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
         calendarView.setMinimumDate(calendar.getTime());
 
         calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
-        calendarView.setMaximumDate(calendar.getTime());
+        calendarView.setMaximumDate(calendar.getTime());*/
 
         return mainView;
     }
@@ -54,15 +54,13 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
     @Override
     public void onActivityCreated(Bundle args) {
         super.onActivityCreated(args);
-        rv = (RecyclerView) getView().findViewById(R.id.calendarRecyclerView);
+        rv = (RecyclerView) getView().findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(llm);
 
         RVAdapter adapter = new RVAdapter(UpcomingEventsFragment.feed.getEvents());
         rv.setAdapter(adapter);
-
-        ((MaterialCalendarView) getView().findViewById(R.id.calendarView)).setSelectedDate(Calendar.getInstance());
     }
 
     @Override
@@ -70,16 +68,6 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
         super.onStart();
 
         ((MainActivity) getActivity()).setBackButtonListener(this);
-    }
-
-    @Override
-    public void onDateChanged(MaterialCalendarView materialCalendarView, CalendarDay calendarDay) {
-        RVAdapter adapter = new RVAdapter(CalendarEvent.sort(
-                CalendarEvent.matchesDay(
-                        UpcomingEventsFragment.feed.getEvents(),
-                        calendarDay.getCalendar())));
-        rv.swapAdapter(adapter, false);
-        ((TextView) getView().findViewById(R.id.selectedDate)).setText(SimpleDateFormat.getDateInstance().format(calendarDay.getDate()));
     }
 
     @Override
@@ -94,14 +82,19 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
         SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
 
         public class CalendarEventViewHolder extends RecyclerView.ViewHolder {
+            TextView eventDate;
             CardView card;
             TextView title;
             TextView duration;
             TextView location;
             String url = "";
 
+            View itemView;
+
             CalendarEventViewHolder(View itemView) {
                 super(itemView);
+                this.itemView = itemView;
+                eventDate = (TextView) itemView.findViewById(R.id.eventDate);
                 card = (CardView) itemView.findViewById(R.id.calendarCard);
                 title = (TextView) itemView.findViewById(R.id.title);
                 duration = (TextView) itemView.findViewById(R.id.duration);
@@ -115,12 +108,26 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
                 });
                 ;*/
             }
+
         }
 
         List<CalendarEvent> events;
 
         RVAdapter(List<CalendarEvent> events) {
-            this.events = events;
+
+            this.events = CalendarEvent.sort(events);
+            for(int i=0; i<events.size(); i++) {
+                try {
+                    events.get(i-1);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    continue;
+                }
+                if (    events.get(i - 1).getDate().get(Calendar.YEAR) == events.get(i).getDate().get(Calendar.YEAR) &&
+                        events.get(i - 1).getDate().get(Calendar.MONTH)== events.get(i).getDate().get(Calendar.MONTH) &&
+                        events.get(i - 1).getDate().get(Calendar.DAY_OF_MONTH) == events.get(i).getDate().get(Calendar.DAY_OF_MONTH)) {
+                    events.get(i).setDateLabelVisible(false);
+                }
+            }
         }
 
         @Override
@@ -140,7 +147,27 @@ public class CalendarListFragment extends Fragment implements OnDateChangedListe
 
         @Override
         public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, int i) {
+            if(!events.get(i).isDateLabelVisible()) {
+                calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.GONE);
+            } else {
+                calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.VISIBLE);
+                try {
+                    calendareventViewHolder.eventDate.setText(SimpleDateFormat.getDateInstance().format(events.get(i).getDate().getTime()));
+                } catch (NullPointerException e) {
+                    ;//pass
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             calendareventViewHolder.title.setText(events.get(i).getTitle());
+            if(events.get(i).getTitle().equals("A Day")|| events.get(i).getTitle().equals("B Day")) {
+                calendareventViewHolder.duration.setVisibility(View.GONE);
+                calendareventViewHolder.location.setVisibility(View.GONE);
+                calendareventViewHolder.url = "";
+                return;
+            }
+            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
+            calendareventViewHolder.location.setVisibility(View.VISIBLE);
             calendareventViewHolder.duration.setText(formatDate(events.get(i)));
             calendareventViewHolder.location.setText(events.get(i).getLocation());
             calendareventViewHolder.url = events.get(i).getLink();

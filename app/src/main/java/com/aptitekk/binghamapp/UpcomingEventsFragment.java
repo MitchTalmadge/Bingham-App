@@ -84,7 +84,8 @@ public class UpcomingEventsFragment extends Fragment {
                 return null;
             }
         };
-
-        feed = new CalendarDog("https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic", refresh);
+        feed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
+                refresh,
+                CalendarDog.FetchType.ICAL);
     }
 }

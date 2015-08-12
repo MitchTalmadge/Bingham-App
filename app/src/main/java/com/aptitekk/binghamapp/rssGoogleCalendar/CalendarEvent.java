@@ -17,6 +17,8 @@ public class CalendarEvent {
     String location;
     String link;
 
+    boolean dateLabelVisible = true;
+
     public CalendarEvent(String title, Calendar date, Calendar endTime, String location, String link) {
         this.title = title;
         this.date = date;
@@ -34,6 +36,8 @@ public class CalendarEvent {
     public String getLink() {
         return link;
     }
+    public boolean isDateLabelVisible() {return dateLabelVisible;}
+    public void setDateLabelVisible(boolean v) {this.dateLabelVisible = v;}
 
     public static List<CalendarEvent> sort(List<CalendarEvent> e) {
         Collections.sort(e, new CalendarEventComparator());
@@ -43,11 +47,23 @@ public class CalendarEvent {
     public static class CalendarEventComparator implements Comparator<CalendarEvent> {
         @Override
         public int compare(CalendarEvent o1, CalendarEvent o2) {
+            //Put A/B Day Labels at the top of each day.
+            if(o1.getTitle().equalsIgnoreCase("A Day") || o1.getTitle().equalsIgnoreCase("B Day")) {
+                if(o1.eventMatchesDay(o1, o2.getDate())) {
+                    return -1;
+                }
+            }
+            if(o2.getTitle().equalsIgnoreCase("A Day") || o2.getTitle().equalsIgnoreCase("B Day")) {
+                if(o2.eventMatchesDay(o2, o1.getDate())) {
+                    return 1;
+                }
+            }
+
             return o1.getDate().compareTo(o2.getDate());
         }
     }
 
-    public static List<CalendarEvent> matchesDay(List<CalendarEvent> e, Calendar day) {
+    public static List<CalendarEvent> eventsMatchesDay(List<CalendarEvent> e, Calendar day) {
         List<CalendarEvent> result = new ArrayList<CalendarEvent>();
         for(CalendarEvent event : e) {
             if(event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
@@ -57,6 +73,14 @@ public class CalendarEvent {
             }
         }
         return result;
+    }
+    public static boolean eventMatchesDay(CalendarEvent event, Calendar day) {
+        if(event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
+                event.getDate().get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
+                event.getDate().get(Calendar.YEAR) == day.get(Calendar.YEAR)) {
+            return true;
+        }
+        return false;
     }
 
 }
