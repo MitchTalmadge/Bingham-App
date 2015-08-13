@@ -10,14 +10,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_NAME = "BinghamApp";
     private Toolbar toolbar;
     private BackButtonListener backButtonListener;
-    private ArrayList<MenuListener> menuListeners = new ArrayList<>();
     private DrawerLayout drawer;
 
     @Override
@@ -31,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
         NavigationDrawerFragment drawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         this.drawer = drawerFragment.getDrawerLayout();
+
+        MainFragment mainFragment = new MainFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentSpace, mainFragment).commit();
     }
 
     @Override
@@ -84,8 +84,8 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public static void popToMainMenu(FragmentManager fragmentManager) {
-        fragmentManager.popBackStackImmediate(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    public void popToMainMenu() {
+        getSupportFragmentManager().popBackStack("navigation", FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public void setBackButtonListener(BackButtonListener listener) {
@@ -97,36 +97,5 @@ public class MainActivity extends AppCompatActivity {
          * @return true if super.onBackPressed() should be called in MainActivity, false if not
          */
         boolean onBackPressed();
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        /*for (MenuListener listener : menuListeners) {
-            if (listener != null) {
-                if (listener instanceof Fragment && !((Fragment) listener).isDetached()) {
-                    listener.onPrepareOptionsMenu(menu);
-                }
-                else
-                {
-                    menuListeners.remove(listener);
-                }
-            }
-            else
-            {
-                menuListeners.remove(listener);
-            }
-        }
-
-        return true; //Must return true for menu to be displayed. False will result in no menu.*/
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    public void addMenuListener(MenuListener listener) {
-        if (!this.menuListeners.contains(listener))
-            this.menuListeners.add(listener);
-    }
-
-    public interface MenuListener {
-        void onPrepareOptionsMenu(Menu menu);
     }
 }

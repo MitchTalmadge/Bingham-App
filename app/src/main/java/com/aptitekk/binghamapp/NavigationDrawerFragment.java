@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,13 +22,11 @@ import android.widget.TextView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment implements FragmentManager.OnBackStackChangedListener {
 
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
-
-    boolean mainLoaded = false;
 
     private NavigationDrawerAdapter adapter;
     private int[] drawerListPositions;
@@ -39,6 +38,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -49,6 +49,8 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     public void setUp(final DrawerLayout drawerLayout, Toolbar toolbar) {
+
+        getFragmentManager().addOnBackStackChangedListener(this);
 
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
@@ -65,8 +67,9 @@ public class NavigationDrawerFragment extends Fragment {
         this.adapter = new NavigationDrawerAdapter(getActivity(), R.layout.navigation_drawer_list_item, drawerListStrings);
         drawerList.setAdapter(adapter);
 
-        //Switch to Main Fragment
-        selectItem(0);
+        // Set adapter selected item to 0 (Main)
+        adapter.setSelectedItem(0);
+        adapter.notifyDataSetChanged();
 
         // Set the list's click listener
         drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -102,13 +105,11 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(int position) {
         Fragment newFragment = null;
-        Bundle bundle = null;
-        boolean addToBackStack = true;
+        Bundle bundle;
         int fragmentID = drawerListPositions[position];
 
         switch (fragmentID) {
             case 0: //Main
-                newFragment = new MainFragment();
                 break;
             case 1: //School News
                 newFragment = new SchoolNewsFragment();
@@ -137,30 +138,34 @@ public class NavigationDrawerFragment extends Fragment {
             default:
                 break;
         }
+
+        ((MainActivity) getActivity()).popToMainMenu(); //Virtually presses the back button until we are at the main menu.
+
         if (newFragment != null) {
             adapter.setSelectedItem(position);
             adapter.notifyDataSetChanged();
-            MainActivity.popToMainMenu(this.getFragmentManager()); //popBackStack to the 1st backStack entry (adding of MainFragment). This allows you to always get back to main menu after pushing back from another menu item.
 
-            if (!(fragmentID == 0 && mainLoaded)) { //We only ever want to load MainFragment once.
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                if (fragmentID == 0) { //If the fragment id is 0 (MainFragment), we only add the fragment (So that pushing back on it will close the app)
-                    mainLoaded = true;
-                    fragmentTransaction.add(R.id.fragmentSpace, newFragment);
-                } else //Otherwise we replace the fragment (So that pushing back will add the MainFragment again)
-                {
-                    fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
-                    fragmentTransaction.addToBackStack(null);
-                }
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.commit();
-            }
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
+            fragmentTransaction.addToBackStack("navigation");
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
         }
+
         MainActivity.closeDrawer(this.drawerLayout);
     }
 
     public DrawerLayout getDrawerLayout() {
         return drawerLayout;
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        if(getFragmentManager().getBackStackEntryCount() == 0) //We are at the main menu
+        {
+            this.adapter.setSelectedItem(0);
+            this.adapter.notifyDataSetChanged();
+        }
     }
 
     public class NavigationDrawerAdapter extends ArrayAdapter {

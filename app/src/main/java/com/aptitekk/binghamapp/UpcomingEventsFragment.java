@@ -6,18 +6,28 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
+import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 
 public class UpcomingEventsFragment extends Fragment {
 
     public static CalendarDog feed;
+
+    private RecyclerView recyclerView;
 
     public UpcomingEventsFragment() {
         // Required empty public constructor
@@ -28,18 +38,26 @@ public class UpcomingEventsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_replaceable, container, false);
-        //Show Loading Fragment
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        LoadingFragment loadingFragment = new LoadingFragment();
-        fragmentTransaction.add(R.id.fragmentSpace, loadingFragment);
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        View view = inflater.inflate(R.layout.fragment_recycler, container, false);
+
+        /*MaterialCalendarView calendarView = (MaterialCalendarView) mainView.findViewById(R.id.calendarView);
+
+        calendarView.setOnDateChangedListener(this);
+        calendarView.setShowOtherDates(true);
+
+        Calendar calendar = Calendar.getInstance();
+        calendarView.setSelectedDate(calendar.getTime());
+
+        calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
+        calendarView.setMinimumDate(calendar.getTime());
+
+        calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
+        calendarView.setMaximumDate(calendar.getTime());*/
 
         if (isNetworkConnected()) {
             populateCalendar();
         } else {
+            //TODO: Add cardview and just make it GONE, then change visibility here
             //Show No Internet Fragment
             MessageCardFragment messageCardFragment = new MessageCardFragment();
             Bundle args = new Bundle();
@@ -47,8 +65,7 @@ public class UpcomingEventsFragment extends Fragment {
             args.putString("description", "Could not download events!");
             messageCardFragment.setArguments(args);
 
-            getFragmentManager().popBackStack(); //Remove Loading Fragment
-            fragmentTransaction = getFragmentManager().beginTransaction();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentTransaction.addToBackStack(null);
@@ -72,20 +89,122 @@ public class UpcomingEventsFragment extends Fragment {
     public void populateCalendar() {
         final Callable<Void> refresh = new Callable<Void>() {
             public Void call() {
-                //Show Calendar List Fragment
-                CalendarListFragment newsListFragment = new CalendarListFragment();
 
-                getFragmentManager().popBackStack(); //Remove Loading Fragment
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.add(R.id.fragmentSpace, newsListFragment);
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                //Hide progress wheel
+                getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
+
+                //Show Recycler View
+                recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
+                recyclerView.setHasFixedSize(true);
+                LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+                recyclerView.setLayoutManager(llm);
+
+                RVAdapter adapter = new RVAdapter(UpcomingEventsFragment.feed.getEvents());
+                recyclerView.setAdapter(adapter);
+                recyclerView.setVisibility(View.VISIBLE);
                 return null;
             }
         };
         feed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
                 refresh,
                 CalendarDog.FetchType.ICAL);
+    }
+
+    public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
+
+        SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa");
+        SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
+
+        public class CalendarEventViewHolder extends RecyclerView.ViewHolder {
+            TextView eventDate;
+            CardView card;
+            TextView title;
+            TextView duration;
+            TextView location;
+            String url = "";
+
+            View itemView;
+
+            CalendarEventViewHolder(View itemView) {
+                super(itemView);
+                this.itemView = itemView;
+                eventDate = (TextView) itemView.findViewById(R.id.eventDate);
+                card = (CardView) itemView.findViewById(R.id.calendarCard);
+                title = (TextView) itemView.findViewById(R.id.title);
+                duration = (TextView) itemView.findViewById(R.id.duration);
+                location = (TextView) itemView.findViewById(R.id.location);
+                /*itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!url.equals(""))
+                            onArticleClick(url);
+                    }
+                });
+                ;*/
+            }
+
+        }
+
+        List<CalendarEvent> events;
+
+        RVAdapter(List<CalendarEvent> events) {
+
+            this.events = CalendarEvent.sort(events);
+            for (int i = 0; i < events.size(); i++) {
+                try {
+                    events.get(i - 1);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    continue;
+                }
+                if (events.get(i - 1).getDate().get(Calendar.YEAR) == events.get(i).getDate().get(Calendar.YEAR) &&
+                        events.get(i - 1).getDate().get(Calendar.MONTH) == events.get(i).getDate().get(Calendar.MONTH) &&
+                        events.get(i - 1).getDate().get(Calendar.DAY_OF_MONTH) == events.get(i).getDate().get(Calendar.DAY_OF_MONTH)) {
+                    events.get(i).setDateLabelVisible(false);
+                }
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return events.size();
+        }
+
+        @Override
+        public CalendarEventViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.calendar_event, viewGroup, false);
+            return new CalendarEventViewHolder(v);
+        }
+
+        private String formatDate(CalendarEvent event) {
+            return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        }
+
+        @Override
+        public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, int i) {
+            if (!events.get(i).isDateLabelVisible()) {
+                calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.GONE);
+            } else {
+                calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.VISIBLE);
+                try {
+                    calendareventViewHolder.eventDate.setText(SimpleDateFormat.getDateInstance().format(events.get(i).getDate().getTime()));
+                } catch (NullPointerException ignored) {
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            calendareventViewHolder.title.setText(events.get(i).getTitle());
+            if (events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) {
+                calendareventViewHolder.duration.setVisibility(View.GONE);
+                calendareventViewHolder.location.setVisibility(View.GONE);
+                calendareventViewHolder.url = "";
+                return;
+            }
+            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
+            calendareventViewHolder.location.setVisibility(View.VISIBLE);
+            calendareventViewHolder.duration.setText(formatDate(events.get(i)));
+            calendareventViewHolder.location.setText(events.get(i).getLocation());
+            calendareventViewHolder.url = events.get(i).getLink();
+        }
+
     }
 }
