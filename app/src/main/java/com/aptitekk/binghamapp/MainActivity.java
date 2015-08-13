@@ -15,9 +15,22 @@ import android.view.MenuItem;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
+import org.w3c.dom.Document;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.Callable;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
         int lastFeedUpdateDay = sharedPreferences.getInt("lastFeedUpdateDay", 0);
         int lastFeedUpdateMonth = sharedPreferences.getInt("lastFeedUpdateMonth", 0);
 
-        Log.v(LOG_NAME, "lastUpdateFeedDay: "+lastFeedUpdateDay);
-        Log.v(LOG_NAME, "lastUpdateFeedMonth: "+lastFeedUpdateMonth);
+        Log.v(LOG_NAME, "lastUpdateFeedDay: " + lastFeedUpdateDay);
+        Log.v(LOG_NAME, "lastUpdateFeedMonth: " + lastFeedUpdateMonth);
 
         if (lastFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
                 || lastFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
@@ -74,6 +87,23 @@ public class MainActivity extends AppCompatActivity {
                         if (listener != null && (listener instanceof Fragment && !((Fragment) listener).isDetached())) {
                             listener.onNewsFeedDownloaded(newsFeed);
                         }
+                    }
+                    // Save the feed to file...
+                    try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "news.feed"));
+
+                        Document document = newsFeed.getRssManager().getDocument();
+
+                        //Converts the Document into a file
+                        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                        Transformer transformer = transformerFactory.newTransformer();
+                        DOMSource source = new DOMSource(document);
+                        StreamResult result = new StreamResult(fileOutputStream);
+                        transformer.transform(source, result);
+
+                        fileOutputStream.close();
+                    } catch (IOException | TransformerException e) {
+                        e.printStackTrace();
                     }
                     return null;
                 }
@@ -88,6 +118,21 @@ public class MainActivity extends AppCompatActivity {
                             listener.onEventFeedDownloaded(eventsFeed);
                         }
                     }
+                    // Save the feed to file...
+                    /*try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "events.feed"));
+
+                        //Converts the Document into a file
+                        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                        Transformer transformer = transformerFactory.newTransformer();
+                        DOMSource source = new DOMSource(document);
+                        StreamResult result = new StreamResult(fileOutputStream);
+                        transformer.transform(source, result);
+
+                        fileOutputStream.close();
+                    } catch (IOException | TransformerException e) {
+                        e.printStackTrace();
+                    }*/
                     return null;
                 }
             };
@@ -95,7 +140,9 @@ public class MainActivity extends AppCompatActivity {
             downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
             downloadingEventsFeed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
                     eventsFeedCallable,
-                    CalendarDog.FetchType.ICAL);
+                    CalendarDog.FetchType.XML);
+        } else { // We have already downloaded the news and events today.. Lets retrieve the files and create feeds from them.
+
         }
     }
 
