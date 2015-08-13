@@ -18,20 +18,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssnewsfeed.NewsArticle;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SchoolNewsFragment extends Fragment {
+public class SchoolNewsFragment extends Fragment implements MainActivity.FeedListener {
 
     private RecyclerView recyclerView;
-    public static RSSNewsFeed feed;
 
     public SchoolNewsFragment() {
         // Required empty public constructor
@@ -44,9 +43,7 @@ public class SchoolNewsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recycler, container, false);
 
-        if (isNetworkConnected()) {
-            populateNewsFeed();
-        } else {
+        if (!isNetworkConnected()) {
             //TODO: Add cardview and just make it GONE, then change visibility here
             //Show No Internet Fragment
             MessageCardFragment messageCardFragment = new MessageCardFragment();
@@ -64,49 +61,53 @@ public class SchoolNewsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (isNetworkConnected()) {
+            if (MainActivity.newsFeed == null)
+                ((MainActivity) getActivity()).addFeedListener(this);
+            else
+                populateNewsFeed(MainActivity.newsFeed);
+        }
+    }
+
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         return (cm.getActiveNetworkInfo() != null);
     }
 
-    public void populateNewsFeed() {
-        final Callable<Void> refresh = new Callable<Void>() {
-            public Void call() {
+    public void populateNewsFeed(RSSNewsFeed newsFeed) {
 
-                //Hide progress wheel
-                getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
+        //Hide progress wheel
+        getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-                if (feed.getRssManager().getNewsArticles().isEmpty()) {
-                    //TODO: Add cardview and just make it GONE, then change visibility here
-                    //Show Website Down Fragment
-                    MessageCardFragment messageCardFragment = new MessageCardFragment();
-                    Bundle args = new Bundle();
-                    args.putString("title", "Unable to retrieve news!");
-                    args.putString("description", "Could not download news! Is the website down?");
-                    messageCardFragment.setArguments(args);
+        if (newsFeed.getRssManager().getNewsArticles().isEmpty()) {
+            //TODO: Add cardview and just make it GONE, then change visibility here
+            //Show Website Down Fragment
+            MessageCardFragment messageCardFragment = new MessageCardFragment();
+            Bundle args = new Bundle();
+            args.putString("title", "Unable to retrieve news!");
+            args.putString("description", "Could not download news! Is the website down?");
+            messageCardFragment.setArguments(args);
 
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                    fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
-                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
-                    return null;
-                } else {
-                    //Show Recycler View
-                    recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
-                    recyclerView.setHasFixedSize(true);
-                    LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-                    recyclerView.setLayoutManager(llm);
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        } else {
+            //Show Recycler View
+            recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
+            recyclerView.setHasFixedSize(true);
+            LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+            recyclerView.setLayoutManager(llm);
 
-                    RVAdapter adapter = new RVAdapter(SchoolNewsFragment.feed.getRssManager().getNewsArticles());
-                    recyclerView.setAdapter(adapter);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    return null;
-                }
-            }
-        };
-
-        feed = new RSSNewsFeed(refresh);
+            RVAdapter adapter = new RVAdapter(newsFeed.getRssManager().getNewsArticles());
+            recyclerView.setAdapter(adapter);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -128,6 +129,15 @@ public class SchoolNewsFragment extends Fragment {
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onNewsFeedDownloaded(RSSNewsFeed newsFeed) {
+        populateNewsFeed(newsFeed);
+    }
+
+    @Override
+    public void onEventFeedDownloaded(CalendarDog eventFeed) {
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NewsArticleViewHolder> {

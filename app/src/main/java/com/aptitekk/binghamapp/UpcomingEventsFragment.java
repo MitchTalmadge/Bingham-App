@@ -16,16 +16,14 @@ import android.widget.TextView;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 
-public class UpcomingEventsFragment extends Fragment {
-
-    public static CalendarDog feed;
+public class UpcomingEventsFragment extends Fragment implements MainActivity.FeedListener {
 
     private RecyclerView recyclerView;
 
@@ -54,9 +52,7 @@ public class UpcomingEventsFragment extends Fragment {
         calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
         calendarView.setMaximumDate(calendar.getTime());*/
 
-        if (isNetworkConnected()) {
-            populateCalendar();
-        } else {
+        if (!isNetworkConnected()) {
             //TODO: Add cardview and just make it GONE, then change visibility here
             //Show No Internet Fragment
             MessageCardFragment messageCardFragment = new MessageCardFragment();
@@ -75,10 +71,15 @@ public class UpcomingEventsFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-
+        if (isNetworkConnected()) {
+            if (MainActivity.eventsFeed == null)
+                ((MainActivity) getActivity()).addFeedListener(this);
+            else
+                populateCalendar(MainActivity.eventsFeed);
+        }
     }
 
     private boolean isNetworkConnected() {
@@ -86,28 +87,29 @@ public class UpcomingEventsFragment extends Fragment {
         return (cm.getActiveNetworkInfo() != null);
     }
 
-    public void populateCalendar() {
-        final Callable<Void> refresh = new Callable<Void>() {
-            public Void call() {
+    public void populateCalendar(CalendarDog eventsFeed) {
 
-                //Hide progress wheel
-                getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
+        //Hide progress wheel
+        getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-                //Show Recycler View
-                recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
-                recyclerView.setHasFixedSize(true);
-                LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-                recyclerView.setLayoutManager(llm);
+        //Show Recycler View
+        recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(llm);
 
-                RVAdapter adapter = new RVAdapter(UpcomingEventsFragment.feed.getEvents());
-                recyclerView.setAdapter(adapter);
-                recyclerView.setVisibility(View.VISIBLE);
-                return null;
-            }
-        };
-        feed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
-                refresh,
-                CalendarDog.FetchType.ICAL);
+        RVAdapter adapter = new RVAdapter(eventsFeed.getEvents());
+        recyclerView.setAdapter(adapter);
+        recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onNewsFeedDownloaded(RSSNewsFeed newsFeed) {
+    }
+
+    @Override
+    public void onEventFeedDownloaded(CalendarDog eventFeed) {
+        populateCalendar(eventFeed);
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
