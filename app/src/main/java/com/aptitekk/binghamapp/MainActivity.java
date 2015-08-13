@@ -7,15 +7,17 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_NAME = "BinghamApp";
     private Toolbar toolbar;
     private BackButtonListener backButtonListener;
+    private ArrayList<MenuListener> menuListeners = new ArrayList<>();
     private DrawerLayout drawer;
 
     @Override
@@ -53,14 +55,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void setBackButtonListener(BackButtonListener listener) {
-        this.backButtonListener = listener;
-    }
-
     @Override
     public void onBackPressed() {
         if (!closeDrawer(this.drawer)) {
-            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && ((Fragment) this.backButtonListener).isResumed()) {
+            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && !((Fragment) this.backButtonListener).isDetached()) {
                 if (this.backButtonListener.onBackPressed()) {
                     super.onBackPressed();
                 }
@@ -90,11 +88,45 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager.popBackStackImmediate(0, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
-    public interface BackButtonListener {
+    public void setBackButtonListener(BackButtonListener listener) {
+        this.backButtonListener = listener;
+    }
 
+    public interface BackButtonListener {
         /**
          * @return true if super.onBackPressed() should be called in MainActivity, false if not
          */
         boolean onBackPressed();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        /*for (MenuListener listener : menuListeners) {
+            if (listener != null) {
+                if (listener instanceof Fragment && !((Fragment) listener).isDetached()) {
+                    listener.onPrepareOptionsMenu(menu);
+                }
+                else
+                {
+                    menuListeners.remove(listener);
+                }
+            }
+            else
+            {
+                menuListeners.remove(listener);
+            }
+        }
+
+        return true; //Must return true for menu to be displayed. False will result in no menu.*/
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void addMenuListener(MenuListener listener) {
+        if (!this.menuListeners.contains(listener))
+            this.menuListeners.add(listener);
+    }
+
+    public interface MenuListener {
+        void onPrepareOptionsMenu(Menu menu);
     }
 }
