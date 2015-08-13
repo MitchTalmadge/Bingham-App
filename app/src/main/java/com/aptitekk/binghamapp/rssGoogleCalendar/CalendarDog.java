@@ -33,15 +33,12 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 
-/**
- * Created by kevint on 8/8/2015.
- */
 public class CalendarDog {
 
     public enum FetchType {
         XML,
         ICAL
-    };
+    }
 
     ArrayList<CalendarEvent> events = new ArrayList<>();
 
@@ -132,7 +129,7 @@ public class CalendarDog {
                 try {
                     Date dDate;
                     if(e.getDateEnd() == null)
-                        dDate = e.getDateEnd().getValue();
+                        dDate = e.getDateEnd().getValue(); //FIXME: Trying to access the getValue method of a null object..? -Mitch
                     else
                         dDate =  e.getDateStart().getValue();
                     Date dEndTime;
@@ -158,7 +155,6 @@ public class CalendarDog {
                 }  catch (NullPointerException ee) {
                     Log.e(MainActivity.LOG_NAME, "Failed on " + e.getSummary().getValue());
                     //ee.printStackTrace();
-                    continue;
                 }
             }
             try {
@@ -175,7 +171,7 @@ public class CalendarDog {
         @Override
         protected Document doInBackground(String... url) {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = null;
+            DocumentBuilder dBuilder;
             try {
                 dBuilder = dbFactory.newDocumentBuilder();
                 return dBuilder.parse(url[0]);

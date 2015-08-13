@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Created by kevint on 8/8/2015.
- */
 public class CalendarEvent {
 
     String title;
@@ -49,12 +46,12 @@ public class CalendarEvent {
         public int compare(CalendarEvent o1, CalendarEvent o2) {
             //Put A/B Day Labels at the top of each day.
             if(o1.getTitle().equalsIgnoreCase("A Day") || o1.getTitle().equalsIgnoreCase("B Day")) {
-                if(o1.eventMatchesDay(o1, o2.getDate())) {
+                if(eventMatchesDay(o1, o2.getDate())) {
                     return -1;
                 }
             }
             if(o2.getTitle().equalsIgnoreCase("A Day") || o2.getTitle().equalsIgnoreCase("B Day")) {
-                if(o2.eventMatchesDay(o2, o1.getDate())) {
+                if(eventMatchesDay(o2, o1.getDate())) {
                     return 1;
                 }
             }
@@ -64,7 +61,7 @@ public class CalendarEvent {
     }
 
     public static List<CalendarEvent> eventsMatchesDay(List<CalendarEvent> e, Calendar day) {
-        List<CalendarEvent> result = new ArrayList<CalendarEvent>();
+        List<CalendarEvent> result = new ArrayList<>();
         for(CalendarEvent event : e) {
             if(event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
                     event.getDate().get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
@@ -75,12 +72,9 @@ public class CalendarEvent {
         return result;
     }
     public static boolean eventMatchesDay(CalendarEvent event, Calendar day) {
-        if(event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
+        return event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
                 event.getDate().get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
-                event.getDate().get(Calendar.YEAR) == day.get(Calendar.YEAR)) {
-            return true;
-        }
-        return false;
+                event.getDate().get(Calendar.YEAR) == day.get(Calendar.YEAR);
     }
 
 }

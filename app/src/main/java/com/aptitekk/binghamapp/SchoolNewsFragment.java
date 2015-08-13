@@ -31,7 +31,7 @@ import java.util.concurrent.Callable;
 public class SchoolNewsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    public static RSSNewsFeed feed;
+    public RSSNewsFeed feed;
 
     public SchoolNewsFragment() {
         // Required empty public constructor
@@ -98,7 +98,7 @@ public class SchoolNewsFragment extends Fragment {
                     LinearLayoutManager llm = new LinearLayoutManager(getActivity());
                     recyclerView.setLayoutManager(llm);
 
-                    RVAdapter adapter = new RVAdapter(SchoolNewsFragment.feed.getRssManager().getNewsArticles());
+                    RVAdapter adapter = new RVAdapter(feed.getRssManager().getNewsArticles());
                     recyclerView.setAdapter(adapter);
                     recyclerView.setVisibility(View.VISIBLE);
                     return null;

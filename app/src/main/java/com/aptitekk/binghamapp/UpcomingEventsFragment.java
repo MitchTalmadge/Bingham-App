@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 
 public class UpcomingEventsFragment extends Fragment {
 
-    public static CalendarDog feed;
+    public CalendarDog feed;
 
     private RecyclerView recyclerView;
 
@@ -99,7 +99,7 @@ public class UpcomingEventsFragment extends Fragment {
                 LinearLayoutManager llm = new LinearLayoutManager(getActivity());
                 recyclerView.setLayoutManager(llm);
 
-                RVAdapter adapter = new RVAdapter(UpcomingEventsFragment.feed.getEvents());
+                RVAdapter adapter = new RVAdapter(feed.getEvents());
                 recyclerView.setAdapter(adapter);
                 recyclerView.setVisibility(View.VISIBLE);
                 return null;

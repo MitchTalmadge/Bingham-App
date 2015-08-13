@@ -31,6 +31,8 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
     private NavigationDrawerAdapter adapter;
     private int[] drawerListPositions;
 
+    private boolean skipMainSelection = false;
+
     public NavigationDrawerFragment() {
         // Required empty public constructor
     }
@@ -139,7 +141,10 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 break;
         }
 
-        ((MainActivity) getActivity()).popToMainMenu(); //Virtually presses the back button until we are at the main menu.
+        if(fragmentID != 0 && newFragment != null) // If we are loading any other fragment than main...
+            skipMainSelection = true; // ...skip setting the Main list item to selected (in onBackStackChanged()).
+
+        ((MainActivity) getActivity()).popToMainMenu(); // Virtually presses the back button until we are at the main menu.
 
         if (newFragment != null) {
             adapter.setSelectedItem(position);
@@ -161,11 +166,12 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
 
     @Override
     public void onBackStackChanged() {
-        if(getFragmentManager().getBackStackEntryCount() == 0) //We are at the main menu
-        {
+        if(!skipMainSelection && getFragmentManager().getBackStackEntryCount() == 0) {
             this.adapter.setSelectedItem(0);
             this.adapter.notifyDataSetChanged();
         }
+        else if(skipMainSelection)
+            skipMainSelection = false;
     }
 
     public class NavigationDrawerAdapter extends ArrayAdapter {
