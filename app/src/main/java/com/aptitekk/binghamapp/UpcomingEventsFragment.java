@@ -6,11 +6,9 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -70,21 +68,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
         calendarView.setMaximumDate(calendar.getTime());*/
 
-        if (!isNetworkConnected()) {
-            //TODO: Add cardview and just make it GONE, then change visibility here
-            //Show No Internet Fragment
-            MessageCardFragment messageCardFragment = new MessageCardFragment();
-            Bundle args = new Bundle();
-            args.putString("title", "No Internet Connection!");
-            args.putString("description", "Could not download events!");
-            messageCardFragment.setArguments(args);
-
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }
         return view;
     }
 
@@ -92,12 +75,10 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (isNetworkConnected()) {
-            if (MainActivity.eventsFeed == null)
-                ((MainActivity) getActivity()).addFeedListener(this);
-            else
-                populateCalendar(MainActivity.eventsFeed);
-        }
+        if (MainActivity.eventsFeed == null)
+            ((MainActivity) getActivity()).addFeedListener(this);
+        else
+            populateCalendar(MainActivity.eventsFeed);
     }
 
     @Override
@@ -126,7 +107,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     Log.d(MainActivity.LOG_NAME, eventsFeed.getEvents().get(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
-
 
                 @Override
                 public void onNegativeActionClicked(DialogFragment fragment) {
