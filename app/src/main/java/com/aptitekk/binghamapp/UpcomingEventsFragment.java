@@ -291,37 +291,64 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 @Override
                 public void onClick(View v) {
                     Log.i(MainActivity.LOG_NAME, "Event clicked!");
-                    Dialog.Builder builder = new SimpleDialog.Builder(R.style.Material_App_Dialog_Simple_Light) {
+
+                    Dialog.Builder builderChoice = new SimpleDialog.Builder(R.style.Material_App_Dialog_Simple_Light) {
                         @Override
                         public void onPositiveActionClicked(DialogFragment fragment) {
                             super.onPositiveActionClicked(fragment);
 
-                            Intent calIntent = new Intent(Intent.ACTION_EDIT);
-                            calIntent.setType("vnd.android.cursor.item/event");
-                            calIntent.putExtra(CalendarContract.Events.TITLE, events.get(i).getTitle());
-                            calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, events.get(i).getLocation());
-                            calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                                    events.get(i).getDate().getTimeInMillis());
-                            calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                                    events.get(i).getEndTime().getTimeInMillis());
-                            getActivity().startActivity(calIntent);
-
+                            //share
+                            Intent textShareIntent = new Intent(Intent.ACTION_SEND);
+                            textShareIntent.setType("text/plain");
+                            textShareIntent.putExtra(Intent.EXTRA_TEXT, events.get(i).getTitle() + " at " +
+                                                                        events.get(i).getLocation() + " from " +
+                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getDate().getTime()) + " to " +
+                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getEndTime().getTime()));
+                            getActivity().startActivity(Intent.createChooser(textShareIntent, "Share event with..."));
                         }
-
-
                         @Override
                         public void onNegativeActionClicked(DialogFragment fragment) {
                             super.onNegativeActionClicked(fragment);
+                            Dialog.Builder builder = new SimpleDialog.Builder(R.style.Material_App_Dialog_Simple_Light) {
+                                @Override
+                                public void onPositiveActionClicked(DialogFragment fragment) {
+                                    super.onPositiveActionClicked(fragment);
+
+                                    Intent calIntent = new Intent(Intent.ACTION_EDIT);
+                                    calIntent.setType("vnd.android.cursor.item/event");
+                                    calIntent.putExtra(CalendarContract.Events.TITLE, events.get(i).getTitle());
+                                    calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, events.get(i).getLocation());
+                                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                                            events.get(i).getDate().getTimeInMillis());
+                                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                                            events.get(i).getEndTime().getTimeInMillis());
+                                    getActivity().startActivity(calIntent);
+
+                                }
+
+
+                                @Override
+                                public void onNegativeActionClicked(DialogFragment fragment) {
+                                    super.onNegativeActionClicked(fragment);
+                                }
+                            };
+
+
+                            ((SimpleDialog.Builder) builder).message(events.get(i).getTitle())
+                                    .title("Add event to your calendar?")
+                                    .positiveAction("YES")
+                                    .negativeAction("NO");
+                            DialogFragment dialogFragment = DialogFragment.newInstance(builder);
+                            dialogFragment.show(getFragmentManager(), null);
                         }
                     };
 
 
-                    ((SimpleDialog.Builder) builder).message(events.get(i).getTitle())
-                            .title("Add event to your calendar?")
-                            .positiveAction("YES")
-                            .negativeAction("NO");
-                    DialogFragment fragment = DialogFragment.newInstance(builder);
-                    fragment.show(getFragmentManager(), null);
+                    ((SimpleDialog.Builder) builderChoice).message("Event Selected")
+                            .positiveAction("SHARE")
+                            .negativeAction("CALENDAR");
+                    DialogFragment dialogFragment = DialogFragment.newInstance(builderChoice);
+                    dialogFragment.show(getFragmentManager(), null);
 
                 }
             });
