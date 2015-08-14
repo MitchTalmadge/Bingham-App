@@ -154,8 +154,8 @@
     <orderEntry type="library" exported="" name="google-http-client-android-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="google-oauth-client-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-cast-7.5.0" level="project" />
-    <orderEntry type="library" exported="" name="gson-2.1" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-gson-1.20.0" level="project" />
+    <orderEntry type="library" exported="" name="gson-2.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-ads-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-location-7.5.0" level="project" />
