@@ -22,15 +22,20 @@ import android.widget.TextView;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.rey.material.app.DatePickerDialog;
+import com.rey.material.app.Dialog;
+import com.rey.material.app.DialogFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
 public class UpcomingEventsFragment extends Fragment implements MainActivity.FeedListener {
 
     private RecyclerView recyclerView;
+    private CalendarDog eventsFeed;
 
     public UpcomingEventsFragment() {
         // Required empty public constructor
@@ -105,7 +110,36 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         return (cm.getActiveNetworkInfo() != null);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Dialog.Builder builder = null;
+        if (item.getTitle().toString().equalsIgnoreCase("calendar")) {
+            builder = new DatePickerDialog.Builder(R.style.Material_App_Dialog_DatePicker) {
+                @Override
+                public void onPositiveActionClicked(DialogFragment fragment) {
+                    DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
+                    Date date = dialog.getCalendar().getTime();
+                    recyclerView.scrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
+                    super.onPositiveActionClicked(fragment);
+                }
+
+
+                @Override
+                public void onNegativeActionClicked(DialogFragment fragment) {
+                    super.onNegativeActionClicked(fragment);
+                }
+            };
+            builder.positiveAction("OK")
+                    .negativeAction("CANCEL");
+            DialogFragment fragment = DialogFragment.newInstance(builder);
+            fragment.show(getFragmentManager(), null);
+            return true;
+        }
+        return false;
+    }
+
     public void populateCalendar(CalendarDog eventsFeed) {
+        this.eventsFeed = eventsFeed;
 
         //Hide progress wheel
         getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
@@ -213,21 +247,21 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 }
             }
             calendareventViewHolder.title.setText(events.get(i).getTitle());
-            if (events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) {
-                calendareventViewHolder.duration.setVisibility(View.GONE);
-                calendareventViewHolder.location.setVisibility(View.GONE);
-                calendareventViewHolder.url = "";
-                return;
-            }
             if (events.get(i).getTitle().contains("Game") || events.get(i).getTitle().contains("Football")) {
                 calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary));
                 calendareventViewHolder.title.setTextColor(Color.WHITE);
-            } else if(events.get(i).getTitle().contains("Dance")) {
+            } else if (events.get(i).getTitle().contains("Dance")) {
                 calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary_text));
                 calendareventViewHolder.title.setTextColor(Color.WHITE);
             } else {
                 calendareventViewHolder.title.setBackgroundColor(Color.WHITE);
                 calendareventViewHolder.title.setTextColor(Color.BLACK);
+            }
+            if (events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) {
+                calendareventViewHolder.duration.setVisibility(View.GONE);
+                calendareventViewHolder.location.setVisibility(View.GONE);
+                calendareventViewHolder.url = "";
+                return;
             }
             calendareventViewHolder.duration.setVisibility(View.VISIBLE);
             calendareventViewHolder.location.setVisibility(View.VISIBLE);

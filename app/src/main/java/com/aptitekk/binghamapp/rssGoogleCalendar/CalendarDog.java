@@ -85,6 +85,19 @@ public class CalendarDog {
 
     }
 
+    public static int findPositionFromDate(ArrayList<CalendarEvent> events, Date date) {
+        long minDiff = -1, currentTime = date.getTime();
+        int minDate = 0;
+        for (int i=0; i<events.size(); i++) {
+            long diff = Math.abs(currentTime - events.get(i).getDate().getTime().getTime());
+            if ((minDiff == -1) || (diff < minDiff)) {
+                minDiff = diff;
+                minDate = i;
+            }
+        }
+        return minDate;
+    }
+
     public ArrayList<CalendarEvent> getEvents() {
         return this.events;
     }
