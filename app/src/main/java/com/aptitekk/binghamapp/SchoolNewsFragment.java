@@ -109,14 +109,6 @@ public class SchoolNewsFragment extends Fragment implements MainActivity.FeedLis
         }
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        Log.i(MainActivity.LOG_NAME, "*Creating");
-        menu.add("calendar").setIcon(R.drawable.calendar_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-    }
-
     public void onArticleClick(String URL) {
         WebViewFragment webViewFragment = new WebViewFragment();
         Bundle bundle = new Bundle();
