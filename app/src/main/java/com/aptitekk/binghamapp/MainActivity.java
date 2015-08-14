@@ -140,9 +140,8 @@ public class MainActivity extends AppCompatActivity {
             };
 
             downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
-            downloadingEventsFeed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
-                    eventsFeedCallable,
-                    CalendarDog.FetchType.ICAL);
+            downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
+                    CalendarDog.FetchType.JSON);
         } else { // We have already downloaded the news and events today.. Lets retrieve the files and create feeds from them.
 
         }

@@ -5,17 +5,19 @@ import android.util.Log;
 
 import com.aptitekk.binghamapp.MainActivity;
 
-import org.mortbay.jetty.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,11 +25,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.Callable;
-import java.util.logging.XMLFormatter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.json.*;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -36,38 +39,51 @@ import biweekly.component.VEvent;
 public class CalendarDog {
 
     public enum FetchType {
+        JSON,
         XML,
         ICAL
     }
 
     ArrayList<CalendarEvent> events = new ArrayList<>();
 
-    Document doc;
-
     Callable<Void> refresh;
 
     final boolean verbose = false;
 
-    public final static String BINGHAM_GOOGLE_CALENDAR = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
+    public static String BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&timeMin=2015-08-01T00:00:00-07:00&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
+
+    public final static String BINGHAM_GOOGLE_CALENDAR_XML = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
+
     //String thing =                                     "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics"
 
-    public CalendarDog(String url, Callable<Void> refresh, FetchType type) {
+    public CalendarDog(Callable<Void> refresh, FetchType type) {
+        setTodaysDate();
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
         this.refresh = refresh;
         try {
             switch (type) {
+                case JSON:
+                    FetchJSONTask jsonTask = new FetchJSONTask();
+                    jsonTask.execute(BINGHAM_GOOGLE_CALENDAR);
                 case XML:
                     FetchXMLTask XMLtask = new FetchXMLTask();
-                    XMLtask.execute(url);
+                    XMLtask.execute(BINGHAM_GOOGLE_CALENDAR_XML);
                 case ICAL:
                     FetchICalTask ICALtask = new FetchICalTask();
-                    ICALtask.execute(url);
+                    ICALtask.execute(BINGHAM_GOOGLE_CALENDAR_XML);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    public static void setTodaysDate() {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz");
+        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&"+
+                "timeMin="+format.format(c.getTime())+"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
     }
 
     public ArrayList<CalendarEvent> getEvents() {
@@ -79,6 +95,67 @@ public class CalendarDog {
             Log.i(MainActivity.LOG_NAME, msg);
         }
     }
+
+    private class FetchJSONTask extends AsyncTask<String, Void, JSONObject> {
+
+        @Override
+        protected JSONObject doInBackground(String... urls) {
+            try {
+                URL url = new URL(urls[0]);
+                URLConnection urlConnection = url.openConnection();
+                urlConnection.setConnectTimeout(1000);
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
+
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
+                return new JSONObject(responseStrBuilder.toString());
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            try {
+                JSONArray arr = jsonObject.getJSONArray("items");
+                for (int i = 0; i < arr.length(); i++) {
+                    String summary = arr.getJSONObject(i).getString("summary");
+                    String location = arr.getJSONObject(i).getString("location");
+                    String link = arr.getJSONObject(i).getString("htmlLink");
+
+                    String rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
+                    String rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
+
+                    DateFormat format = (rawStartTime.contains("T") ? new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz") : new SimpleDateFormat("yyyy-MM-dd"));
+                    DateFormat endTimeFormat = (rawEndTime.contains("T") ? new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz") : new SimpleDateFormat("yyyy-MM-dd"));
+                    Calendar date = Calendar.getInstance();
+                    Calendar endTime = Calendar.getInstance();
+                    try {
+                        date.setTime(format.parse(rawStartTime));
+                        endTime.setTime(endTimeFormat.parse(rawEndTime));
+                        events.add(new CalendarEvent(summary,
+                                date,
+                                endTime,
+                                location,
+                                link
+                        ));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                refresh.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private class FetchICalTask extends AsyncTask<String, Integer, ICalendar> {
 
@@ -184,16 +261,15 @@ public class CalendarDog {
 
         @Override
         protected void onPostExecute(Document docu) {
-            doc = docu;
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-            doc.getDocumentElement().normalize();
+            docu.getDocumentElement().normalize();
 
             //logDebug("Root element :" + doc.getDocumentElement().getNodeName());
 
             //logDebug("Title : " + doc.getElementsByTagName("title").item(0).getTextContent());
 
-            NodeList nList = doc.getElementsByTagName("entry");
+            NodeList nList = docu.getElementsByTagName("entry");
 
             //logDebug("----------------------------");
 
