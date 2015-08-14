@@ -123,6 +123,7 @@ public class NavigationDrawerFragment extends Fragment {
                 newFragment.setArguments(bundle);
                 break;
             case 4: //School Map
+                newFragment = new MapsFragment();
                 break;
             case 5: //Upcoming Events
                 newFragment = new UpcomingEventsFragment();
