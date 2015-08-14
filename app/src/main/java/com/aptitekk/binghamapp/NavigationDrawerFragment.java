@@ -117,6 +117,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 newFragment = new SchoolNewsFragment();
                 break;
             case 2: //Bell Schedules
+                newFragment = new BellSchedulesFragment();
                 break;
             case 3: //Lunch Menus
                 newFragment = new WebViewFragment();

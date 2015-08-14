@@ -1,5 +1,6 @@
 package com.aptitekk.binghamapp;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +20,6 @@ import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 import org.w3c.dom.Document;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import java.util.Calendar;
 import java.util.concurrent.Callable;
 
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FragmentManager.enableDebugLogging(true);
 
         // Set up the toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 public Void call() {
                     newsFeed = downloadingNewsFeed;
                     for (FeedListener listener : feedListeners) {
-                        if (listener != null && (listener instanceof Fragment && !((Fragment) listener).isDetached())) {
+                        if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
                             listener.onNewsFeedDownloaded(newsFeed);
                         }
                     }
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
             downloadingEventsFeed = new CalendarDog(CalendarDog.BINGHAM_GOOGLE_CALENDAR,
                     eventsFeedCallable,
-                    CalendarDog.FetchType.XML);
+                    CalendarDog.FetchType.ICAL);
         } else { // We have already downloaded the news and events today.. Lets retrieve the files and create feeds from them.
 
         }
@@ -171,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (!closeDrawer(this.drawer)) {
-            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && !((Fragment) this.backButtonListener).isDetached()) {
+            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && ((Fragment) this.backButtonListener).isAdded()) {
                 if (this.backButtonListener.onBackPressed()) {
                     super.onBackPressed();
                 }
@@ -221,5 +223,22 @@ public class MainActivity extends AppCompatActivity {
         void onNewsFeedDownloaded(RSSNewsFeed newsFeed);
 
         void onEventFeedDownloaded(CalendarDog eventFeed);
+    }
+
+    public static int pixelsToDP(int pixels, Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int dp = (int) (pixels / (metrics.densityDpi / 160f));
+        return dp;
+    }
+
+    public static void listFragments(FragmentManager manager)
+    {
+        int count = manager.getBackStackEntryCount();
+        Log.i(LOG_NAME, "*----------------");
+        Log.i(LOG_NAME, "*Backstack Count: "+count);
+        for(int i = 0; i < count; i++)
+        {
+            Log.i(LOG_NAME, "*"+i+": "+manager.getBackStackEntryAt(i));
+        }
     }
 }

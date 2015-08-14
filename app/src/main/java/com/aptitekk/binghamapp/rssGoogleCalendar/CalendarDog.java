@@ -48,7 +48,7 @@ public class CalendarDog {
 
     final boolean verbose = false;
 
-    public final static String BINGHAM_GOOGLE_CALENDAR = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/full";
+    public final static String BINGHAM_GOOGLE_CALENDAR = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
     //String thing =                                     "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics"
 
     public CalendarDog(String url, Callable<Void> refresh, FetchType type) {
