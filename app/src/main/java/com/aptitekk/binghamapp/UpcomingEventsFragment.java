@@ -37,6 +37,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     private RecyclerView recyclerView;
     private CalendarDog eventsFeed;
 
+    private boolean showABDays = true;
+
     public UpcomingEventsFragment() {
         // Required empty public constructor
     }
@@ -103,6 +105,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         super.onCreateOptionsMenu(menu, inflater);
 
         menu.add("calendar").setIcon(R.drawable.calendar_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add("Show A/B Days").setCheckable(true).setChecked(this.showABDays).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
 
     private boolean isNetworkConnected() {
@@ -120,6 +123,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
                     Date date = dialog.getCalendar().getTime();
                     recyclerView.scrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
+                    Log.d(MainActivity.LOG_NAME, eventsFeed.getEvents().get(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
 
@@ -133,6 +137,13 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     .negativeAction("CANCEL");
             DialogFragment fragment = DialogFragment.newInstance(builder);
             fragment.show(getFragmentManager(), null);
+            return true;
+        }
+        else if(item.getTitle().toString().equalsIgnoreCase("Show A/B Days")) {
+            item.setChecked(!item.isChecked());
+            this.showABDays = item.isChecked();
+            this.recyclerView.refreshDrawableState();
+            this.recyclerView.getAdapter().notifyDataSetChanged();
             return true;
         }
         return false;
@@ -235,9 +246,29 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
 
         @Override
         public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, int i) {
+            //Refresh everything
+            calendareventViewHolder.card.setVisibility(View.VISIBLE);
+            calendareventViewHolder.title.setVisibility(View.VISIBLE);
+            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
+            calendareventViewHolder.location.setVisibility(View.VISIBLE);
+
+            if((events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) && !showABDays) {
+                events.get(i).setDateLabelVisible(false);
+                try {
+                    if(CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
+                        events.get(i+1).setDateLabelVisible(true);
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
+            } else if((events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) && showABDays) {
+                events.get(i).setDateLabelVisible(true);
+                try {
+                    if(CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
+                        events.get(i+1).setDateLabelVisible(false);
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
+            }
+
             if (!events.get(i).isDateLabelVisible()) {
                 calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.GONE);
-            } else {
+            }  else {
                 calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.VISIBLE);
                 try {
                     calendareventViewHolder.eventDate.setText(SimpleDateFormat.getDateInstance().format(events.get(i).getDate().getTime()));
@@ -257,14 +288,22 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 calendareventViewHolder.title.setBackgroundColor(Color.WHITE);
                 calendareventViewHolder.title.setTextColor(Color.BLACK);
             }
+
             if (events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) {
-                calendareventViewHolder.duration.setVisibility(View.GONE);
-                calendareventViewHolder.location.setVisibility(View.GONE);
-                calendareventViewHolder.url = "";
-                return;
+                if(showABDays) {
+                    calendareventViewHolder.duration.setVisibility(View.GONE);
+                    calendareventViewHolder.location.setVisibility(View.GONE);
+                    calendareventViewHolder.url = "";
+                    return;
+                } else {
+                    calendareventViewHolder.card.setVisibility(View.GONE);
+                    calendareventViewHolder.title.setVisibility(View.GONE);
+                    calendareventViewHolder.duration.setVisibility(View.GONE);
+                    calendareventViewHolder.location.setVisibility(View.GONE);
+                    calendareventViewHolder.url = "";
+                    return;
+                }
             }
-            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
-            calendareventViewHolder.location.setVisibility(View.VISIBLE);
             calendareventViewHolder.duration.setText(formatDate(events.get(i)));
             calendareventViewHolder.location.setText(events.get(i).getLocation());
             calendareventViewHolder.url = events.get(i).getLink();
