@@ -48,7 +48,7 @@ public class CalendarDog {
 
     Callable<Void> refresh;
 
-    final boolean verbose = false;
+    final boolean verbose = true;
 
     public static String BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&timeMin=2015-08-01T00:00:00-07:00&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
 
@@ -57,7 +57,10 @@ public class CalendarDog {
     //String thing =                                     "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics"
 
     public CalendarDog(Callable<Void> refresh, FetchType type) {
-        setTodaysDate();
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
+        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&"+
+                "timeMin="+format.format(c.getTime()).replace(" ","T")+"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
         this.refresh = refresh;
         try {
@@ -65,25 +68,21 @@ public class CalendarDog {
                 case JSON:
                     FetchJSONTask jsonTask = new FetchJSONTask();
                     jsonTask.execute(BINGHAM_GOOGLE_CALENDAR);
+                    break;
                 case XML:
                     FetchXMLTask XMLtask = new FetchXMLTask();
                     XMLtask.execute(BINGHAM_GOOGLE_CALENDAR_XML);
+                    break;
                 case ICAL:
                     FetchICalTask ICALtask = new FetchICalTask();
                     ICALtask.execute(BINGHAM_GOOGLE_CALENDAR_XML);
+                    break;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-    }
-
-    public static void setTodaysDate() {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz");
-        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&"+
-                "timeMin="+format.format(c.getTime())+"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
     }
 
     public ArrayList<CalendarEvent> getEvents() {
@@ -101,7 +100,9 @@ public class CalendarDog {
         @Override
         protected JSONObject doInBackground(String... urls) {
             try {
+                Log.i(MainActivity.LOG_NAME, "JSON Parsing");
                 URL url = new URL(urls[0]);
+                logDebug(BINGHAM_GOOGLE_CALENDAR);
                 URLConnection urlConnection = url.openConnection();
                 urlConnection.setConnectTimeout(1000);
                 BufferedReader streamReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -112,6 +113,7 @@ public class CalendarDog {
                     responseStrBuilder.append(inputStr);
                 return new JSONObject(responseStrBuilder.toString());
             } catch (Exception ex) {
+                ex.printStackTrace();
                 return null;
             }
         }
@@ -121,20 +123,35 @@ public class CalendarDog {
             try {
                 JSONArray arr = jsonObject.getJSONArray("items");
                 for (int i = 0; i < arr.length(); i++) {
-                    String summary = arr.getJSONObject(i).getString("summary");
-                    String location = arr.getJSONObject(i).getString("location");
                     String link = arr.getJSONObject(i).getString("htmlLink");
+                    String summary = arr.getJSONObject(i).getString("summary");
 
-                    String rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
-                    String rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
-
-                    DateFormat format = (rawStartTime.contains("T") ? new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz") : new SimpleDateFormat("yyyy-MM-dd"));
-                    DateFormat endTimeFormat = (rawEndTime.contains("T") ? new SimpleDateFormat("yyyy-MM-ddThh:mm:sszzzzzz") : new SimpleDateFormat("yyyy-MM-dd"));
+                    String location;
+                    try {
+                        location = arr.getJSONObject(i).getString("location");
+                    } catch(JSONException e) { // A/B days dont have locations x)
+                        location = "";
+                    }
+                    String rawStartTime;
+                    String rawEndTime;
+                    DateFormat format;
+                    DateFormat endTimeFormat;
+                    try {
+                        rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
+                        rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
+                        format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
+                        endTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
+                    } catch(JSONException e) { //Date not DateTime
+                        rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("date");
+                        rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("date");
+                        format = new SimpleDateFormat("yyyy-MM-dd");
+                        endTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    }
                     Calendar date = Calendar.getInstance();
                     Calendar endTime = Calendar.getInstance();
                     try {
-                        date.setTime(format.parse(rawStartTime));
-                        endTime.setTime(endTimeFormat.parse(rawEndTime));
+                        date.setTime(format.parse(rawStartTime.replace("T"," ")));
+                        endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
                         events.add(new CalendarEvent(summary,
                                 date,
                                 endTime,
@@ -168,6 +185,7 @@ public class CalendarDog {
 
         @Override
         protected ICalendar doInBackground(String... given_url) {
+            Log.i(MainActivity.LOG_NAME, "iCal Parsing");
             InputStream stream;
             try {
                 URL url = new URL((given_url[0]+".ics").replace("feeds","ical"));
@@ -247,6 +265,7 @@ public class CalendarDog {
 
         @Override
         protected Document doInBackground(String... url) {
+            Log.i(MainActivity.LOG_NAME, "XML Parsing");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder;
             try {
