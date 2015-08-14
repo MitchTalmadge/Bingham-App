@@ -9,11 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -40,36 +36,17 @@ public class SchoolNewsFragment extends Fragment implements MainActivity.FeedLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_recycler, container, false);
-
-        if (!isNetworkConnected()) {
-            //TODO: Add cardview and just make it GONE, then change visibility here
-            //Show No Internet Fragment
-            MessageCardFragment messageCardFragment = new MessageCardFragment();
-            Bundle args = new Bundle();
-            args.putString("title", "No Internet Connection!");
-            args.putString("description", "Could not download news!");
-            messageCardFragment.setArguments(args);
-
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.add(R.id.fragmentSpace, messageCardFragment);
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }
-        return view;
+        return inflater.inflate(R.layout.fragment_recycler, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (isNetworkConnected()) {
-            if (MainActivity.newsFeed == null)
-                ((MainActivity) getActivity()).addFeedListener(this);
-            else
-                populateNewsFeed(MainActivity.newsFeed);
-        }
+        if (MainActivity.newsFeed == null)
+            ((MainActivity) getActivity()).addFeedListener(this);
+        else
+            populateNewsFeed(MainActivity.newsFeed);
     }
 
     private boolean isNetworkConnected() {

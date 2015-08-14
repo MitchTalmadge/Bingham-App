@@ -38,6 +38,12 @@ import biweekly.component.VEvent;
 
 public class CalendarDog {
 
+    private JSONObject jsonObject;
+
+    public JSONObject getJSONObject() {
+        return jsonObject;
+    }
+
     public enum FetchType {
         JSON,
         XML,
@@ -83,6 +89,11 @@ public class CalendarDog {
             e.printStackTrace();
         }
 
+    }
+
+    public CalendarDog(JSONObject jsonObject)
+    {
+        buildFromJSONObject(jsonObject);
     }
 
     public static int findPositionFromDate(ArrayList<CalendarEvent> events, Date date) {
@@ -133,60 +144,65 @@ public class CalendarDog {
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
-            try {
-                JSONArray arr = jsonObject.getJSONArray("items");
-                for (int i = 0; i < arr.length(); i++) {
-                    String link = arr.getJSONObject(i).getString("htmlLink");
-                    String summary = arr.getJSONObject(i).getString("summary");
-
-                    String location;
-                    String rawStartTime;
-                    String rawEndTime;
-                    DateFormat format;
-                    DateFormat endTimeFormat;
-                    Calendar date = Calendar.getInstance();
-                    Calendar endTime = Calendar.getInstance();
-
-                    try {
-                        location = arr.getJSONObject(i).getString("location");
-                    } catch(JSONException e) { // A/B days dont have locations x)
-                        location = "";
-                    }
-                    try {
-                        rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
-                        rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
-                        format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
-                        endTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
-                    } catch(JSONException e) { //Date not DateTime
-                        rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("date");
-                        rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("date");
-                        format = new SimpleDateFormat("yyyy-MM-dd");
-                        endTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    }
-                    try {
-                        date.setTime(format.parse(rawStartTime.replace("T"," ")));
-                        endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
-                        events.add(new CalendarEvent(summary,
-                                date,
-                                endTime,
-                                location,
-                                link
-                        ));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                refresh.call();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            buildFromJSONObject(jsonObject);
         }
     }
 
+    private void buildFromJSONObject(JSONObject jsonObject)
+    {
+        this.jsonObject = jsonObject;
+        try {
+            JSONArray arr = jsonObject.getJSONArray("items");
+            for (int i = 0; i < arr.length(); i++) {
+                String link = arr.getJSONObject(i).getString("htmlLink");
+                String summary = arr.getJSONObject(i).getString("summary");
+
+                String location;
+                String rawStartTime;
+                String rawEndTime;
+                DateFormat format;
+                DateFormat endTimeFormat;
+                Calendar date = Calendar.getInstance();
+                Calendar endTime = Calendar.getInstance();
+
+                try {
+                    location = arr.getJSONObject(i).getString("location");
+                } catch(JSONException e) { // A/B days dont have locations x)
+                    location = "";
+                }
+                try {
+                    rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
+                    rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
+                    format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
+                    endTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
+                } catch(JSONException e) { //Date not DateTime
+                    rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("date");
+                    rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("date");
+                    format = new SimpleDateFormat("yyyy-MM-dd");
+                    endTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
+                }
+                try {
+                    date.setTime(format.parse(rawStartTime.replace("T"," ")));
+                    endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
+                    events.add(new CalendarEvent(summary,
+                            date,
+                            endTime,
+                            location,
+                            link
+                    ));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            refresh.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private class FetchICalTask extends AsyncTask<String, Integer, ICalendar> {
 
