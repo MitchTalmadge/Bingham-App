@@ -279,11 +279,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void listFragments(FragmentManager manager) {
-        int count = manager.getBackStackEntryCount();
-        Log.i(LOG_NAME, "*----------------");
-        Log.i(LOG_NAME, "*Backstack Count: " + count);
-        for (int i = 0; i < count; i++) {
-            Log.i(LOG_NAME, "*" + i + ": " + manager.getBackStackEntryAt(i));
+        if (manager != null) {
+            int count = manager.getBackStackEntryCount();
+            Log.i(LOG_NAME, "*----------------");
+            Log.i(LOG_NAME, "*Backstack Count: " + count);
+            for (int i = 0; i < count; i++) {
+                Log.i(LOG_NAME, "*" + i + ": " + manager.getBackStackEntryAt(i));
+            }
         }
     }
 }

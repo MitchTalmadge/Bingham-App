@@ -39,5 +39,18 @@
         <item>3_Afternoon (60 Minute After 4th)</item>
     </string-array>
 
+    <string-array name="assemblyBellSchedule0">
+        <item>Warning Bell_7:25 AM_--</item>
+        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>1st/5th Period_7:30 AM_8:48 AM</item>
+        <item>Assembly_8:53 AM_9:53 AM</item>
+        <item>2nd/6th Period_9:58 AM_11:12 AM</item>
+        <item>A Lunch_11:12 AM_11:47 AM</item>
+        <item>3rd/7th Period (B Lunchers)_11:17 AM_12:31 PM</item>
+        <item>3rd/7th Period (A Lunchers)_11:52 AM_1:06 PM</item>
+        <item>B Lunch_12:31 PM_1:06 PM</item>
+        <item>4th/8th Period_1:11 PM_2:25 PM</item>
+    </string-array>
+
 
 </resources>

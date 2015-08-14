@@ -108,6 +108,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
                 switch(assemblyScheduleListPositions[position])
                 {
                     case 0:
+                        scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule0);
                         break;
                     case 1:
                         break;
