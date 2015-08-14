@@ -2,6 +2,7 @@ package com.aptitekk.binghamapp;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -217,6 +218,16 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 calendareventViewHolder.location.setVisibility(View.GONE);
                 calendareventViewHolder.url = "";
                 return;
+            }
+            if (events.get(i).getTitle().contains("Game") || events.get(i).getTitle().contains("Football")) {
+                calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary));
+                calendareventViewHolder.title.setTextColor(Color.WHITE);
+            } else if(events.get(i).getTitle().contains("Dance")) {
+                calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary_text));
+                calendareventViewHolder.title.setTextColor(Color.WHITE);
+            } else {
+                calendareventViewHolder.title.setBackgroundColor(Color.WHITE);
+                calendareventViewHolder.title.setTextColor(Color.BLACK);
             }
             calendareventViewHolder.duration.setVisibility(View.VISIBLE);
             calendareventViewHolder.location.setVisibility(View.VISIBLE);
