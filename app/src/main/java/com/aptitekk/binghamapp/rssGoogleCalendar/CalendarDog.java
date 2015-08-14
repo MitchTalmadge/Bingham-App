@@ -127,15 +127,18 @@ public class CalendarDog {
                     String summary = arr.getJSONObject(i).getString("summary");
 
                     String location;
+                    String rawStartTime;
+                    String rawEndTime;
+                    DateFormat format;
+                    DateFormat endTimeFormat;
+                    Calendar date = Calendar.getInstance();
+                    Calendar endTime = Calendar.getInstance();
+
                     try {
                         location = arr.getJSONObject(i).getString("location");
                     } catch(JSONException e) { // A/B days dont have locations x)
                         location = "";
                     }
-                    String rawStartTime;
-                    String rawEndTime;
-                    DateFormat format;
-                    DateFormat endTimeFormat;
                     try {
                         rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
                         rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
@@ -147,8 +150,6 @@ public class CalendarDog {
                         format = new SimpleDateFormat("yyyy-MM-dd");
                         endTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
                     }
-                    Calendar date = Calendar.getInstance();
-                    Calendar endTime = Calendar.getInstance();
                     try {
                         date.setTime(format.parse(rawStartTime.replace("T"," ")));
                         endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
