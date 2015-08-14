@@ -82,7 +82,7 @@ public class SchoolNewsFragment extends Fragment implements MainActivity.FeedLis
         //Hide progress wheel
         getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-        if (newsFeed.getRssManager().getNewsArticles().isEmpty()) {
+        if (newsFeed.getNewsArticles().isEmpty()) {
             //TODO: Add cardview and just make it GONE, then change visibility here
             //Show Website Down Fragment
             MessageCardFragment messageCardFragment = new MessageCardFragment();
@@ -103,7 +103,7 @@ public class SchoolNewsFragment extends Fragment implements MainActivity.FeedLis
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             recyclerView.setLayoutManager(llm);
 
-            RVAdapter adapter = new RVAdapter(newsFeed.getRssManager().getNewsArticles());
+            RVAdapter adapter = new RVAdapter(newsFeed.getNewsArticles());
             recyclerView.setAdapter(adapter);
             recyclerView.setVisibility(View.VISIBLE);
         }

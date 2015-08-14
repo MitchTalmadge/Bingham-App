@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "news.feed"));
 
-                        Document document = newsFeed.getRssManager().getDocument();
+                        Document document = newsFeed.getDocument();
 
                         //Converts the Document into a file
                         TransformerFactory transformerFactory = TransformerFactory.newInstance();
