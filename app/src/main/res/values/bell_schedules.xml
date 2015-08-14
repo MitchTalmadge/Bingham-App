@@ -9,14 +9,27 @@
     <!-- Format: Subject Name_TimeStart_TimeEnd ... Put two dashes for no time specified -->
     <string-array name="regularBellSchedule0">
         <item>Warning Bell_7:25 AM_--</item>
-        <item>1st/5th Period_7:30 AM_9:05 AM</item>
         <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>1st/5th Period_7:30 AM_9:05 AM</item>
         <item>2nd/6th Period_9:10 AM_10:40 AM</item>
         <item>A Lunch_10:40 AM_11:15 AM</item>
         <item>3rd/7th Period (B Lunchers)_10:45 AM_12:15 PM</item>
         <item>3rd/7th Period (A Lunchers)_11:20 AM_12:50 PM</item>
         <item>B Lunch_12:15 PM_12:50 PM</item>
         <item>4th/8th Period_12:55 PM_2:25 PM</item>
+    </string-array>
+
+    <string-array name="regularBellSchedule1">
+        <item>Conference Time_7:00 AM_8:25 AM</item>
+        <item>Warning Bell_8:25 AM_--</item>
+        <item>Announcements_8:30 AM_8:35 AM</item>
+        <item>1st/5th Period_8:30 AM_9:50 AM</item>
+        <item>2nd/6th Period_9:55 AM_11:10 AM</item>
+        <item>A Lunch_11:10 AM_11:45 AM</item>
+        <item>3rd/7th Period (B Lunchers)_11:15 AM_12:30 PM</item>
+        <item>3rd/7th Period (A Lunchers)_11:50 AM_1:05 PM</item>
+        <item>B Lunch_12:30 PM_1:05 PM</item>
+        <item>4th/8th Period_1:10 PM_2:25 PM</item>
     </string-array>
 
     <string-array name="assemblyBellSchedules">
