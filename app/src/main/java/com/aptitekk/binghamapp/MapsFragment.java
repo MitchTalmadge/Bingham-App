@@ -4,9 +4,8 @@ package com.aptitekk.binghamapp;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-
 import android.support.v4.app.Fragment;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,27 +13,24 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
-/**
- * Created by kevint on 8/12/2015.
- */
-public class MapsFragment extends Fragment implements OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener {
 
     GoogleMap map;
-    MapFragment mMapFragment;
+    SupportMapFragment mMapFragment;
 
     final LatLng bingham = new LatLng(40.5636511, -111.9455659);
     final LatLngBounds binghamGrounds = new LatLngBounds(
             new LatLng(40.562165, -111.948173),
             new LatLng(40.566093, -111.943560)
-            );
+    );
 
     public MapsFragment() {
         // Required empty public constructor
@@ -48,6 +44,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         return mainView;
 
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -58,13 +55,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .tiltGesturesEnabled(true)
                 .zoomGesturesEnabled(true)
                 .scrollGesturesEnabled(false)
-                ;
-        mMapFragment = MapFragment.newInstance(options);
+        ;
+        mMapFragment = SupportMapFragment.newInstance(options);
         FragmentTransaction fragmentTransaction =
-                this.getActivity().getFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.fragmentSpace, mMapFragment);
+                getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentSpace, mMapFragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
         mMapFragment.getMapAsync(this);
+
+        ((MainActivity) getActivity()).setBackButtonListener(this);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         map.setPadding(0, 10, 0, 0);
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.firstfloor_map);
         BitmapFactory.Options o2 = new BitmapFactory.Options();
-        o2.inSampleSize=1;
+        o2.inSampleSize = 1;
         BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
         GroundOverlayOptions firstFloor = new GroundOverlayOptions()
                 .image(image)
@@ -88,4 +88,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .title("Marker"));*/
     }
 
+    @Override
+    public boolean onBackPressed() {
+        ((MainActivity) getActivity()).popToMainMenu();
+        return false;
+    }
 }

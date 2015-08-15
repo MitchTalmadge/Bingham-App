@@ -5,6 +5,9 @@ import android.util.Log;
 
 import com.aptitekk.binghamapp.MainActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,13 +27,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.*;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -60,13 +63,12 @@ public class CalendarDog {
 
     public final static String BINGHAM_GOOGLE_CALENDAR_XML = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
 
-    //String thing =                                     "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics"
-
     public CalendarDog(Callable<Void> refresh, FetchType type) {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
-        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&"+
-                "timeMin="+format.format(c.getTime()).replace(" ","T")+"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
+        String timeZone = TimeZone.getDefault().getID();
+        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
+                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone +"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
         this.refresh = refresh;
         try {
@@ -91,15 +93,14 @@ public class CalendarDog {
 
     }
 
-    public CalendarDog(JSONObject jsonObject)
-    {
+    public CalendarDog(JSONObject jsonObject) {
         buildFromJSONObject(jsonObject);
     }
 
     public static int findPositionFromDate(ArrayList<CalendarEvent> events, Date date) {
         long minDiff = -1, currentTime = date.getTime();
         int minDate = 0;
-        for (int i=0; i<events.size(); i++) {
+        for (int i = 0; i < events.size(); i++) {
             long diff = Math.abs(currentTime - events.get(i).getDate().getTime().getTime());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
@@ -110,7 +111,7 @@ public class CalendarDog {
     }
 
     public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {
-        if(e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
+        if (e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
                 e1.getDate().get(Calendar.MONTH) == e2.getDate().get(Calendar.MONTH) &&
                 e1.getDate().get(Calendar.DAY_OF_MONTH) == e2.getDate().get(Calendar.DAY_OF_MONTH)) {
             return true;
@@ -123,7 +124,7 @@ public class CalendarDog {
     }
 
     private void logDebug(String msg) {
-        if(verbose) {
+        if (verbose) {
             Log.i(MainActivity.LOG_NAME, msg);
         }
     }
@@ -154,11 +155,15 @@ public class CalendarDog {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             buildFromJSONObject(jsonObject);
+            try {
+                refresh.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void buildFromJSONObject(JSONObject jsonObject)
-    {
+    private void buildFromJSONObject(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
         try {
             JSONArray arr = jsonObject.getJSONArray("items");
@@ -176,7 +181,7 @@ public class CalendarDog {
 
                 try {
                     location = arr.getJSONObject(i).getString("location");
-                } catch(JSONException e) { // A/B days dont have locations x)
+                } catch (JSONException e) { // A/B days dont have locations x)
                     location = "";
                 }
                 try {
@@ -184,14 +189,14 @@ public class CalendarDog {
                     rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
                     format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
                     endTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ");
-                } catch(JSONException e) { //Date not DateTime
+                } catch (JSONException e) { //Date not DateTime
                     rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("date");
                     rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("date");
                     format = new SimpleDateFormat("yyyy-MM-dd");
                     endTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
                 }
                 try {
-                    date.setTime(format.parse(rawStartTime.replace("T"," ")));
+                    date.setTime(format.parse(rawStartTime.replace("T", " ")));
                     endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
                     events.add(new CalendarEvent(summary,
                             date,
@@ -204,11 +209,6 @@ public class CalendarDog {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        try {
-            refresh.call();
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -227,7 +227,7 @@ public class CalendarDog {
             Log.i(MainActivity.LOG_NAME, "iCal Parsing");
             InputStream stream;
             try {
-                URL url = new URL((given_url[0]+".ics").replace("feeds","ical"));
+                URL url = new URL((given_url[0] + ".ics").replace("feeds", "ical"));
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000 /* milliseconds */);
                 conn.setConnectTimeout(15000 /* milliseconds */);
@@ -259,22 +259,22 @@ public class CalendarDog {
         protected void onPostExecute(ICalendar ical) {
 
             // convert ical to our CalendarEvents
-            for(VEvent e : ical.getEvents()) {
+            for (VEvent e : ical.getEvents()) {
                 try {
                     Date dDate;
-                    if(e.getDateEnd() == null)
+                    if (e.getDateEnd() == null)
                         dDate = e.getDateEnd().getValue(); //FIXME: Trying to access the getValue method of a null object..? -Mitch
                     else
-                        dDate =  e.getDateStart().getValue();
+                        dDate = e.getDateStart().getValue();
                     Date dEndTime;
-                    if(e.getDateEnd() == null)
+                    if (e.getDateEnd() == null)
                         dEndTime = dDate;
                     else
                         dEndTime = e.getDateEnd().getValue();
                     Calendar date = Calendar.getInstance();
                     Calendar endTime = Calendar.getInstance();
 
-                    if(dDate.before(date.getTime())) { //if this event we're parsing is before today, drop it
+                    if (dDate.before(date.getTime())) { //if this event we're parsing is before today, drop it
                         continue;
                     }
 
@@ -286,7 +286,7 @@ public class CalendarDog {
                             e.getLocation().getValue(),
                             null
                     ));
-                }  catch (NullPointerException ee) {
+                } catch (NullPointerException ee) {
                     Log.e(MainActivity.LOG_NAME, "Failed on " + e.getSummary().getValue());
                     //ee.printStackTrace();
                 }
@@ -345,7 +345,7 @@ public class CalendarDog {
 
                     String rawSummary = eElement.getElementsByTagName("summary").item(0).getTextContent();
 
-                    if(!rawSummary.contains("Recurring Event")) {
+                    if (!rawSummary.contains("Recurring Event")) {
 
                         rawSummary = rawSummary.replace("&nbsp;", " ");
                         //rawSummary.replace("&lt;br&gt;","");
@@ -361,7 +361,7 @@ public class CalendarDog {
                         String rawTimeZone = rawEndTimeAndTimeZone.split("\n")[1];
                         String rawEndTime = rawEndTimeAndTimeZone.split("\n")[0].replace(" ", "");
 
-                        if(rawEndTime.length() < 7 && rawEndTime.contains(":")) {
+                        if (rawEndTime.length() < 7 && rawEndTime.contains(":")) {
                             rawEndTime = String.format("%7s", rawEndTime);
                             rawEndTime = rawEndTime.replace(" ", "0");
                         }
@@ -370,7 +370,7 @@ public class CalendarDog {
 
                         String where = splitSummary[2].replace("Where: ", ""); // We dont need [1] cus the Who is always public....and we dont need that
 
-                        if(where.contains("Who")) {
+                        if (where.contains("Who")) {
                             where = splitSummary[3].replace("Where: ", "");
                         }
 
