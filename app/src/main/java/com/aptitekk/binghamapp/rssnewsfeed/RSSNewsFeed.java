@@ -111,11 +111,6 @@ public class RSSNewsFeed {
 
             }
         }
-        try {
-            refresh.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private class DownloadRSSFeedTask extends AsyncTask<String, Void, Document> {
@@ -137,6 +132,11 @@ public class RSSNewsFeed {
         @Override
         protected void onPostExecute(Document document) {
             buildFeedFromDocument(document);
+            try {
+                refresh.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
