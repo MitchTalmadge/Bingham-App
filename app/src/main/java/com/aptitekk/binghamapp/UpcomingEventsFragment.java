@@ -2,13 +2,16 @@ package com.aptitekk.binghamapp;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +26,7 @@ import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 import com.rey.material.app.DatePickerDialog;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
+import com.rey.material.app.SimpleDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -34,6 +38,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
 
     private RecyclerView recyclerView;
     private CalendarDog eventsFeed;
+
+    private boolean showABDays = true;
 
     public UpcomingEventsFragment() {
         // Required empty public constructor
@@ -84,6 +90,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         super.onCreateOptionsMenu(menu, inflater);
 
         menu.add("calendar").setIcon(R.drawable.calendar_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add("Show A/B Days").setCheckable(true).setChecked(this.showABDays).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
 
     private boolean isNetworkConnected() {
@@ -101,6 +108,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
                     Date date = dialog.getCalendar().getTime();
                     recyclerView.scrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
+                    Log.i(MainActivity.LOG_NAME, eventsFeed.getEvents().get(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
 
@@ -113,6 +121,12 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     .negativeAction("CANCEL");
             DialogFragment fragment = DialogFragment.newInstance(builder);
             fragment.show(getFragmentManager(), null);
+            return true;
+        } else if (item.getTitle().toString().equalsIgnoreCase("Show A/B Days")) {
+            item.setChecked(!item.isChecked());
+            this.showABDays = item.isChecked();
+            this.recyclerView.refreshDrawableState();
+            this.recyclerView.getAdapter().notifyDataSetChanged();
             return true;
         }
         return false;
@@ -167,14 +181,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 title = (TextView) itemView.findViewById(R.id.title);
                 duration = (TextView) itemView.findViewById(R.id.duration);
                 location = (TextView) itemView.findViewById(R.id.location);
-                /*itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!url.equals(""))
-                            onArticleClick(url);
-                    }
-                });
-                ;*/
+
+
             }
 
         }
@@ -214,7 +222,29 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         }
 
         @Override
-        public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, int i) {
+        public void onBindViewHolder(CalendarEventViewHolder calendareventViewHolder, final int i) {
+            //Refresh everything
+            calendareventViewHolder.card.setVisibility(View.VISIBLE);
+            calendareventViewHolder.title.setVisibility(View.VISIBLE);
+            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
+            calendareventViewHolder.location.setVisibility(View.VISIBLE);
+
+            if ((events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) && !showABDays) {
+                events.get(i).setDateLabelVisible(false);
+                try {
+                    if (CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
+                        events.get(i + 1).setDateLabelVisible(true);
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                }
+            } else if ((events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) && showABDays) {
+                events.get(i).setDateLabelVisible(true);
+                try {
+                    if (CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
+                        events.get(i + 1).setDateLabelVisible(false);
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                }
+            }
+
             if (!events.get(i).isDateLabelVisible()) {
                 calendareventViewHolder.itemView.findViewById(R.id.eventDate).setVisibility(View.GONE);
             } else {
@@ -237,17 +267,91 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 calendareventViewHolder.title.setBackgroundColor(Color.WHITE);
                 calendareventViewHolder.title.setTextColor(Color.BLACK);
             }
+
             if (events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) {
-                calendareventViewHolder.duration.setVisibility(View.GONE);
-                calendareventViewHolder.location.setVisibility(View.GONE);
-                calendareventViewHolder.url = "";
-                return;
+                if (showABDays) {
+                    calendareventViewHolder.duration.setVisibility(View.GONE);
+                    calendareventViewHolder.location.setVisibility(View.GONE);
+                    calendareventViewHolder.url = "";
+                    return;
+                } else {
+                    calendareventViewHolder.card.setVisibility(View.GONE);
+                    calendareventViewHolder.title.setVisibility(View.GONE);
+                    calendareventViewHolder.duration.setVisibility(View.GONE);
+                    calendareventViewHolder.location.setVisibility(View.GONE);
+                    calendareventViewHolder.url = "";
+                    return;
+                }
             }
-            calendareventViewHolder.duration.setVisibility(View.VISIBLE);
-            calendareventViewHolder.location.setVisibility(View.VISIBLE);
             calendareventViewHolder.duration.setText(formatDate(events.get(i)));
             calendareventViewHolder.location.setText(events.get(i).getLocation());
             calendareventViewHolder.url = events.get(i).getLink();
+
+            calendareventViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(MainActivity.LOG_NAME, "Event clicked!");
+
+                    Dialog.Builder builderChoice = new SimpleDialog.Builder(R.style.Material_App_Dialog_Simple_Light) {
+                        @Override
+                        public void onPositiveActionClicked(DialogFragment fragment) {
+                            super.onPositiveActionClicked(fragment);
+
+                            //share
+                            Intent textShareIntent = new Intent(Intent.ACTION_SEND);
+                            textShareIntent.setType("text/plain");
+                            textShareIntent.putExtra(Intent.EXTRA_TEXT, events.get(i).getTitle() + " at " +
+                                                                        events.get(i).getLocation() + " from " +
+                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getDate().getTime()) + " to " +
+                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getEndTime().getTime()));
+                            getActivity().startActivity(Intent.createChooser(textShareIntent, "Share event with..."));
+                        }
+                        @Override
+                        public void onNegativeActionClicked(DialogFragment fragment) {
+                            super.onNegativeActionClicked(fragment);
+                            Dialog.Builder builder = new SimpleDialog.Builder(R.style.Material_App_Dialog_Simple_Light) {
+                                @Override
+                                public void onPositiveActionClicked(DialogFragment fragment) {
+                                    super.onPositiveActionClicked(fragment);
+
+                                    Intent calIntent = new Intent(Intent.ACTION_EDIT);
+                                    calIntent.setType("vnd.android.cursor.item/event");
+                                    calIntent.putExtra(CalendarContract.Events.TITLE, events.get(i).getTitle());
+                                    calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, events.get(i).getLocation());
+                                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                                            events.get(i).getDate().getTimeInMillis());
+                                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                                            events.get(i).getEndTime().getTimeInMillis());
+                                    getActivity().startActivity(calIntent);
+
+                                }
+
+
+                                @Override
+                                public void onNegativeActionClicked(DialogFragment fragment) {
+                                    super.onNegativeActionClicked(fragment);
+                                }
+                            };
+
+
+                            ((SimpleDialog.Builder) builder).message(events.get(i).getTitle())
+                                    .title("Add event to your calendar?")
+                                    .positiveAction("YES")
+                                    .negativeAction("NO");
+                            DialogFragment dialogFragment = DialogFragment.newInstance(builder);
+                            dialogFragment.show(getFragmentManager(), null);
+                        }
+                    };
+
+
+                    ((SimpleDialog.Builder) builderChoice).message("Event Selected")
+                            .positiveAction("SHARE")
+                            .negativeAction("CALENDAR");
+                    DialogFragment dialogFragment = DialogFragment.newInstance(builderChoice);
+                    dialogFragment.show(getFragmentManager(), null);
+
+                }
+            });
         }
 
     }

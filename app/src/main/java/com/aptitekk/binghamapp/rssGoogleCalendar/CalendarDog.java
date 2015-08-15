@@ -109,6 +109,15 @@ public class CalendarDog {
         return minDate;
     }
 
+    public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {
+        if(e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
+                e1.getDate().get(Calendar.MONTH) == e2.getDate().get(Calendar.MONTH) &&
+                e1.getDate().get(Calendar.DAY_OF_MONTH) == e2.getDate().get(Calendar.DAY_OF_MONTH)) {
+            return true;
+        }
+        return false;
+    }
+
     public ArrayList<CalendarEvent> getEvents() {
         return this.events;
     }
