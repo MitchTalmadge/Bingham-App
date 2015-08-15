@@ -109,6 +109,13 @@ public class CalendarDog {
         }
         return minDate;
     }
+    public static int findNextAorBDay(ArrayList<CalendarEvent> events) {
+        for (int i = 0; i < events.size(); i++) {
+            if(events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
+                return i;
+        }
+        return -1;
+    }
 
     public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {
         if (e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
