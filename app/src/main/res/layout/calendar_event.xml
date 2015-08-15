@@ -24,60 +24,70 @@
         card_view:cardUseCompatPadding="true">
 
         <RelativeLayout
-            android:id="@+id/calendarCardWrapper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:text="Title"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/title"
-                android:text="Duration"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/duration"
-                android:text="Location"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="14sp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-
-            <ImageView
-                android:id="@+id/calendarEventShare"
+            <RelativeLayout
+                android:id="@+id/eventIconsWrapper"
                 android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentRight="true"
-                android:src="@drawable/ic_arrow_grey600_48dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_alignParentRight="true">
 
-            <ImageView
-                android:id="@+id/calendarEventIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/calendarEventShare"
-                android:layout_marginTop="8dp"
-                android:src="@drawable/ic_calendar_grey600_48dp" />
+                <ImageView
+                    android:id="@+id/calendarEventShare"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/ic_arrow_grey600_48dp" />
+
+                <ImageView
+                    android:id="@+id/calendarEventIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/calendarEventShare"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/ic_calendar_grey600_48dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/calendarCardWrapper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/eventIconsWrapper">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:text="Event Title"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/title"
+                    android:text="Duration"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/duration"
+                    android:text="Location"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="14sp" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 
