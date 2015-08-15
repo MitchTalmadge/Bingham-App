@@ -111,6 +111,13 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
                         scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule0);
                         break;
                     case 1:
+                        scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule1);
+                        break;
+                    case 2:
+                        scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule2);
+                        break;
+                    case 3:
+                        scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule3);
                         break;
                     default:
                         break;

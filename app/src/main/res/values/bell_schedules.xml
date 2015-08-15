@@ -52,5 +52,44 @@
         <item>4th/8th Period_1:11 PM_2:25 PM</item>
     </string-array>
 
+    <string-array name="assemblyBellSchedule1">
+        <item>Warning Bell_7:25 AM_--</item>
+        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>1st/5th Period_7:30 AM_8:40 AM</item>
+        <item>Assembly_8:45 AM_10:15 AM</item>
+        <item>2nd/6th Period_10:20 AM_11:27 AM</item>
+        <item>A Lunch_11:27 AM_12:02 PM</item>
+        <item>3rd/7th Period (B Lunchers)_11:32 AM_12:39 PM</item>
+        <item>3rd/7th Period (A Lunchers)_12:07 PM_1:14 PM</item>
+        <item>B Lunch_12:39 PM_1:14 PM</item>
+        <item>4th/8th Period_1:19 PM_2:25 PM</item>
+    </string-array>
+
+    <string-array name="assemblyBellSchedule2">
+        <item>Warning Bell_7:25 AM_--</item>
+        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>1st/5th Period_7:30 AM_8:45 AM</item>
+        <item>2nd/6th Period_8:50 AM_10:05 AM</item>
+        <item>A Lunch_10:05 AM_10:40 AM</item>
+        <item>3rd/7th Period (B Lunchers)_10:10 AM_11:25 AM</item>
+        <item>3rd/7th Period (A Lunchers)_10:45 AM_12:00 PM</item>
+        <item>B Lunch_11:25 AM_12:00 PM</item>
+        <item>Assembly_12:05 PM_1:05 PM</item>
+        <item>4th/8th Period_1:10 PM_2:25 PM</item>
+    </string-array>
+
+    <string-array name="assemblyBellSchedule3">
+        <item>Warning Bell_7:25 AM_--</item>
+        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>1st/5th Period_7:30 AM_8:50 AM</item>
+        <item>2nd/6th Period_8:55 AM_10:10 AM</item>
+        <item>A Lunch_10:10 AM_10:45 AM</item>
+        <item>3rd/7th Period (B Lunchers)_10:15 AM_11:30 AM</item>
+        <item>3rd/7th Period (A Lunchers)_10:50 AM_12:05 PM</item>
+        <item>B Lunch_11:30 AM_12:05 PM</item>
+        <item>4th/8th Period_12:10 PM_1:20 PM</item>
+        <item>Assembly_1:25 PM_2:25 PM</item>
+    </string-array>
+
 
 </resources>
