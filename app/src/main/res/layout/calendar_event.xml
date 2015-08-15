@@ -27,36 +27,65 @@
             android:foreground="?android:attr/selectableItemBackground"
             card_view:cardUseCompatPadding="true">
 
-            <RelativeLayout
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/title"
+                <RelativeLayout
+                    android:id="@+id/calendarCardWrapper"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:textColor="#000"
-                    android:textSize="18sp" />
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/duration"
+                    <TextView
+                        android:id="@+id/title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:textColor="#000"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/title"
+                        android:textColor="#000"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/duration"
+                        android:textColor="#000"
+                        android:textSize="12sp" />
+
+                </RelativeLayout>
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/title"
-                    android:textColor="#000"
-                    android:textSize="14sp"/>
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@+id/calendarCardWrapper"
+                    android:gravity="end">
 
-                <TextView
-                    android:id="@+id/location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/duration"
-                    android:textColor="#000"
-                    android:textSize="12sp" />
+                    <ImageView
+                        android:id="@+id/calendarEventIcon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_calendar_grey600_48dp"/>
 
-            </RelativeLayout>
+                    <ImageView
+                        android:id="@+id/calendarEventShare"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_below="@+id/calendarEventIcon"
+                        android:src="@drawable/ic_arrow_grey600_48dp"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
 
         </android.support.v7.widget.CardView>
     </RelativeLayout>
