@@ -65,7 +65,7 @@ public class BellScheduleFragment extends Fragment {
         return view;
     }
 
-    private class ClassPeriodAdapter extends ArrayAdapter<String> {
+    private class ClassPeriodAdapter extends ArrayAdapter {
         private final String[] subjectNames;
         private final String[] subjectStartTimes;
         private final String[] subjectEndTimes;

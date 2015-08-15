@@ -71,7 +71,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
             assemblyBellScheduleStrings[i] = split[1];
         }
 
-        this.assemblyScheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.bell_schedules_list_item, assemblyBellScheduleStrings);
+        this.assemblyScheduleAdapter = new ArrayAdapter<>(getActivity(), R.layout.bell_schedules_list_item, assemblyBellScheduleStrings);
         assemblyScheduleList.setAdapter(assemblyScheduleAdapter);
         assemblyScheduleList.setDivider(null);
         assemblyScheduleList.setDividerHeight(0);
@@ -94,8 +94,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
 
                 BellSchedule schedule = new BellSchedule(regularBellScheduleStrings[position], scheduleStrings);
 
-                for(BellSchedulesListListener listener : listeners)
-                {
+                for (BellSchedulesListListener listener : listeners) {
                     listener.openSchedule(BellScheduleFragment.newInstance(schedule));
                 }
             }
@@ -105,8 +104,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String[] scheduleStrings = null;
-                switch(assemblyScheduleListPositions[position])
-                {
+                switch (assemblyScheduleListPositions[position]) {
                     case 0:
                         scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule0);
                         break;
@@ -125,8 +123,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
 
                 BellSchedule schedule = new BellSchedule(assemblyBellScheduleStrings[position], scheduleStrings);
 
-                for(BellSchedulesListListener listener : listeners)
-                {
+                for (BellSchedulesListListener listener : listeners) {
                     listener.openSchedule(BellScheduleFragment.newInstance(schedule));
                 }
             }
@@ -135,8 +132,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
         return view;
     }
 
-    public void addBellSchedulesListListener(BellSchedulesListListener listener)
-    {
+    public void addBellSchedulesListListener(BellSchedulesListListener listener) {
         this.listeners.add(listener);
     }
 
@@ -146,8 +142,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
         return false;
     }
 
-    public interface BellSchedulesListListener
-    {
+    public interface BellSchedulesListListener {
         void openSchedule(Fragment scheduleToOpen);
     }
 

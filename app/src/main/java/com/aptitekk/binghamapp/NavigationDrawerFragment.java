@@ -3,6 +3,8 @@ package com.aptitekk.binghamapp;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -66,7 +69,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
         }
 
         // Set the adapter for the list view
-        this.adapter = new NavigationDrawerAdapter(getActivity(), R.layout.navigation_drawer_list_item, drawerListStrings);
+        this.adapter = new NavigationDrawerAdapter(getActivity(), R.layout.navigation_drawer_list_item, drawerListStrings, drawerListPositions);
         drawerList.setAdapter(adapter);
 
         // Set adapter selected item to 0 (Main)
@@ -178,14 +181,13 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
 
     public class NavigationDrawerAdapter extends ArrayAdapter {
 
+        private final int[] drawerListPositions;
         private int selectedItem;
 
-        public NavigationDrawerAdapter(Context context, int resource, Object[] objects) {
-            super(context, resource, objects);
-        }
-
-        public int getSelectedItem() {
-            return selectedItem;
+        public NavigationDrawerAdapter(Context context, int resource, String[] itemTitles, int[] drawerListPositions) {
+            super(context, -1, itemTitles);
+            
+            this.drawerListPositions = drawerListPositions;
         }
 
         public void setSelectedItem(int selectedItem) {
@@ -195,16 +197,47 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
-            TextView view = (TextView) super.getView(position, convertView, parent);
+            View view = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_drawer_list_item, parent, false);
+            ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
 
-            view.setText((String) getItem(position));
+            switch(drawerListPositions[position])
+            {
+                case 0: //Main
+                    imageView.setImageResource(R.drawable.ic_home_grey600_48dp);
+                    break;
+                case 1: //School News
+                    imageView.setImageResource(R.drawable.ic_newspaper_grey600_48dp);
+                    break;
+                case 2: //Bell Schedules
+                    imageView.setImageResource(R.drawable.ic_bell_grey600_48dp);
+                    break;
+                case 3: //Lunch Menus
+                    imageView.setImageResource(R.drawable.ic_food_grey600_48dp);
+                    break;
+                case 4: //School Map
+                    imageView.setImageResource(R.drawable.ic_map_grey600_48dp);
+                    break;
+                case 5: //Upcoming Events
+                    imageView.setImageResource(R.drawable.ic_calendar_grey600_48dp);
+                    break;
+                case 6: //Skyward Access
+                    imageView.setImageResource(R.drawable.ic_skyward_grey600_48dp);
+                    break;
+                default:
+                    break;
+            }
+
+            TextView textView = (TextView) view.findViewById(R.id.textView);
+            textView.setText((String) getItem(position));
 
             if (position == selectedItem) {
-                view.setTextColor(getContext().getResources().getColor(R.color.primary));
-                view.setTypeface(Typeface.DEFAULT_BOLD);
+                textView.setTextColor(getContext().getResources().getColor(R.color.primary));
+                textView.setTypeface(Typeface.DEFAULT_BOLD);
+                imageView.setColorFilter(getContext().getResources().getColor(R.color.primary));
             } else {
-                view.setTextColor(getContext().getResources().getColor(R.color.primary_text));
-                view.setTypeface(Typeface.DEFAULT);
+                textView.setTextColor(getContext().getResources().getColor(R.color.secondary_text));
+                textView.setTypeface(Typeface.DEFAULT);
+                imageView.setColorFilter(getContext().getResources().getColor(R.color.secondary_text));
             }
 
             return view;

@@ -5,6 +5,7 @@
 
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+
     <string-array name="drawer_list_strings">
         <item>0_Main</item>
         <item>1_School News</item>
@@ -14,4 +15,5 @@
         <item>4_School Map</item>
         <item>6_Skyward Access</item>
     </string-array>
+
 </resources>
