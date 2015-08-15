@@ -297,15 +297,59 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                         public void onPositiveActionClicked(DialogFragment fragment) {
                             super.onPositiveActionClicked(fragment);
 
+                            String dateStamp = "";
+                            String location = "";
+                            String title = events.get(i).getTitle();
+
+                            //Format Date
+                            if (SimpleDateFormat.getDateTimeInstance().format(events.get(i).getDate().getTime()).equalsIgnoreCase(
+                                    SimpleDateFormat.getDateTimeInstance().format(events.get(i).getEndTime().getTime()))) {
+                                dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(events.get(i).getDate().getTime()) + " at " +
+                                        new SimpleDateFormat("hh:mmaa").format(events.get(i).getDate().getTime()).toLowerCase());
+
+                            } else {
+                                if (new SimpleDateFormat("MMM dd").format(events.get(i).getDate().getTime()).equalsIgnoreCase(
+                                        new SimpleDateFormat("MMM dd").format(events.get(i).getEndTime().getTime()))) {
+                                    dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(events.get(i).getDate().getTime()) + " from " +
+                                            new SimpleDateFormat("hh:mmaa").format(events.get(i).getDate().getTime()).toLowerCase() + " to " +
+                                            new SimpleDateFormat("hh:mmaa").format(events.get(i).getEndTime().getTime()).toLowerCase());
+                                } else {
+                                    dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(events.get(i).getDate().getTime()) + " from " +
+                                            new SimpleDateFormat("hh:mmaa").format(events.get(i).getDate().getTime()).toLowerCase() + " to " +
+                                            new SimpleDateFormat("MMM dd").format(events.get(i).getEndTime().getTime()) + " " +
+                                            new SimpleDateFormat("hh:mmaa").format(events.get(i).getEndTime().getTime()).toLowerCase());
+                                }
+                            }
+                            // Format location
+                            if (events.get(i).getLocation() != "") {
+                                if (events.get(i).getLocation().contains(",") && events.get(i).getLocation().contains("Bingham High"))
+                                    location = "Bingham High";
+                                else
+                                    location = events.get(i).getLocation();
+
+                                if(location.contains(", United States")) {
+                                    location = location.replace(", United States", "");
+                                }
+
+                                if (!events.get(i).getLocation().contains(" ") && !events.get(i).getLocation().contains("Bingham High")) {
+                                    location = "the " + location;
+                                }
+                                location = " at " + location;
+                            }
+                            // Format title
+                            if(events.get(i).getTitle().contains("@")) {
+                                title = title.split("@")[0].replaceFirst("\\s+$", ""); // cut off any trailing spaces after splitting by @
+                            }
+
                             //share
                             Intent textShareIntent = new Intent(Intent.ACTION_SEND);
                             textShareIntent.setType("text/plain");
-                            textShareIntent.putExtra(Intent.EXTRA_TEXT, events.get(i).getTitle() + " at " +
-                                                                        events.get(i).getLocation() + " from " +
-                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getDate().getTime()) + " to " +
-                                                                        SimpleDateFormat.getDateTimeInstance().format(events.get(i).getEndTime().getTime()));
+                            textShareIntent.putExtra(Intent.EXTRA_TEXT, title +
+                                    location +
+                                    dateStamp);
                             getActivity().startActivity(Intent.createChooser(textShareIntent, "Share event with..."));
                         }
+
                         @Override
                         public void onNegativeActionClicked(DialogFragment fragment) {
                             super.onNegativeActionClicked(fragment);
@@ -344,9 +388,9 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     };
 
 
-                    ((SimpleDialog.Builder) builderChoice).message("Event Selected")
+                    ((SimpleDialog.Builder) builderChoice).message("Do you want to")
                             .positiveAction("SHARE")
-                            .negativeAction("CALENDAR");
+                            .negativeAction("CALENDAR    or");
                     DialogFragment dialogFragment = DialogFragment.newInstance(builderChoice);
                     dialogFragment.show(getFragmentManager(), null);
 
