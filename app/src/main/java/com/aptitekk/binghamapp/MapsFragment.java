@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +22,14 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.rey.material.app.Dialog;
+import com.rey.material.app.DialogFragment;
+import com.rey.material.app.SimpleDialog;
+import com.rey.material.widget.EditText;
 import com.rey.material.widget.FloatingActionButton;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener/*, View.OnClickListener*/ {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener/*, GoogleMap.OnMapLongClickListener, View.OnClickListener*/ {
 
     GoogleMap map;
     SupportMapFragment mMapFragment;
@@ -179,6 +185,46 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         ((MainActivity) getActivity()).popToMainMenu();
         return false;
     }
+
+    /*@Override
+    public void onMapLongClick(final LatLng latLng) {
+        map.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("Marker"));
+        Dialog.Builder builder = new SimpleDialog.Builder(R.style.SimpleDialogLight) {
+
+            @Override
+            protected void onBuildDone(Dialog dialog) {
+                dialog.layoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+
+
+            @Override
+            public void onPositiveActionClicked(DialogFragment fragment) {
+                EditText roomNumber = (EditText) fragment.getDialog().findViewById(R.id.text_input);
+
+                Log.i(MainActivity.LOG_NAME, roomNumber.getText().toString() + " @ Lat: " + latLng.latitude + " Long: " + latLng.longitude);
+
+                super.onPositiveActionClicked(fragment);
+            }
+
+
+            @Override
+            public void onNegativeActionClicked(DialogFragment fragment) {
+                super.onNegativeActionClicked(fragment);
+            }
+        };
+
+
+        builder.title("Marker Dropped")
+                .positiveAction("RECORD")
+                .negativeAction("CANCEL")
+                .contentView(R.layout.dialog_text_input);
+        DialogFragment fragment = DialogFragment.newInstance(builder);
+        fragment.show(getFragmentManager(), null);
+
+
+    }*/
 
     /*@Override
     @Deprecated

@@ -1,8 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <array name="text_title">
+        <item>@style/LightTitleText</item>
+    </array>
+
+    <array name="text_body">
+        <item>@style/LightBodyText</item>
+    </array>
+
+    <array name="button_flat">
+        <item>@style/LightFlatButtonRippleStyle</item>
+    </array>
+
+    <array name="button_flat_color">
+        <item>@style/LightFlatColorButtonRippleStyle</item>
+    </array>
+
+    <array name="button_flat_wave">
+        <item>@style/LightFlatWaveButtonRippleStyle</item>
+    </array>
+
+    <array name="button_flat_wave_color">
+        <item>@style/LightFlatWaveColorButtonRippleStyle</item>
+    </array>
+
+    <array name="button_raise">
+        <item>@style/LightRaiseButtonRippleStyle</item>
+    </array>
+
+    <array name="button_raise_color">
+        <item>@style/LightRaiseColorButtonRippleStyle</item>
+    </array>
+
+    <array name="button_raise_wave">
+        <item>@style/LightRaiseWaveButtonRippleStyle</item>
+    </array>
+
+    <array name="button_raise_wave_color">
+        <item>@style/LightRaiseWaveColorButtonRippleStyle</item>
+    </array>
+
+    <array name="fab_icon">
+        <item>@style/LightFABIcon</item>
+    </array>
+
     <array name="fab_line">
         <item>@style/LightFABLine</item>
     </array>
 
+    <array name="fab">
+        <item>@style/LightFAB</item>
+    </array>
+
+    <array name="fab_color">
+        <item>@style/LightFABColor</item>
+    </array>
+
+    <array name="fab_wave">
+        <item>@style/LightFABWave</item>
+    </array>
+
+    <array name="fab_wave_color">
+        <item>@style/LightFABWaveColor</item>
+    </array>
+
+    <array name="slider">
+        <item>@style/LightSlider</item>
+    </array>
+
+    <array name="slider_discrete">
+        <item>@style/LightSliderDiscrete</item>
+    </array>
+
+    <array name="pv_circular">
+        <item>@style/LightCircularProgressView</item>
+    </array>
+
+    <array name="pv_circular_colors">
+        <item>@style/LightColorCircularProgressView</item>
+    </array>
+
+    <array name="pv_circular_in">
+        <item>@style/LightInCircularProgressView</item>
+    </array>
+
+    <array name="pv_circular_in_colors">
+        <item>@style/LightInColorCircularProgressView</item>
+    </array>
+
+    <array name="pv_circular_determinate">
+        <item>@style/LightDeterminateCircularProgressView</item>
+    </array>
+
+    <array name="pv_circular_determinate_in">
+        <item>@style/LightDeterminateInCircularProgressView</item>
+    </array>
+
+    <array name="pv_linear">
+        <item>@style/LightLinearProgressView</item>
+    </array>
+
+    <array name="pv_linear_color">
+        <item>@style/LightColorLinearProgressView</item>
+    </array>
+
+    <array name="pv_linear_determinate">
+        <item>@style/LightDeterminateLinearProgressView</item>
+    </array>
+
+    <array name="pv_linear_query">
+        <item>@style/LightQueryLinearProgressView</item>
+    </array>
+
+    <array name="pv_linear_buffer">
+        <item>@style/LightBufferLinearProgressView</item>
+    </array>
+
+    <array name="listview">
+        <item>@style/LightListView</item>
+    </array>
+
 </resources>
+
