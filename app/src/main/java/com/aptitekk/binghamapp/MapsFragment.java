@@ -99,6 +99,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 protected void onBuildDone(Dialog dialog) {
                     dialog.layoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 }
+
                 @Override
                 public void onPositiveActionClicked(DialogFragment fragment) {
                     EditText roomNumber = (EditText) fragment.getDialog().findViewById(R.id.text_input);
@@ -108,9 +109,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                     for (String name : mapping.keySet()) {
                         if (name.toLowerCase().contains(roomNumber.getText().toString().toLowerCase())) { // room found
                             if (markedRoom != null) markedRoom.remove();
+                            if (name.replaceAll("[^\\d.]", "").charAt(0) == "2".charAt(0)) {
+                                if (showFirstFloor) changeFloors();
+                            } else if (!showFirstFloor) changeFloors();
                             markedRoom = map.addMarker(new MarkerOptions()
                                     .position(mapping.get(name))
-                                    .title("Marker"));
+                                    .title(Boolean.toString(showFirstFloor)));
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(name), 18f));
                             super.onPositiveActionClicked(fragment);
                             return;
@@ -246,44 +250,45 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
 
     private void updateOverlays() {
         if (showFirstFloor) {
-            if (secondFloorMainOverlay != null) {
-                secondFloorMainOverlay.remove();
+            if (firstFloorOverlay == null) {
+                Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_1);
+                BitmapFactory.Options o2 = new BitmapFactory.Options();
+                o2.inSampleSize = 1;
+                BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
+                GroundOverlayOptions firstFloor = new GroundOverlayOptions()
+                        .image(image)
+                        .position(firstFloorPos, firstFloorWidth, firstFloorHeight)
+                        .transparency(0.3f);
+                firstFloorOverlay = map.addGroundOverlay(firstFloor);
             }
-            if (secondFloorVocOverlay != null) {
-                secondFloorVocOverlay.remove();
-            }
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_1);
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = 1;
-            BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
-            GroundOverlayOptions firstFloor = new GroundOverlayOptions()
-                    .image(image)
-                    .position(firstFloorPos, firstFloorWidth, firstFloorHeight)
-                    .transparency(0.3f);
-            firstFloorOverlay = map.addGroundOverlay(firstFloor);
         } else {
-            firstFloorOverlay.remove();
+            if (secondFloorMainOverlay == null && secondFloorVocOverlay == null) {
+                Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2);
+                BitmapFactory.Options o2 = new BitmapFactory.Options();
+                o2.inSampleSize = 1;
+                BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
+                GroundOverlayOptions secondFloor = new GroundOverlayOptions()
+                        .image(image)
+                        .position(secondFloorPos, secondFloorWidth, secondFloorHeight)
+                        .transparency(0.3f);
+                secondFloorMainOverlay = map.addGroundOverlay(secondFloor);
 
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2);
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = 1;
-            BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
-            GroundOverlayOptions secondFloor = new GroundOverlayOptions()
-                    .image(image)
-                    .position(secondFloorPos, secondFloorWidth, secondFloorHeight)
-                    .transparency(0.3f);
-            secondFloorMainOverlay = map.addGroundOverlay(secondFloor);
-
-            Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2_voc);
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inSampleSize = 1;
-            BitmapDescriptor image2 = BitmapDescriptorFactory.fromBitmap(bitmap2);
-            GroundOverlayOptions secondFloor1 = new GroundOverlayOptions()
-                    .image(image2)
-                    .position(secondFloorVocPos, secondFloorVocWidth, secondFloorVocHeight)
-                    .transparency(0.3f);
-            secondFloorVocOverlay = map.addGroundOverlay(secondFloor1);
+                Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2_voc);
+                BitmapFactory.Options o = new BitmapFactory.Options();
+                o.inSampleSize = 1;
+                BitmapDescriptor image2 = BitmapDescriptorFactory.fromBitmap(bitmap2);
+                GroundOverlayOptions secondFloor1 = new GroundOverlayOptions()
+                        .image(image2)
+                        .position(secondFloorVocPos, secondFloorVocWidth, secondFloorVocHeight)
+                        .transparency(0.3f);
+                secondFloorVocOverlay = map.addGroundOverlay(secondFloor1);
+            }
         }
+        if(markedRoom != null) markedRoom.setVisible((showFirstFloor == Boolean.parseBoolean(markedRoom.getTitle())));
+        firstFloorOverlay.setVisible(showFirstFloor);
+        if (secondFloorMainOverlay != null) secondFloorMainOverlay.setVisible(!showFirstFloor);
+        if (secondFloorVocOverlay != null) secondFloorVocOverlay.setVisible(!showFirstFloor);
+
     }
 
     /*@Override
