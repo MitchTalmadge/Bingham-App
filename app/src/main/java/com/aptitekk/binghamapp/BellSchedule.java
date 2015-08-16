@@ -3,16 +3,80 @@ package com.aptitekk.binghamapp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
 public class BellSchedule {
+
+    public static final BellSchedule NONE = null;
 
     String scheduleName;
     private String[] subjectNames;
     private String[] subjectStartTimes;
     private String[] subjectEndTimes;
     private int[] subjectLengths;
+
+    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule) {
+        DateFormat df = new SimpleDateFormat("hh:mm a", Locale.US);
+        ArrayList<Subject> result = new ArrayList<>();
+        for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
+            try {
+                if(schedule.getScheduleName().toLowerCase().contains("warning")) // warning bell doesnt need to be in there
+                    continue;
+                result.add(
+                        new Subject(
+                                schedule.getSubjectNames()[i],
+                                df.parse(schedule.getSubjectStartTimes()[i]),
+                                df.parse(schedule.getSubjectEndTimes()[i])));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    public static Subject getNextSubject(Date currentTime, ArrayList<Subject> subjects) {
+        long minDiff = -1;
+        Subject minDate = null;
+        for (Subject subject : subjects) {
+            ArrayList<Date> dates = new ArrayList<>();
+            dates.add(subject.getStartTime());
+            dates.add(subject.getEndTime());
+            for (Date date : dates) {
+                long diff = Math.abs(currentTime.getTime() - date.getTime());
+                if ((minDiff == -1) || (diff < minDiff)) {
+                    minDiff = diff;
+                    minDate = subject;
+                }
+            }
+        }
+        return minDate;
+    }
+
+    public static class Subject {
+        String name;
+        Date startTime;
+        Date endTime;
+
+        public Subject(String name, Date start, Date end) {
+            this.name = name;
+            startTime = start;
+            endTime = end;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Date getStartTime() {
+            return startTime;
+        }
+
+        public Date getEndTime() {
+            return endTime;
+        }
+    }
 
     public BellSchedule(String scheduleName, String[] schedule) {
 

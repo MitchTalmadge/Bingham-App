@@ -16,6 +16,7 @@
         card_view:cardUseCompatPadding="true">
 
         <RelativeLayout
+            android:id="@+id/mainCountdownCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
@@ -27,6 +28,16 @@
                 android:text="Time Remaining"
                 android:textSize="24sp"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView"
+                android:id="@+id/progress_wheel_Main"
+                android:progressDrawable="@drawable/circular_progress_bar"
+                android:layout_gravity="center"
+                />
 
             <TextView
                 android:id="@+id/currentPeriod"

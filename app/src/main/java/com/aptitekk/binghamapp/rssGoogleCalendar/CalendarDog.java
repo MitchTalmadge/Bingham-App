@@ -1,9 +1,12 @@
 package com.aptitekk.binghamapp.rssGoogleCalendar;
 
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import com.aptitekk.binghamapp.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
+import com.aptitekk.binghamapp.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -68,7 +72,7 @@ public class CalendarDog {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
         String timeZone = TimeZone.getDefault().getID();
         BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
-                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone +"&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
+                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
         this.refresh = refresh;
         try {
@@ -109,12 +113,91 @@ public class CalendarDog {
         }
         return minDate;
     }
+
+    public static Date getNearestDate(ArrayList<Date> dates, Date currentDate) {
+        long minDiff = -1, currentTime = currentDate.getTime();
+        Date minDate = null;
+        for (Date date : dates) {
+            long diff = Math.abs(currentTime - date.getTime());
+            if ((minDiff == -1) || (diff < minDiff)) {
+                minDiff = diff;
+                minDate = date;
+            }
+        }
+        return minDate;
+    }
+
     public static int findNextAorBDay(ArrayList<CalendarEvent> events) {
         for (int i = 0; i < events.size(); i++) {
-            if(events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
+            if (events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
                 return i;
         }
         return -1;
+    }
+
+    public static BellSchedule determineSchedule(Fragment fragment, ArrayList<CalendarEvent> events, Calendar dateTime) {
+
+        ArrayList<CalendarEvent> eventsOfDay = getEventsForDay(events, dateTime);
+
+        if (eventsOfDay.isEmpty())
+            return null;
+
+        Collections.rotate(eventsOfDay, -1); // move top A/B Day labels to bottom so potential assembly events may appear first.
+
+        for (CalendarEvent e : eventsOfDay) {
+            if (e.getTitle().toLowerCase().contains("schedule") && e.getTitle().toLowerCase().contains("assembly")) { // Assembly Event Found!
+                String schedule = e.getTitle().toLowerCase().split("-")[1].split("assembly")[0].replaceFirst("\\s+$", "");
+
+                //DETERMINE MORNING/AFTERNOON
+                int timeOfDay = e.getDate().get(Calendar.HOUR_OF_DAY);
+                if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
+                    schedule = "Morning (" + schedule.replace("AM", "") + ")";
+                } else if ((timeOfDay >= 12 && timeOfDay < 16) || schedule.contains("PM")) { // AFTERNOON
+                    schedule = "Afternoon (" + schedule.replace("PM", "") + ")";
+                } else {
+                    return null;
+                }
+                for (int i = 0; i < fragment.getResources().getStringArray(R.array.assemblyBellSchedules).length; i++) {
+                    if (fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {
+                        String[] scheduleTimeArray = null;
+                        switch (i) {
+                            case 0:
+                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule0);
+                                break;
+                            case 1:
+                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule1);
+                                break;
+                            case 2:
+                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule2);
+                                break;
+                            case 3:
+                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule3);
+                                break;
+                        }
+                        return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i], scheduleTimeArray);
+                    }
+                }
+            } else if (e.getTitle().contains("A Day") || e.getTitle().contains("B Day")) {
+                if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                    return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
+                }
+                return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
+            }
+
+        }
+        return null;
+    }
+
+    public static ArrayList<CalendarEvent> getEventsForDay(ArrayList<CalendarEvent> events, Calendar dayToMatch) {
+        ArrayList<CalendarEvent> result = new ArrayList<>();
+        for (CalendarEvent e : events) {
+            if (e.getDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
+                    e.getDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
+                    e.getDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
+                result.add(e);
+            }
+        }
+        return result;
     }
 
     public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {

@@ -1,5 +1,6 @@
 package com.aptitekk.binghamapp.rssGoogleCalendar;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -35,6 +36,53 @@ public class CalendarEvent {
     }
     public boolean isDateLabelVisible() {return dateLabelVisible;}
     public void setDateLabelVisible(boolean v) {this.dateLabelVisible = v;}
+
+    public String toString() {
+        String dateStamp = "";
+        String location = "";
+        String title = this.getTitle();
+
+        //Format Date
+        if (SimpleDateFormat.getDateTimeInstance().format(this.getDate().getTime()).equalsIgnoreCase(
+                SimpleDateFormat.getDateTimeInstance().format(this.getEndTime().getTime()))) {
+            dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(this.getDate().getTime()) + " at " +
+                    new SimpleDateFormat("hh:mmaa").format(this.getDate().getTime()).toLowerCase());
+
+        } else {
+            if (new SimpleDateFormat("MMM dd").format(this.getDate().getTime()).equalsIgnoreCase(
+                    new SimpleDateFormat("MMM dd").format(this.getEndTime().getTime()))) {
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(this.getDate().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa").format(this.getDate().getTime()).toLowerCase() + " to " +
+                        new SimpleDateFormat("hh:mmaa").format(this.getEndTime().getTime()).toLowerCase());
+            } else {
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd").format(this.getDate().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa").format(this.getDate().getTime()).toLowerCase() + " to " +
+                        new SimpleDateFormat("MMM dd").format(this.getEndTime().getTime()) + " " +
+                        new SimpleDateFormat("hh:mmaa").format(this.getEndTime().getTime()).toLowerCase());
+            }
+        }
+        // Format location
+        if (this.getLocation() != "") {
+            if (this.getLocation().contains(",") && this.getLocation().contains("Bingham High"))
+                location = "Bingham High";
+            else
+                location = this.getLocation();
+
+            if(location.contains(", United States")) {
+                location = location.replace(", United States", "");
+            }
+
+            if (!this.getLocation().contains(" ") && !this.getLocation().contains("Bingham High")) {
+                location = "the " + location;
+            }
+            location = " at " + location;
+        }
+        // Format title
+        if(this.getTitle().contains("@")) {
+            title = title.split("@")[0].replaceFirst("\\s+$", ""); // cut off any trailing spaces after splitting by @
+        }
+        return title + location + dateStamp;
+    }
 
     public static List<CalendarEvent> sort(List<CalendarEvent> e) {
         Collections.sort(e, new CalendarEventComparator());
