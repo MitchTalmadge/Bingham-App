@@ -264,7 +264,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary_text));
                 calendareventViewHolder.title.setTextColor(Color.WHITE);
             } else {
-                calendareventViewHolder.title.setBackgroundColor(Color.WHITE);
                 calendareventViewHolder.title.setTextColor(Color.BLACK);
             }
 
