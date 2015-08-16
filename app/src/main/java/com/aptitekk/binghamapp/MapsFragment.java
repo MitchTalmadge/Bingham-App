@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -22,6 +25,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
@@ -29,10 +33,14 @@ import com.rey.material.app.SimpleDialog;
 import com.rey.material.widget.EditText;
 import com.rey.material.widget.FloatingActionButton;
 
+import java.util.HashMap;
+
 public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener/*, GoogleMap.OnMapLongClickListener, View.OnClickListener*/ {
 
     GoogleMap map;
     SupportMapFragment mMapFragment;
+
+    HashMap<String, LatLng> mapping = null;
 
     GroundOverlay firstFloorOverlay = null;
     GroundOverlay secondFloorMainOverlay = null;
@@ -52,6 +60,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
 
     boolean showFirstFloor = true;
 
+    Marker markedRoom;
+
     final LatLngBounds binghamGrounds = new LatLngBounds(
             new LatLng(40.562165, -111.948173),
             new LatLng(40.566093, -111.943560)
@@ -61,12 +71,84 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View mainView = inflater.inflate(R.layout.fragment_map, container, false);
         return mainView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        menu.add("search").setIcon(R.drawable.ic_search_white_48dp).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getTitle().toString().equalsIgnoreCase("search")) {
+            Dialog.Builder builder = new SimpleDialog.Builder(R.style.SimpleDialogLight) {
+                @Override
+                protected void onBuildDone(Dialog dialog) {
+                    dialog.layoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+                @Override
+                public void onPositiveActionClicked(DialogFragment fragment) {
+                    EditText roomNumber = (EditText) fragment.getDialog().findViewById(R.id.text_input);
+
+                    if (mapping == null) initMapping();
+
+                    for (String name : mapping.keySet()) {
+                        if (name.toLowerCase().contains(roomNumber.getText().toString().toLowerCase())) { // room found
+                            if (markedRoom != null) markedRoom.remove();
+                            markedRoom = map.addMarker(new MarkerOptions()
+                                    .position(mapping.get(name))
+                                    .title("Marker"));
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(name), 18f));
+                            super.onPositiveActionClicked(fragment);
+                            return;
+                        }
+                    }
+                    //uh oh
+                    Dialog.Builder builder = new SimpleDialog.Builder(R.style.SimpleDialogLight) {
+                        @Override
+                        public void onPositiveActionClicked(DialogFragment fragment) {
+                            super.onPositiveActionClicked(fragment);
+                        }
+
+                        @Override
+                        public void onNegativeActionClicked(DialogFragment fragment) {
+                            super.onNegativeActionClicked(fragment);
+                        }
+                    };
+
+                    ((SimpleDialog.Builder) builder).message("Room not found!")
+                            .positiveAction("Ok");
+                    DialogFragment fragment_ = DialogFragment.newInstance(builder);
+                    fragment_.show(getFragmentManager(), null);
+                    super.onPositiveActionClicked(fragment);
+                }
+
+                @Override
+                public void onNegativeActionClicked(DialogFragment fragment) {
+                    super.onNegativeActionClicked(fragment);
+                }
+            };
+            builder.title("Find Room")
+                    .positiveAction("SEARCH")
+                    .negativeAction("CANCEL")
+                    .contentView(R.layout.dialog_text_input);
+            DialogFragment fragment = DialogFragment.newInstance(builder);
+            fragment.show(getFragmentManager(), null);
+        }
+        return false;
     }
 
     @Override
@@ -115,8 +197,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
             @Override
             public void onClick(View v) {
                 fab_line.setLineMorphingState((fab_line.getLineMorphingState() + 1) % 2, true);
-                showFirstFloor = !showFirstFloor;
-                updateOverlays();
+                changeFloors();
             }
         });
 
@@ -126,7 +207,44 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
 
     }
 
-    public void updateOverlays() {
+    @Override
+    public void onMapReady(GoogleMap map) {
+        this.map = map;
+        map.setPadding(0, 10, 0, 0);
+        updateOverlays();
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(binghamGrounds, 0));
+
+        /*map.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Marker"));*/
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        ((MainActivity) getActivity()).popToMainMenu();
+        return false;
+    }
+
+    private HashMap<String, LatLng> parseStringArray(int stringArrayResourceId) {
+        String[] stringArray = getResources().getStringArray(stringArrayResourceId);
+        HashMap<String, LatLng> outputMap = new HashMap<>();
+        for (String entry : stringArray) {
+            String[] splitResult = entry.split("\\|", 3);
+            outputMap.put(splitResult[0], new LatLng(Double.parseDouble(splitResult[1]), Double.parseDouble(splitResult[2])));
+        }
+        return outputMap;
+    }
+
+    private void initMapping() {
+        this.mapping = parseStringArray(R.array.rooms);
+    }
+
+    private void changeFloors() {
+        showFirstFloor = !showFirstFloor;
+        updateOverlays();
+    }
+
+    private void updateOverlays() {
         if (showFirstFloor) {
             if (secondFloorMainOverlay != null) {
                 secondFloorMainOverlay.remove();
@@ -166,24 +284,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                     .transparency(0.3f);
             secondFloorVocOverlay = map.addGroundOverlay(secondFloor1);
         }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap map) {
-        this.map = map;
-        map.setPadding(0, 10, 0, 0);
-        updateOverlays();
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(binghamGrounds, 0));
-
-        /*map.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));*/
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        ((MainActivity) getActivity()).popToMainMenu();
-        return false;
     }
 
     /*@Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="first_floor">
+    <string-array name="rooms">
         <item>V107|40.56445920480418|-111.94718699902296</item>
         <item>V105|40.56431886449547|-111.94743979722261</item>
         <item>V102|40.56434815514681|-111.94718029350042</item>
@@ -66,9 +66,7 @@
         <item>Registrar Office|40.56336958575147|-111.94684535264969</item>
         <item>Attendance Office|40.563264901921166|-111.9467967376113</item>
         <item>Counselors Office|40.56336678399657|-111.94654326885939</item>
-    </string-array>
-
-    <string-array name="second_floor">
+        <!-- Second Floor Begin -->
         <item>V200|40.56395591405667|-111.94747634232044</item>
         <item>V201|40.56393018907369|-111.94723092019558</item>
         <item>V202|40.56387568264143|-111.94747969508171</item>
