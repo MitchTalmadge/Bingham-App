@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:id="@+id/map"
+        map:mapType="hybrid"
+        map:uiCompass="true"
+        map:uiRotateGestures="true"
+        map:uiScrollGestures="true"
+        map:uiTiltGestures="true"
+        map:uiZoomGestures="true"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="W UP"
+            android:id="@+id/widthup"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:onClick="moveMap"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="H UP"
+            android:id="@+id/heightup"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:onClick="moveMap"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="up"
+            android:id="@+id/moveup"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:onClick="moveMap" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="left"
+            android:id="@+id/moveleft"
+            android:layout_row="0"
+            android:layout_column="3"
+            android:onClick="moveMap" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="right"
+            android:id="@+id/moveright"
+            android:layout_row="1"
+            android:layout_column="3"
+            android:onClick="moveMap" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="down"
+            android:id="@+id/movedown"
+            android:layout_row="1"
+            android:layout_column="2"
+            android:onClick="moveMap" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="H DOWN"
+            android:id="@+id/heightdown"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:onClick="moveMap" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="W DOWN"
+            android:id="@+id/widthdown"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:onClick="moveMap" />
+
+    </GridLayout>
+</RelativeLayout>
