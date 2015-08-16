@@ -32,17 +32,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     GroundOverlay secondFloorMainOverlay = null;
     GroundOverlay secondFloorVocOverlay = null;
 
-    float firstFloorWidth = 239.5f;
-    float firstFloorHeight = 179.0f;
-    LatLng firstFloorPos = new LatLng(40.56372380000001, -111.94644699999999);
+    float firstFloorWidth = 236.5f;
+    float firstFloorHeight = 181.0f;
+    LatLng firstFloorPos = new LatLng(40.5637438, -111.94642);
 
-    float secondMainFloorWidth = 90.5f;
-    float secondMainFloorHeight = 149.0f;
-    LatLng secondMainFloorPos = new LatLng(40.56355879999996, -111.94651700000001);
+    float secondFloorWidth = 56.5f;
+    float secondFloorHeight = 139.0f;
+    LatLng secondFloorPos = new LatLng(40.563567, -111.94668);
 
-    float secondVocFloorWidth = 43.5f;
-    float secondVocFloorHeight = 159.0f;
-    LatLng secondVocFloorPos = new LatLng(40.563388799999906, -111.94733200000027);
+    float secondFloorVocWidth = 35.5f;
+    float secondFloorVocHeight = 23.0f;
+    LatLng secondFloorVocPos = new LatLng(40.5639138, -111.947342);
 
     boolean showFirstFloor = true;
 
@@ -61,7 +61,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                              Bundle savedInstanceState) {
         View mainView = inflater.inflate(R.layout.fragment_map, container, false);
         return mainView;
-
     }
 
     @Override
@@ -87,7 +86,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         moveUp.setOnClickListener(this);
         moveDown.setOnClickListener(this);
         moveLeft.setOnClickListener(this);
-        moveRight.setOnClickListener(this); FOR POSITIONING NEW OVERLAYS */
+        moveRight.setOnClickListener(this);*/ //For adjusting new images
 
         GoogleMapOptions options = new GoogleMapOptions();
         options.mapType(GoogleMap.MAP_TYPE_HYBRID)
@@ -105,7 +104,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
 
         mMapFragment.getMapAsync(this);
 
-        final FloatingActionButton fab_line = (FloatingActionButton)this.getView().findViewById(R.id.floorToggle);
+        final FloatingActionButton fab_line = (FloatingActionButton) this.getView().findViewById(R.id.floorToggle);
         fab_line.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,14 +121,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     }
 
     public void updateOverlays() {
-        if(showFirstFloor) {
-            if(secondFloorMainOverlay != null) {
+        if (showFirstFloor) {
+            if (secondFloorMainOverlay != null) {
                 secondFloorMainOverlay.remove();
             }
-            if(secondFloorVocOverlay != null) {
+            if (secondFloorVocOverlay != null) {
                 secondFloorVocOverlay.remove();
             }
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.firstfloor_map);
+            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_1);
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize = 1;
             BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
@@ -141,23 +140,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         } else {
             firstFloorOverlay.remove();
 
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.secondfloormapmain);
+            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2);
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize = 1;
             BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
             GroundOverlayOptions secondFloor = new GroundOverlayOptions()
                     .image(image)
-                    .position(secondMainFloorPos, secondMainFloorWidth, secondMainFloorHeight)
+                    .position(secondFloorPos, secondFloorWidth, secondFloorHeight)
                     .transparency(0.3f);
             secondFloorMainOverlay = map.addGroundOverlay(secondFloor);
 
-            Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.secondfloormapvoc);
+            Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2_voc);
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inSampleSize = 1;
             BitmapDescriptor image2 = BitmapDescriptorFactory.fromBitmap(bitmap2);
             GroundOverlayOptions secondFloor1 = new GroundOverlayOptions()
                     .image(image2)
-                    .position(secondVocFloorPos, secondVocFloorWidth, secondVocFloorHeight)
+                    .position(secondFloorVocPos, secondFloorVocWidth, secondFloorVocHeight)
                     .transparency(0.3f);
             secondFloorVocOverlay = map.addGroundOverlay(secondFloor1);
         }
@@ -185,27 +184,27 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     @Deprecated
     public void onClick(View v) {
         if (v.getId() == R.id.widthup) {
-            this.firstFloorWidth = this.firstFloorWidth + 1;
+            this.secondFloorVocWidth = this.secondFloorVocWidth + 1;
         } else if (v.getId() == R.id.widthdown) {
-            this.firstFloorWidth = this.firstFloorWidth - 1;
+            this.secondFloorVocWidth = this.secondFloorVocWidth - 1;
         } else if (v.getId() == R.id.heightup) {
-            this.firstFloorHeight = this.firstFloorHeight + 1;
+            this.secondFloorVocHeight = this.secondFloorVocHeight + 1;
         } else if (v.getId() == R.id.heightdown) {
-            this.firstFloorHeight = this.firstFloorHeight - 1;
+            this.secondFloorVocHeight = this.secondFloorVocHeight - 1;
         } else if (v.getId() == R.id.moveup) {
-            bingham = new LatLng(bingham.latitude + 0.000005, bingham.longitude);
+            secondFloorVocPos = new LatLng(secondFloorVocPos.latitude + 0.000005, secondFloorVocPos.longitude);
         } else if (v.getId() == R.id.movedown) {
-            bingham = new LatLng(bingham.latitude - 0.000005, bingham.longitude);
+            secondFloorVocPos = new LatLng(secondFloorVocPos.latitude - 0.000005, secondFloorVocPos.longitude);
         } else if (v.getId() == R.id.moveleft) {
-            bingham = new LatLng(bingham.latitude, bingham.longitude + 0.000005);
+            secondFloorVocPos = new LatLng(secondFloorVocPos.latitude, secondFloorVocPos.longitude + 0.000005);
         } else if (v.getId() == R.id.moveright) {
-            bingham = new LatLng(bingham.latitude, bingham.longitude - 0.000005);
+            secondFloorVocPos = new LatLng(secondFloorVocPos.latitude, secondFloorVocPos.longitude - 0.000005);
         }
 
-        Log.i(MainActivity.LOG_NAME, "width: " + this.firstFloorWidth + " height: " + this.firstFloorHeight);
-        Log.i(MainActivity.LOG_NAME, "Lat: " + this.bingham.latitude + " Lng: " + this.bingham.longitude);
+        Log.i(MainActivity.LOG_NAME, "width: " + this.secondFloorVocWidth + " height: " + this.secondFloorVocHeight);
+        Log.i(MainActivity.LOG_NAME, "Lat: " + this.secondFloorVocPos.latitude + " Lng: " + this.secondFloorVocPos.longitude);
 
-        firstFloorOverlay.setDimensions(this.firstFloorWidth, this.firstFloorHeight);
-        firstFloorOverlay.setPosition(bingham);
-    }*/
+        firstFloorOverlay.setDimensions(this.secondFloorVocWidth, this.secondFloorVocHeight);
+        firstFloorOverlay.setPosition(secondFloorVocPos);
+    }*/ //For adjusting new images
 }

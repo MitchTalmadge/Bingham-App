@@ -181,10 +181,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 title = (TextView) itemView.findViewById(R.id.title);
                 duration = (TextView) itemView.findViewById(R.id.duration);
                 location = (TextView) itemView.findViewById(R.id.location);
-
-
             }
-
         }
 
         List<CalendarEvent> events;
@@ -264,6 +261,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 calendareventViewHolder.title.setBackgroundColor(getResources().getColor(R.color.primary_text));
                 calendareventViewHolder.title.setTextColor(Color.WHITE);
             } else {
+                calendareventViewHolder.title.setBackgroundColor(Color.TRANSPARENT);
                 calendareventViewHolder.title.setTextColor(Color.BLACK);
             }
 
