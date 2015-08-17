@@ -114,6 +114,8 @@ public class BellSchedulesListFragment extends Fragment {
                     case 3:
                         scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule3);
                         break;
+                    case 4:
+                        scheduleStrings = getResources().getStringArray(R.array.assemblyBellSchedule4);
                     default:
                         break;
                 }
