@@ -34,6 +34,8 @@ import com.rey.material.widget.EditText;
 import com.rey.material.widget.FloatingActionButton;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener/*, GoogleMap.OnMapLongClickListener, View.OnClickListener*/ {
 
@@ -41,6 +43,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     SupportMapFragment mMapFragment;
 
     HashMap<String, LatLng> mapping = null;
+    TreeMap<String, String> room_aliases = null;
 
     GroundOverlay firstFloorOverlay = null;
     GroundOverlay secondFloorMainOverlay = null;
@@ -103,36 +106,42 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 @Override
                 public void onPositiveActionClicked(DialogFragment fragment) {
                     EditText roomNumber = (EditText) fragment.getDialog().findViewById(R.id.text_input);
-
+                    String query = roomNumber.getText().toString().toLowerCase();
                     if (mapping == null) initMapping();
 
-                    for (String name : mapping.keySet()) {
-                        if (name.toLowerCase().contains(roomNumber.getText().toString().toLowerCase())) { // room found
-                            if (markedRoom != null) markedRoom.remove();
-                            if (name.replaceAll("[^\\d.]", "").charAt(0) == "2".charAt(0)) {
-                                if (showFirstFloor) changeFloors();
-                            } else if (!showFirstFloor) changeFloors();
-                            markedRoom = map.addMarker(new MarkerOptions()
-                                    .position(mapping.get(name))
-                                    .title(Boolean.toString(showFirstFloor)));
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(name), 18f));
-                            super.onPositiveActionClicked(fragment);
-                            return;
+                    //check for aliases -- this will make the next for loop MUCH shorter
+                    for (Map.Entry<String, String> entry : room_aliases.entrySet()) {
+                        if (entry.getValue().toLowerCase().contains(roomNumber.getText().toString().toLowerCase())) { // Room alias possibility found
+                            query = entry.getValue();
+                            if (entry.getValue().toLowerCase().equals(roomNumber.getText().toString().toLowerCase())) { // Perfect match, stop searching
+                                break;
+                            }
                         }
                     }
+
+                    String chosenRoomName = null;
+                    for (String name : mapping.keySet()) {
+                        if (name.toLowerCase().contains(query)) { // Room possibility found
+                            chosenRoomName = name;
+                            if (name.toLowerCase().equals(query)) { // Perfect match, stop searching
+                                break;
+                            }
+                        }
+                    }
+                    if (chosenRoomName != null) {
+                        if (markedRoom != null) markedRoom.remove();
+                        if (chosenRoomName.replaceAll("[^\\d.]", "").charAt(0) == '2') {
+                            if (showFirstFloor) changeFloors();
+                        } else if (!showFirstFloor) changeFloors();
+                        markedRoom = map.addMarker(new MarkerOptions()
+                                .position(mapping.get(chosenRoomName))
+                                .title(Boolean.toString(showFirstFloor)));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(chosenRoomName), 18f));
+                        super.onPositiveActionClicked(fragment);
+                        return;
+                    }
                     //uh oh
-                    Dialog.Builder builder = new SimpleDialog.Builder(R.style.SimpleDialogLight) {
-                        @Override
-                        public void onPositiveActionClicked(DialogFragment fragment) {
-                            super.onPositiveActionClicked(fragment);
-                        }
-
-                        @Override
-                        public void onNegativeActionClicked(DialogFragment fragment) {
-                            super.onNegativeActionClicked(fragment);
-                        }
-                    };
-
+                    Dialog.Builder builder = new SimpleDialog.Builder(R.style.SimpleDialogLight);
                     ((SimpleDialog.Builder) builder).message("Room not found!")
                             .positiveAction("Ok");
                     DialogFragment fragment_ = DialogFragment.newInstance(builder);
@@ -229,18 +238,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         return false;
     }
 
-    private HashMap<String, LatLng> parseStringArray(int stringArrayResourceId) {
-        String[] stringArray = getResources().getStringArray(stringArrayResourceId);
-        HashMap<String, LatLng> outputMap = new HashMap<>();
+    private void initMapping() {
+        String[] stringArray = getResources().getStringArray(R.array.rooms);
+        this.mapping = new HashMap<>();
         for (String entry : stringArray) {
             String[] splitResult = entry.split("\\|", 3);
-            outputMap.put(splitResult[0], new LatLng(Double.parseDouble(splitResult[1]), Double.parseDouble(splitResult[2])));
+            mapping.put(splitResult[0], new LatLng(Double.parseDouble(splitResult[1]), Double.parseDouble(splitResult[2])));
         }
-        return outputMap;
-    }
+        String[] aliasArray = getResources().getStringArray(R.array.room_aliases);
+        this.room_aliases = new TreeMap<>();
+        for (String item : aliasArray) {
+            String[] split = item.split("\\|", 2);
+            this.room_aliases.put(split[0], split[1]);
+        }
 
-    private void initMapping() {
-        this.mapping = parseStringArray(R.array.rooms);
     }
 
     private void changeFloors() {
@@ -284,7 +295,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 secondFloorVocOverlay = map.addGroundOverlay(secondFloor1);
             }
         }
-        if(markedRoom != null) markedRoom.setVisible((showFirstFloor == Boolean.parseBoolean(markedRoom.getTitle())));
+        if (markedRoom != null)
+            markedRoom.setVisible((showFirstFloor == Boolean.parseBoolean(markedRoom.getTitle())));
         firstFloorOverlay.setVisible(showFirstFloor);
         if (secondFloorMainOverlay != null) secondFloorMainOverlay.setVisible(!showFirstFloor);
         if (secondFloorVocOverlay != null) secondFloorVocOverlay.setVisible(!showFirstFloor);

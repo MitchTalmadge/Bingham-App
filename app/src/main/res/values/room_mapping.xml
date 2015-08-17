@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string-array name="room_aliases"> <!-- Format: <Name in array>|<alias> -->
+        <item>Cafeteria|Lunch</item>
+        <item>Gym|PE</item>
+        <item>Media Center|Library</item>
+    </string-array>
+
     <string-array name="rooms">
         <item>V107|40.56445920480418|-111.94718699902296</item>
         <item>V105|40.56431886449547|-111.94743979722261</item>
@@ -62,10 +68,10 @@
         <item>G121|40.563867022736886|-111.9450643658638</item>
         <item>G102|40.56333698350555|-111.945707090199</item>
         <item>G105|40.56351476743492|-111.94564204663038</item>
-        <item>Main Office|40.56333290822369|-111.94696202874184</item>
-        <item>Registrar Office|40.56336958575147|-111.94684535264969</item>
-        <item>Attendance Office|40.563264901921166|-111.9467967376113</item>
-        <item>Counselors Office|40.56336678399657|-111.94654326885939</item>
+        <item>Main|40.56333290822369|-111.94696202874184</item>
+        <item>Registrar|40.56336958575147|-111.94684535264969</item>
+        <item>Attendance|40.563264901921166|-111.9467967376113</item>
+        <item>Counselors|40.56336678399657|-111.94654326885939</item>
         <!-- Second Floor Begin -->
         <item>V200|40.56395591405667|-111.94747634232044</item>
         <item>V201|40.56393018907369|-111.94723092019558</item>
