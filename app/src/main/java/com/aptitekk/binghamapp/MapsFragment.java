@@ -106,14 +106,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 @Override
                 public void onPositiveActionClicked(DialogFragment fragment) {
                     EditText roomNumber = (EditText) fragment.getDialog().findViewById(R.id.text_input);
-                    String query = roomNumber.getText().toString().toLowerCase();
+                    String original_entry = roomNumber.getText().toString().toLowerCase().replaceFirst("\\s+$", ""); //remove trailing whitespace
+                    String query = original_entry;
                     if (mapping == null) initMapping();
 
                     //check for aliases -- this will make the next for loop MUCH shorter
                     for (Map.Entry<String, String> entry : room_aliases.entrySet()) {
-                        if (entry.getValue().toLowerCase().contains(roomNumber.getText().toString().toLowerCase())) { // Room alias possibility found
-                            query = entry.getValue();
-                            if (entry.getValue().toLowerCase().equals(roomNumber.getText().toString().toLowerCase())) { // Perfect match, stop searching
+                        if (entry.getValue().toLowerCase().contains(original_entry)) { // Room alias possibility found
+                            query = entry.getKey().toLowerCase();
+                            if (entry.getValue().toLowerCase().equals(original_entry)) { // Perfect match, stop searching
                                 break;
                             }
                         }
@@ -130,13 +131,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                     }
                     if (chosenRoomName != null) {
                         if (markedRoom != null) markedRoom.remove();
-                        if (chosenRoomName.replaceAll("[^\\d.]", "").charAt(0) == '2') {
+                        if(!chosenRoomName.matches(".*\\d.*")) { // no numbers, first floor
+                            if (!showFirstFloor) changeFloors();
+                        } else if (chosenRoomName.replaceAll("[^\\d.]", "").charAt(0) == '2') {
                             if (showFirstFloor) changeFloors();
                         } else if (!showFirstFloor) changeFloors();
                         markedRoom = map.addMarker(new MarkerOptions()
                                 .position(mapping.get(chosenRoomName))
                                 .title(Boolean.toString(showFirstFloor)));
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(chosenRoomName), 18f));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(mapping.get(chosenRoomName),
+                                ((map.getCameraPosition().zoom >= 19f) ? map.getCameraPosition().zoom : 19f))); // keep a zoom level of 18-or-higher
                         super.onPositiveActionClicked(fragment);
                         return;
                     }
@@ -224,6 +228,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     public void onMapReady(GoogleMap map) {
         this.map = map;
         map.setPadding(0, 10, 0, 0);
+        map.setMyLocationEnabled(true);
+        map.setBuildingsEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
         updateOverlays();
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(binghamGrounds, 0));
 
