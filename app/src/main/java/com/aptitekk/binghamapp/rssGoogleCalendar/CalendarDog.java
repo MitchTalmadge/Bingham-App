@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -130,6 +131,14 @@ public class CalendarDog {
     public static int findNextAorBDay(ArrayList<CalendarEvent> events) {
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
+                return i;
+        }
+        return -1;
+    }
+
+    public static int findNextHolidayByIndex(ArrayList<CalendarEvent> events) {
+        for (int i = 0; i < events.size(); i++) {
+            if (events.get(i).getTitle().contains("No School"))
                 return i;
         }
         return -1;
