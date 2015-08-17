@@ -217,14 +217,14 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 try {
                     if (CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
                         events.get(i + 1).setDateLabelVisible(true);
-                } catch (ArrayIndexOutOfBoundsException ignored) {
+                } catch (IndexOutOfBoundsException ignored) {
                 }
             } else if ((events.get(i).getTitle().equals("A Day") || events.get(i).getTitle().equals("B Day")) && showABDays) {
                 events.get(i).setDateLabelVisible(true);
                 try {
                     if (CalendarDog.isSameDay(events.get(i), events.get(i + 1)))
                         events.get(i + 1).setDateLabelVisible(false);
-                } catch (ArrayIndexOutOfBoundsException ignored) {
+                } catch (IndexOutOfBoundsException ignored) {
                 }
             }
 
