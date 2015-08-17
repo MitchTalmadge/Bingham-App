@@ -142,6 +142,9 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 bundle.putBoolean("useJavaScript", true);
                 newFragment.setArguments(bundle);
                 break;
+            case 7: // GPA Calc
+                newFragment = new GPACalcFragment();
+                break;
             default:
                 break;
         }
