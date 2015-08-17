@@ -8,10 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.aptitekk.binghamapp.cards.CountdownCard;
-import com.aptitekk.binghamapp.cards.HolidayCountdownCard;
+import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 
@@ -22,10 +24,10 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
 
     CalendarDog eventsFeed;
 
-    CountdownCard countDownCard;
+    CountdownCard baseCountDownCard;
     CardViewNative countDownCardView;
-    HolidayCountdownCard holidayCountDownCard;
-    CardViewNative holidayCountDownCardView;
+    CustomCountdownCardExpand holidayCountDownCard;
+    //CardViewNative holidayCountDownCardView;
 
     public MainFragment() {
         // Required empty public constructor
@@ -43,22 +45,36 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
         super.onActivityCreated(savedInstanceState);
 
         //Create a Card
-        countDownCard = new CountdownCard(getActivity());
+        baseCountDownCard = new CountdownCard(getActivity());
         //Set the card inner text
-        countDownCard.setTitle("Time remaining");
-        //Set card in the cardView
-        countDownCardView = (CardViewNative) getActivity().findViewById(R.id.immediateCountdown);
-        countDownCardView.setCard(countDownCard);
-        //Create a Card
+        CardHeader header = new CardHeader(getActivity());
+        header.setTitle("Countdown");
+        //Set visible the expand/collapse button
+        header.setButtonExpandVisible(true);
+        //Add Header to card
+        baseCountDownCard.addCardHeader(header);
+
+        holidayCountDownCard = new CustomCountdownCardExpand(getActivity(), CustomCountdownCardExpand.CountdownTarget.HOLIDAY);
+        baseCountDownCard.addCardExpand(holidayCountDownCard);
+
+        countDownCardView = (CardViewNative) getActivity().findViewById(R.id.countdowns);
+        ViewToClickToExpand viewToClickToExpand =
+                ViewToClickToExpand.builder()
+                        .setupView(countDownCardView);
+        baseCountDownCard.setViewToClickToExpand(viewToClickToExpand);
+
+        countDownCardView.setCard(baseCountDownCard);
+
+        /*//Create a Card
         holidayCountDownCard = new HolidayCountdownCard(getActivity());
         //Set the card inner text
         holidayCountDownCard.setTitle("Time remaining");
         //Set card in the cardView
         holidayCountDownCardView = (CardViewNative) getActivity().findViewById(R.id.holidayCountdown);
-        holidayCountDownCardView.setCard(holidayCountDownCard);
+        holidayCountDownCardView.setCard(holidayCountDownCard);*/
 
         countDownCardView.setVisibility(View.GONE);
-        holidayCountDownCardView.setVisibility(View.GONE);
+        //holidayCountDownCardView.setVisibility(View.GONE);
 
         ((MainActivity) getActivity()).addFeedListener(this);
     }
@@ -73,9 +89,8 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
         this.eventsFeed = eventsFeed;
 
         countDownCardView.setVisibility(View.VISIBLE);
-        holidayCountDownCardView.setVisibility(View.VISIBLE);
 
-        countDownCard.refresh(this.eventsFeed, this, countDownCardView);
-        holidayCountDownCard.refresh(this.eventsFeed, this, holidayCountDownCardView);
+        baseCountDownCard.refresh(this.eventsFeed, this, countDownCardView);
+        holidayCountDownCard.refresh(this.eventsFeed, this, countDownCardView);
     }
 }

@@ -91,12 +91,7 @@ public class CountdownCard extends Card {
 
                 public void onTick(long millisUntilFinished) {
 
-                    timeRemaining.setText("" + String.format(FORMAT,
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
-                                    TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                    TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+                    timeRemaining.setText(CustomCountdownCardExpand.formatLongToReadableTime(millisUntilFinished));
                 }
 
                 public void onFinish() {

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.aptitekk.binghamapp.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
+import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -135,10 +136,9 @@ public class CalendarDog {
         }
         return -1;
     }
-
-    public static int findNextHolidayByIndex(ArrayList<CalendarEvent> events) {
+    public static int findNextTargetByIndex(ArrayList<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
         for (int i = 0; i < events.size(); i++) {
-            if (events.get(i).getTitle().contains("No School"))
+            if (events.get(i).getTitle().toLowerCase().contains(target.getValue()))
                 return i;
         }
         return -1;

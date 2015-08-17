@@ -19,13 +19,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
             <it.gmariotti.cardslib.library.view.CardViewNative
-                android:id="@+id/immediateCountdown"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                card_view:cardUseCompatPadding="true" />
-
-            <it.gmariotti.cardslib.library.view.CardViewNative
-                android:id="@+id/holidayCountdown"
+                android:id="@+id/countdowns"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 card_view:cardUseCompatPadding="true" />
