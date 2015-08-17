@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Load the MainFragment
         MainFragment mainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentSpace, mainFragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
 
         // Download News & Events
         final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 eventsFeed = downloadingEventsFeed;
                 for (FeedListener listener : feedListeners) {
                     if (listener != null && (listener instanceof Fragment && !((Fragment) listener).isDetached())) {
-                        listener.onEventFeedDownloaded(eventsFeed);
+                        listener.onEventsFeedDownloaded(eventsFeed);
                     }
                 }
                 // Save the feed to file...
@@ -263,12 +263,21 @@ public class MainActivity extends AppCompatActivity {
     public void addFeedListener(FeedListener listener) {
         if (!this.feedListeners.contains(listener))
             this.feedListeners.add(listener);
+
+        // If the listener was late to the party, send them what we already got
+        if (newsFeed != null) {
+            listener.onNewsFeedDownloaded(newsFeed);
+        }
+
+        if (eventsFeed != null) {
+            listener.onEventsFeedDownloaded(eventsFeed);
+        }
     }
 
     public interface FeedListener {
         void onNewsFeedDownloaded(RSSNewsFeed newsFeed);
 
-        void onEventFeedDownloaded(CalendarDog eventFeed);
+        void onEventsFeedDownloaded(CalendarDog eventsFeed);
     }
 
     public static int pixelsToDP(int pixels, Context context) {

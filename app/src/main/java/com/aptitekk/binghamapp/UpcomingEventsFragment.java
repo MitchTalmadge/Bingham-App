@@ -56,33 +56,14 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_recycler, container, false);
-
-        /*MaterialCalendarView calendarView = (MaterialCalendarView) mainView.findViewById(R.id.calendarView);
-
-        calendarView.setOnDateChangedListener(this);
-        calendarView.setShowOtherDates(true);
-
-        Calendar calendar = Calendar.getInstance();
-        calendarView.setSelectedDate(calendar.getTime());
-
-        calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
-        calendarView.setMinimumDate(calendar.getTime());
-
-        calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
-        calendarView.setMaximumDate(calendar.getTime());*/
-
-        return view;
+        return inflater.inflate(R.layout.fragment_recycler, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (MainActivity.eventsFeed == null)
-            ((MainActivity) getActivity()).addFeedListener(this);
-        else
-            populateCalendar(MainActivity.eventsFeed);
+        ((MainActivity) getActivity()).addFeedListener(this);
     }
 
     @Override
@@ -100,7 +81,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Dialog.Builder builder = null;
+        Dialog.Builder builder;
         if (item.getTitle().toString().equalsIgnoreCase("calendar")) {
             builder = new DatePickerDialog.Builder(R.style.Material_App_Dialog_DatePicker) {
                 @Override
@@ -154,7 +135,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     }
 
     @Override
-    public void onEventFeedDownloaded(CalendarDog eventFeed) {
+    public void onEventsFeedDownloaded(CalendarDog eventFeed) {
         populateCalendar(eventFeed);
     }
 

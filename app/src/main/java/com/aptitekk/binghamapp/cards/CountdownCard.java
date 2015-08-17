@@ -22,9 +22,6 @@ import java.util.concurrent.TimeUnit;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
-/**
- * Created by kevint on 8/16/2015.
- */
 public class CountdownCard extends Card {
 
     TextView timeRemaining;
@@ -39,7 +36,7 @@ public class CountdownCard extends Card {
         init();
     }
 
-    private void init(){
+    private void init() {
         this.setTitle("Time Remaining");
     }
 
@@ -49,39 +46,41 @@ public class CountdownCard extends Card {
         //DETERMINE TIME
         Calendar currentDateTime = Calendar.getInstance();
 
-        if (currentDateTime.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || currentDateTime.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            //pass onto before/after school
-        } else {
+        if (currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
-            ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(CalendarDog.determineSchedule(context, eventsFeed.getEvents(), currentDateTime));
+            BellSchedule schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), currentDateTime);
+            if (schedule != null) {
+                ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule);
 
-            BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime.getTime(), timeTable);
-            ArrayList<Date> closestPotentialTimes = new ArrayList<>();
-            closestPotentialTimes.add(closest.getStartTime());
-            closestPotentialTimes.add(closest.getEndTime());
-            Date closestTime = CalendarDog.getNearestDate(closestPotentialTimes, currentDateTime.getTime());
+                BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime.getTime(), timeTable);
+                ArrayList<Date> closestPotentialTimes = new ArrayList<>();
+                closestPotentialTimes.add(closest.getStartTime());
+                closestPotentialTimes.add(closest.getEndTime());
+                Date closestTime = CalendarDog.getNearestDate(closestPotentialTimes, currentDateTime.getTime());
 
-            new CountDownTimer(closestTime.getTime(), 1000) { // adjust the milli seconds here
+                new CountDownTimer(closestTime.getTime(), 1000) { // adjust the milli seconds here
 
-                public void onTick(long millisUntilFinished) {
+                    public void onTick(long millisUntilFinished) {
 
-                    timeRemaining.setText("" + String.format(FORMAT,
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
-                                    TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                    TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
-                }
+                        timeRemaining.setText("" + String.format(FORMAT,
+                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
+                                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+                    }
 
-                public void onFinish() {
-                    refresh(eventsFeed, context, cardHolder);
-                }
-            }.start();
-            currentPeriod.setText("To " + closest.getName());
-            cardHolder.setVisibility(View.VISIBLE);
-            cardHolder.refreshCard(this);
-            return;
+                    public void onFinish() {
+                        refresh(eventsFeed, context, cardHolder);
+                    }
+                }.start();
+                currentPeriod.setText("To " + closest.getName());
+                cardHolder.setVisibility(View.VISIBLE);
+                cardHolder.refreshCard(this);
+                return;
+            }
         }
+
         //IF ITS BEFORE/AFTER SCHOOL
         try {
             CalendarEvent nextABDay = eventsFeed.getEvents().get(CalendarDog.findNextAorBDay(eventsFeed.getEvents()));
@@ -111,7 +110,6 @@ public class CountdownCard extends Card {
         }
         cardHolder.setVisibility(View.VISIBLE);
         cardHolder.refreshCard(this);
-        return;
     }
 
     @Override

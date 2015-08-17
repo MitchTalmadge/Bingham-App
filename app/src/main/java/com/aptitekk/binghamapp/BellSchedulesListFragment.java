@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class BellSchedulesListFragment extends Fragment implements MainActivity.BackButtonListener {
+public class BellSchedulesListFragment extends Fragment {
 
 
     private ListView regularScheduleList;
@@ -34,14 +34,11 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bell_schedules, container, false);
-
-        ((MainActivity) getActivity()).setBackButtonListener(this);
 
         this.regularScheduleList = (ListView) view.findViewById(R.id.regularSchedulesListView);
         this.assemblyScheduleList = (ListView) view.findViewById(R.id.assemblySchedulesListView);
@@ -56,7 +53,7 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
             regularBellScheduleStrings[i] = split[1];
         }
 
-        this.regularScheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.bell_schedules_list_item, regularBellScheduleStrings);
+        this.regularScheduleAdapter = new ArrayAdapter<>(getActivity(), R.layout.bell_schedules_list_item, regularBellScheduleStrings);
         regularScheduleList.setAdapter(regularScheduleAdapter);
         regularScheduleList.setDivider(null);
         regularScheduleList.setDividerHeight(0);
@@ -134,12 +131,6 @@ public class BellSchedulesListFragment extends Fragment implements MainActivity.
 
     public void addBellSchedulesListListener(BellSchedulesListListener listener) {
         this.listeners.add(listener);
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        ((MainActivity) getActivity()).popToMainMenu();
-        return false;
     }
 
     public interface BellSchedulesListListener {

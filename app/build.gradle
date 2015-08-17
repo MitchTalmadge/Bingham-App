@@ -27,6 +27,7 @@ dependencies {
     compile 'com.prolificinteractive:material-calendarview:0.7.0'
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'com.github.rey5137:material:1.2.1'
+    compile 'com.rengwuxian.materialedittext:library:2.1.4'
     compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'
     compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.1.0'
     compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.1.0'

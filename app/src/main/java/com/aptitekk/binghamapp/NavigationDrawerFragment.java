@@ -3,8 +3,6 @@ package com.aptitekk.binghamapp;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,7 +67,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
         }
 
         // Set the adapter for the list view
-        this.adapter = new NavigationDrawerAdapter(getActivity(), R.layout.navigation_drawer_list_item, drawerListStrings, drawerListPositions);
+        this.adapter = new NavigationDrawerAdapter(getActivity(), drawerListStrings, drawerListPositions);
         drawerList.setAdapter(adapter);
 
         // Set adapter selected item to 0 (Main)
@@ -136,11 +134,12 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 newFragment = new UpcomingEventsFragment();
                 break;
             case 6: //Skyward Access
-                newFragment = new WebViewFragment();
+                newFragment = new SkywardFragment();
+                /*newFragment = new WebViewFragment();
                 bundle = new Bundle();
                 bundle.putString("URL", "https://skystu.jordan.k12.ut.us/scripts/wsisa.dll/WService=wsEAplus/mobilelogin.w");
                 bundle.putBoolean("useJavaScript", true);
-                newFragment.setArguments(bundle);
+                newFragment.setArguments(bundle);*/
                 break;
             case 7: // GPA Calc
                 newFragment = new GPACalcFragment();
@@ -149,7 +148,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 break;
         }
 
-        if(fragmentID != 0 && newFragment != null) // If we are loading any other fragment than main...
+        if (fragmentID != 0 && newFragment != null) // If we are loading any other fragment than main...
             skipMainSelection = true; // ...skip setting the Main list item to selected (in onBackStackChanged()).
 
         ((MainActivity) getActivity()).popToMainMenu(); // Virtually presses the back button until we are at the main menu.
@@ -159,7 +158,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
             adapter.notifyDataSetChanged();
 
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentSpace, newFragment);
+            fragmentTransaction.replace(R.id.fragmentSpaceMain, newFragment);
             fragmentTransaction.addToBackStack("navigation");
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentTransaction.commit();
@@ -174,11 +173,10 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
 
     @Override
     public void onBackStackChanged() {
-        if(!skipMainSelection && getFragmentManager().getBackStackEntryCount() == 0) {
+        if (!skipMainSelection && getFragmentManager().getBackStackEntryCount() == 0) {
             this.adapter.setSelectedItem(0);
             this.adapter.notifyDataSetChanged();
-        }
-        else if(skipMainSelection)
+        } else if (skipMainSelection)
             skipMainSelection = false;
     }
 
@@ -187,9 +185,9 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
         private final int[] drawerListPositions;
         private int selectedItem;
 
-        public NavigationDrawerAdapter(Context context, int resource, String[] itemTitles, int[] drawerListPositions) {
+        public NavigationDrawerAdapter(Context context, String[] itemTitles, int[] drawerListPositions) {
             super(context, -1, itemTitles);
-            
+
             this.drawerListPositions = drawerListPositions;
         }
 
@@ -203,8 +201,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
             View view = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_drawer_list_item, parent, false);
             ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
 
-            switch(drawerListPositions[position])
-            {
+            switch (drawerListPositions[position]) {
                 case 0: //Main
                     imageView.setImageResource(R.drawable.ic_home_grey600_48dp);
                     break;

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +20,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, MainActivity.BackButtonListener/*, GoogleMap.OnMapLongClickListener, View.OnClickListener*/ {
+public class MapsFragment extends Fragment implements OnMapReadyCallback/*, GoogleMap.OnMapLongClickListener, View.OnClickListener*/ {
 
     GoogleMap map;
     SupportMapFragment mMapFragment;
@@ -84,8 +82,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View mainView = inflater.inflate(R.layout.fragment_map, container, false);
-        return mainView;
+        return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
     @Override
@@ -133,7 +130,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                     }
                     if (chosenRoomName != null) {
                         if (markedRoom != null) markedRoom.remove();
-                        if(!chosenRoomName.matches(".*\\d.*")) { // no numbers, first floor
+                        if (!chosenRoomName.matches(".*\\d.*")) { // no numbers, first floor
                             if (!showFirstFloor) changeFloors();
                         } else if (chosenRoomName.replaceAll("[^\\d.]", "").charAt(0) == '2') {
                             if (showFirstFloor) changeFloors();
@@ -204,10 +201,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 .scrollGesturesEnabled(true)
         ;
         mMapFragment = SupportMapFragment.newInstance(options);
-        FragmentTransaction fragmentTransaction =
-                getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.map, mMapFragment);
-        fragmentTransaction.addToBackStack(null);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.map, mMapFragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
 
         mMapFragment.getMapAsync(this);
 
@@ -219,10 +216,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
                 changeFloors();
             }
         });
-
-        fragmentTransaction.commit();
-
-        ((MainActivity) getActivity()).setBackButtonListener(this);
 
     }
 
@@ -239,12 +232,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, MainAc
         /*map.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("Marker"));*/
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        ((MainActivity) getActivity()).popToMainMenu();
-        return false;
     }
 
     private void initMapping() {

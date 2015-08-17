@@ -17,14 +17,14 @@ public class SkywardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_replaceable, container, false);
+        return inflater.inflate(R.layout.fragment_skyward, container, false);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        //TODO: Notify if skyward can't be loaded
+        /*//TODO: Notify if skyward can't be loaded
         //TODO: Automatically log user in and skip all the bull poop
         WebViewFragment webViewFragment = new WebViewFragment();
         Bundle bundle = new Bundle();
@@ -33,7 +33,7 @@ public class SkywardFragment extends Fragment {
         bundle.putBoolean("useJavaScript", true);
         webViewFragment.setArguments(bundle);
 
-        getFragmentManager().beginTransaction().add(R.id.fragmentSpace, webViewFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).addToBackStack(null).commit();
+        getFragmentManager().beginTransaction().add(R.id.fragmentSpace, webViewFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).addToBackStack(null).commit();*/
     }
 
 

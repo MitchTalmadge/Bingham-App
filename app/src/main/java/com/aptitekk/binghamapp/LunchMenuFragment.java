@@ -30,7 +30,12 @@ public class LunchMenuFragment extends Fragment {
         bundle.putBoolean("useJavaScript", true);
         webViewFragment.setArguments(bundle);
 
-        getFragmentManager().beginTransaction().add(R.id.fragmentSpace, webViewFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).addToBackStack(null).commit();
+        getFragmentManager()
+                .beginTransaction()
+                .add(R.id.fragmentSpaceReplaceable, webViewFragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack("lunchMenu")
+                .commit();
         return view;
     }
 

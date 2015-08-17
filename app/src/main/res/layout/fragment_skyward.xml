@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
+
+    <RelativeLayout
+        android:id="@+id/loginLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/usernamePasswordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/login_to_skyward_label"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <RelativeLayout
+                android:id="@+id/innerLogin1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView"
+                android:layout_marginLeft="16dp">
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/usernameEditText"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/username_hint"
+                    android:imeOptions="actionNext"
+                    android:singleLine="true"
+                    app:met_floatingLabel="highlight" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/passwordEditText"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/usernameEditText"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/password_hint"
+                    android:imeOptions="actionNext"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    app:met_floatingLabel="highlight" />
+
+                <CheckBox
+                    android:id="@+id/rememberCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/passwordEditText"
+                    android:text="@string/remember_username_password_label" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rememberLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/usernamePasswordLayout"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Secure your Login Details"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <RelativeLayout
+                android:id="@+id/innerLogin2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView2"
+                android:layout_marginLeft="16dp">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/create_pin_label"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText1"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView3"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText2"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView3"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText1"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText3"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView3"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText2"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText4"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView3"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText3"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/PINEditText1"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/verify_pin_label"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText1V"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText2V"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText1V"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText3V"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText2V"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:id="@+id/PINEditText4V"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/PINEditText3V"
+                    android:gravity="center"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="1"
+                    android:singleLine="true"
+                    android:textSize="20dp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rememberLayout"
+            android:text="@string/login_button_label" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

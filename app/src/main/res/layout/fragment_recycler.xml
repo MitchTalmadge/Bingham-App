@@ -5,7 +5,7 @@
     tools:context="com.aptitekk.binghamapp.NewsListFragment">
 
     <FrameLayout
-        android:id="@+id/fragmentSpace"
+        android:id="@+id/fragmentSpaceReplaceable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

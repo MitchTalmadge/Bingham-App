@@ -2,26 +2,16 @@ package com.aptitekk.binghamapp;
 
 
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.aptitekk.binghamapp.cards.CountdownCard;
 import com.aptitekk.binghamapp.cards.HolidayCountdownCard;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
-import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 
@@ -67,15 +57,10 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
         holidayCountDownCardView = (CardViewNative) getActivity().findViewById(R.id.holidayCountdown);
         holidayCountDownCardView.setCard(holidayCountDownCard);
 
-        if (MainActivity.eventsFeed == null) {
-            ((MainActivity) getActivity()).addFeedListener(this);
-            countDownCardView.setVisibility(View.GONE);
-            holidayCountDownCardView.setVisibility(View.GONE);
-        } else {
-            eventsFeed = MainActivity.eventsFeed;
-            countDownCard.refresh(eventsFeed, this, countDownCardView);
-            holidayCountDownCard.refresh(eventsFeed, this, holidayCountDownCardView);
-        }
+        countDownCardView.setVisibility(View.GONE);
+        holidayCountDownCardView.setVisibility(View.GONE);
+
+        ((MainActivity) getActivity()).addFeedListener(this);
     }
 
     @Override
@@ -84,9 +69,13 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
     }
 
     @Override
-    public void onEventFeedDownloaded(CalendarDog eventFeed) {
-        eventsFeed = eventFeed;
-        countDownCard.refresh(eventsFeed, this, countDownCardView);
-        holidayCountDownCard.refresh(eventsFeed, this, holidayCountDownCardView);
+    public void onEventsFeedDownloaded(CalendarDog eventsFeed) {
+        this.eventsFeed = eventsFeed;
+
+        countDownCardView.setVisibility(View.VISIBLE);
+        holidayCountDownCardView.setVisibility(View.VISIBLE);
+
+        countDownCard.refresh(this.eventsFeed, this, countDownCardView);
+        holidayCountDownCard.refresh(this.eventsFeed, this, holidayCountDownCardView);
     }
 }
