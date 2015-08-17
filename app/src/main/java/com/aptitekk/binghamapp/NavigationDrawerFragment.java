@@ -141,7 +141,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 bundle.putBoolean("useJavaScript", true);
                 newFragment.setArguments(bundle);*/
                 break;
-            case 7: // GPA Calc
+            case 7: // GPA Calculator
                 newFragment = new GPACalcFragment();
                 break;
             default:
@@ -223,6 +223,8 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 case 6: //Skyward Access
                     imageView.setImageResource(R.drawable.ic_skyward_grey600_48dp);
                     break;
+                case 7: //GPA Calculator
+                    imageView.setImageResource(R.drawable.ic_calculator_grey600_48dp);
                 default:
                     break;
             }

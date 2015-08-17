@@ -32,24 +32,15 @@
                 android:id="@+id/eventIconsWrapper"
                 android:layout_width="24dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_alignParentRight="true">
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="8dp">
 
                 <ImageView
                     android:id="@+id/calendarEventShare"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_alignParentRight="true"
-                    android:src="@drawable/ic_arrow_grey600_48dp" />
-
-                <ImageView
-                    android:id="@+id/calendarEventIcon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_below="@+id/calendarEventShare"
-                    android:layout_marginTop="8dp"
-                    android:src="@drawable/ic_calendar_grey600_48dp" />
+                    android:src="@drawable/ic_share_variant_grey600_48dp" />
 
             </RelativeLayout>
 

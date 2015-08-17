@@ -2,7 +2,6 @@ package com.aptitekk.binghamapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.ParseException;
 
 
 public class GPACalcFragment extends Fragment implements View.OnClickListener {
@@ -54,7 +52,7 @@ public class GPACalcFragment extends Fragment implements View.OnClickListener {
     }
 
     private double calculateGPA() {
-        int a,am,bp,b,bm,cp,c,cm,dp,d,dm,f;
+        int a, am, bp, b, bm, cp, c, cm, dp, d, dm, f;
 
         a = ((!this.a.getText().toString().equals("")) ? Integer.valueOf(this.a.getText().toString()) : 0);
         am = ((!this.am.getText().toString().equals("")) ? Integer.valueOf(this.am.getText().toString()) : 0);
@@ -70,9 +68,10 @@ public class GPACalcFragment extends Fragment implements View.OnClickListener {
         f = ((!this.f.getText().toString().equals("")) ? Integer.valueOf(this.f.getText().toString()) : 0);
 
         int total = a + am + bp + b + bm + cp + c + cm + dp + d + dm + f;
-        double gpa = (a*4 + am*3.67 + bp*3.33 + b*3 + bm*2.67 + cp*2.33 + c*2 + cm*1.67 + dp*1.33 + d*1 + dm*0.67 + f*0)/total;
+        if (total == 0) // You can't divide by 0
+            return 0;
+        double gpa = (a * 4 + am * 3.67 + bp * 3.33 + b * 3 + bm * 2.67 + cp * 2.33 + c * 2 + cm * 1.67 + dp * 1.33 + d * 1 + dm * 0.67 + f * 0) / total;
         return round(gpa, 3);
-        //return gpa;
     }
 
     public static double round(double value, int places) {
@@ -85,7 +84,7 @@ public class GPACalcFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == calculate.getId()) {
+        if (v.getId() == calculate.getId()) {
             try {
                 result.setText(String.valueOf(calculateGPA()));
             } catch (NullPointerException e) {

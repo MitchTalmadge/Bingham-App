@@ -4,6 +4,7 @@ package com.aptitekk.binghamapp;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -70,7 +71,11 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        menu.add("calendar").setIcon(R.drawable.calendar_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        MenuItem calendarItem = menu.add("calendar");
+        calendarItem.setIcon(R.drawable.ic_calendar_grey600_48dp);
+        calendarItem.getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP); // Set color to white
+        calendarItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
         menu.add("Show A/B Days").setCheckable(true).setChecked(this.showABDays).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
 

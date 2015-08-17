@@ -3,6 +3,8 @@ package com.aptitekk.binghamapp;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -89,7 +91,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        menu.add("search").setIcon(R.drawable.ic_search_white_48dp).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        MenuItem searchItem = menu.add("search");
+        searchItem.setIcon(R.drawable.ic_search_grey600_48dp);
+        searchItem.getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP); // Set color to white
+        searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     }
 
     @Override
