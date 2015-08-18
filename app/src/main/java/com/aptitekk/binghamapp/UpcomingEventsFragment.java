@@ -21,6 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.aptitekk.binghamapp.cards.CalendarEventCard;
+import com.aptitekk.binghamapp.cards.CalendarEventView;
+import com.aptitekk.binghamapp.cards.MarkedCalendarEventCard;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
@@ -30,14 +33,28 @@ import com.rey.material.app.DialogFragment;
 import com.rey.material.app.SimpleDialog;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
+import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
+import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.prototypes.CardSection;
+import it.gmariotti.cardslib.library.prototypes.SectionedCardAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 
 public class UpcomingEventsFragment extends Fragment implements MainActivity.FeedListener {
 
     private RecyclerView recyclerView;
+
+    private CardArrayAdapter cardArrayAdapter;
+    private CardListView listView;
+
     private CalendarDog eventsFeed;
 
     private boolean showABDays = true;
@@ -75,8 +92,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         calendarItem.setIcon(R.drawable.ic_calendar_grey600_48dp);
         calendarItem.getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP); // Set color to white
         calendarItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        menu.add("Show A/B Days").setCheckable(true).setChecked(this.showABDays).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
 
     private boolean isNetworkConnected() {
@@ -93,7 +108,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 public void onPositiveActionClicked(DialogFragment fragment) {
                     DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
                     Date date = dialog.getCalendar().getTime();
-                    recyclerView.scrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
+                    //recyclerView.scrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
+                    listView.smoothScrollToPosition(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date));
                     Log.i(MainActivity.LOG_NAME, eventsFeed.getEvents().get(CalendarDog.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
@@ -108,12 +124,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
             DialogFragment fragment = DialogFragment.newInstance(builder);
             fragment.show(getFragmentManager(), null);
             return true;
-        } else if (item.getTitle().toString().equalsIgnoreCase("Show A/B Days")) {
-            item.setChecked(!item.isChecked());
-            this.showABDays = item.isChecked();
-            this.recyclerView.refreshDrawableState();
-            this.recyclerView.getAdapter().notifyDataSetChanged();
-            return true;
         }
         return false;
     }
@@ -124,7 +134,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         //Hide progress wheel
         getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-        //Show Recycler View
+        /*//Show Recycler View
         recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -132,7 +142,62 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
 
         RVAdapter adapter = new RVAdapter(eventsFeed.getEvents());
         recyclerView.setAdapter(adapter);
-        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);*/
+
+        //populate a list full of calendar card events
+        ArrayList<Card> cards = new ArrayList<Card>();
+        ArrayList<CardSection> sections = new ArrayList<>();
+        for (int i = 0; i < eventsFeed.getEvents().size(); i++) {
+            if (eventsFeed.getEvents().get(i).getTitle().equals("A Day") || eventsFeed.getEvents().get(i).getTitle().equals("B Day")) {
+                sections.add(new CardSection(i, SimpleDateFormat.getDateInstance().format(eventsFeed.getEvents().get(i).getDate().getTime())
+                        + " (" + eventsFeed.getEvents().get(i).getTitle() + ")"));
+                continue;
+            }
+            CalendarEventView card = ((eventsFeed.getEvents().get(i).getTitle().toLowerCase().contains("dance") ||
+                    eventsFeed.getEvents().get(i).getTitle().toLowerCase().contains("football")) //DUMMY FILTER
+                    ? new MarkedCalendarEventCard(getActivity()) : new CalendarEventCard(getActivity())); //filters will change with settings menu
+            card.setTitle(eventsFeed.getEvents().get(i).getTitle());
+            card.setDuration(formatDate(eventsFeed.getEvents().get(i)));
+            card.setLocation(eventsFeed.getEvents().get(i).getLocation());
+            //TODO: Figure out what the ID param is for
+            /*ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();
+            IconSupplementalAction t1 = new IconSupplementalAction(getActivity(), R.id.ic_calendar_grey600_48dp); // calendar
+            t1.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+
+                }
+            });
+            actions.add(t1);
+
+            IconSupplementalAction t2 = new IconSupplementalAction(getActivity(), R.id.ic2); // share
+            t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                }
+            });
+            actions.add(t2);
+            IconSupplementalAction t3 = new IconSupplementalAction(getActivity(), R.id.ic2); // open web view
+            t3.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                }
+            });
+            actions.add(t3);*/
+        }
+
+        this.cardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+
+        CardSection[] pointer = new CardSection[sections.size()];
+        SectionedCardAdapter mAdapter = new SectionedCardAdapter(getActivity(), cardArrayAdapter);
+        mAdapter.setCardSections(sections.toArray(pointer));
+
+        this.listView = (CardListView) getActivity().findViewById(R.id.cardlist);
+        if (listView != null) {
+            listView.setExternalAdapter(mAdapter, cardArrayAdapter);
+        }
+
+
     }
 
     @Override
@@ -144,10 +209,14 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         populateCalendar(eventFeed);
     }
 
-    public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
-
+    private String formatDate(CalendarEvent event) {
         SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa");
         SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
+        return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+    }
+    /*
+    @Deprecated
+    public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CalendarEventViewHolder> {
 
         public class CalendarEventViewHolder extends RecyclerView.ViewHolder {
             TextView eventDate;
@@ -198,10 +267,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         public CalendarEventViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.calendar_event, viewGroup, false);
             return new CalendarEventViewHolder(v);
-        }
-
-        private String formatDate(CalendarEvent event) {
-            return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
         }
 
         @Override
@@ -335,5 +400,5 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
             });
         }
 
-    }
+    }*/
 }

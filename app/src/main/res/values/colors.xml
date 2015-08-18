@@ -11,6 +11,8 @@
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
 
+    <color name="marked_event">#060</color>
+
     <color name="colorPrimaryQuarter">#3303A9F4</color>
     <color name="colorPrimaryHalf">#9003A9F4</color>
     <color name="colorControlNormalHalf">#9078909C</color>
