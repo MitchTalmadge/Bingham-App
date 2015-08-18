@@ -3,20 +3,15 @@ package com.aptitekk.binghamapp.cards;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.aptitekk.binghamapp.BellSchedule;
-import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import it.gmariotti.cardslib.library.internal.CardExpand;
@@ -69,8 +64,6 @@ public class CustomCountdownCardExpand extends CardExpand {
     }
 
     public void refresh(final CalendarDog eventsFeed, final Fragment context, final CardViewNative cardHolder) {
-        final String FORMAT = "%02d hours %02d minutes %02d seconds";
-
         //DETERMINE TIME
         Calendar currentDateTime = Calendar.getInstance();
 
@@ -86,7 +79,7 @@ public class CustomCountdownCardExpand extends CardExpand {
                 }
 
                 public void onFinish() {
-                    timeRemaining.setText("done!");
+                    refresh(eventsFeed, context, cardHolder);
                 }
             }.start();
             currentPeriod.setText("To " + targetEvent.getTitle());
@@ -109,13 +102,11 @@ public class CustomCountdownCardExpand extends CardExpand {
     }
 
     public static String formatLongToReadableTime(long millis) {
-        if(millis < 0)
-        {
+        if (millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
         }
-
-        long weeks = TimeUnit.MILLISECONDS.toDays(millis)/7;
-        millis -= TimeUnit.MILLISECONDS.toDays(millis)/7;
+        long weeks = TimeUnit.MILLISECONDS.toDays(millis) / 7;
+        millis -= TimeUnit.MILLISECONDS.toDays(millis) / 7;
         long days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
@@ -125,26 +116,26 @@ public class CustomCountdownCardExpand extends CardExpand {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
 
         StringBuilder sb = new StringBuilder(64);
-        if(weeks > 0) {
+        if (weeks > 0) {
             sb.append(weeks);
-            sb.append(" Weeks ");
+            sb.append(" weeks ");
         }
-        if (days > 0) {
+        if (days > 0 || (days == 0 && weeks > 0)) {
             sb.append(days);
-            sb.append(" Days ");
+            sb.append(" days ");
         }
-        if (hours > 0) {
+        if (hours > 0 || (hours == 0 && days > 0)) {
             sb.append(hours);
-            sb.append(" Hours ");
+            sb.append(" hours ");
         }
-        if(minutes > 0) {
+        if (minutes > 0 || (minutes == 0 && hours >0)) {
             sb.append(minutes);
-            sb.append(" Minutes ");
+            sb.append(" minutes ");
         }
         sb.append(seconds);
-        sb.append(" Seconds");
+        sb.append(" seconds");
 
-        return(sb.toString());
+        return (sb.toString());
     }
 
 

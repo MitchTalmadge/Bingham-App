@@ -27,7 +27,6 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
     CountdownCard baseCountDownCard;
     CardViewNative countDownCardView;
     CustomCountdownCardExpand holidayCountDownCard;
-    //CardViewNative holidayCountDownCardView;
 
     public MainFragment() {
         // Required empty public constructor
@@ -65,16 +64,7 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener 
 
         countDownCardView.setCard(baseCountDownCard);
 
-        /*//Create a Card
-        holidayCountDownCard = new HolidayCountdownCard(getActivity());
-        //Set the card inner text
-        holidayCountDownCard.setTitle("Time remaining");
-        //Set card in the cardView
-        holidayCountDownCardView = (CardViewNative) getActivity().findViewById(R.id.holidayCountdown);
-        holidayCountDownCardView.setCard(holidayCountDownCard);*/
-
         countDownCardView.setVisibility(View.GONE);
-        //holidayCountDownCardView.setVisibility(View.GONE);
 
         ((MainActivity) getActivity()).addFeedListener(this);
     }

@@ -1,6 +1,7 @@
 package com.aptitekk.binghamapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -238,6 +239,9 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(i);
+
             return true;
         }
 
