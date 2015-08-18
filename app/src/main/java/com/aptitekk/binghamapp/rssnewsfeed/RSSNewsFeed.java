@@ -12,6 +12,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
@@ -24,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class RSSNewsFeed {
 
+    private static NewsFeedSizeListener newsFeedSizeListener;
     ArrayList<NewsArticle> articles = new ArrayList<>();
 
     Document document;
@@ -32,12 +35,14 @@ public class RSSNewsFeed {
 
     final boolean verbose = false;
 
+    private static final String newsFeedURL = "http://www.binghamminers.org/apps/news/news_rss.jsp?id=0";
+
     public RSSNewsFeed(Callable<Void> refresh) {
         Log.i(MainActivity.LOG_NAME, "Populating Articles...\n");
         this.refresh = refresh;
         try {
             DownloadRSSFeedTask task = new DownloadRSSFeedTask();
-            task.execute("http://www.binghamminers.org/apps/news/news_rss.jsp?id=0");
+            task.execute(newsFeedURL);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,6 +51,48 @@ public class RSSNewsFeed {
 
     public RSSNewsFeed(Document document) {
         buildFeedFromDocument(document);
+    }
+
+    /**
+     * Gets the size of the news feed on the web.
+     */
+    public static void getNewsFeedSize(NewsFeedSizeListener listener) {
+        newsFeedSizeListener = listener;
+
+        new getNewsFeedSizeTask().execute(newsFeedURL);
+    }
+
+    public interface NewsFeedSizeListener {
+
+        void onGetNewsFeedSize(final int newsFeedSize);
+
+    }
+
+    private static class getNewsFeedSizeTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... url) {
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) new URL(url[0]).openConnection();
+                conn.setRequestMethod("HEAD");
+                conn.getInputStream();
+                return conn.getContentLength();
+            } catch (IOException e) {
+                return 0;
+            } finally {
+                if (conn != null)
+                    conn.disconnect();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer newsFeedSize) {
+            if(newsFeedSizeListener != null)
+            {
+                newsFeedSizeListener.onGetNewsFeedSize(newsFeedSize);
+            }
+        }
     }
 
     public Document getDocument() {

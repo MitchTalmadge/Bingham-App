@@ -40,6 +40,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         getFragmentManager().beginTransaction()
                 .add(R.id.fragmentSpaceReplaceable, schoolNewsListFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(null)
                 .commit();
     }
 

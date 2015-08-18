@@ -22,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -47,6 +46,7 @@ import biweekly.component.VEvent;
 
 public class CalendarDog {
 
+    private static EventsFeedSizeListener eventsFeedSizeListener;
     private JSONObject jsonObject;
 
     public JSONObject getJSONObject() {
@@ -66,15 +66,11 @@ public class CalendarDog {
     final boolean verbose = true;
 
     public static String BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&timeMin=2015-08-01T00:00:00-07:00&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
-
     public final static String BINGHAM_GOOGLE_CALENDAR_XML = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
+    public final static String BINGHAM_GOOGLE_CALENDAR_ICAL = "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics";
 
     public CalendarDog(Callable<Void> refresh, FetchType type) {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
-        String timeZone = TimeZone.getDefault().getID();
-        BINGHAM_GOOGLE_CALENDAR = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
-                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
+        BINGHAM_GOOGLE_CALENDAR = generateJSONURL();
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
         this.refresh = refresh;
         try {
@@ -89,18 +85,83 @@ public class CalendarDog {
                     break;
                 case ICAL:
                     FetchICalTask ICALtask = new FetchICalTask();
-                    ICALtask.execute(BINGHAM_GOOGLE_CALENDAR_XML);
+                    ICALtask.execute(BINGHAM_GOOGLE_CALENDAR_ICAL);
                     break;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private static String generateJSONURL() {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
+        String timeZone = TimeZone.getDefault().getID();
+        String url = "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
+                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
+        return url;
     }
 
     public CalendarDog(JSONObject jsonObject) {
         buildFromJSONObject(jsonObject);
+    }
+
+    /**
+     * Gets the size of the events feed on the web for specified fetch type
+     *
+     * @param fetchType type of feed to check
+     */
+    public static void getEventsFeedSize(FetchType fetchType, EventsFeedSizeListener listener) {
+
+        eventsFeedSizeListener = listener;
+
+        String url = null;
+        switch (fetchType) {
+            case JSON:
+                url = generateJSONURL();
+                break;
+            case XML:
+                url = BINGHAM_GOOGLE_CALENDAR_XML;
+                break;
+            case ICAL:
+                url = BINGHAM_GOOGLE_CALENDAR_ICAL;
+                break;
+        }
+
+        new getEventsFeedSizeTask().execute(url);
+    }
+
+    public interface EventsFeedSizeListener {
+
+        void onGetEventsFeedSize(final int eventsFeedSize);
+
+    }
+
+    private static class getEventsFeedSizeTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... url) {
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) new URL(url[0]).openConnection();
+                conn.setRequestMethod("HEAD");
+                conn.getInputStream();
+                return conn.getContentLength();
+            } catch (IOException e) {
+                return 0;
+            } finally {
+                if (conn != null)
+                    conn.disconnect();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer eventsFeedSize) {
+            if (eventsFeedSizeListener != null) {
+                eventsFeedSizeListener.onGetEventsFeedSize(eventsFeedSize);
+            }
+        }
     }
 
     public static int findPositionFromDate(ArrayList<CalendarEvent> events, Date date) {
@@ -136,6 +197,7 @@ public class CalendarDog {
         }
         return -1;
     }
+
     public static int findNextTargetByIndex(ArrayList<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getTitle().toLowerCase().contains(target.getValue()))
@@ -326,7 +388,7 @@ public class CalendarDog {
             Log.i(MainActivity.LOG_NAME, "iCal Parsing");
             InputStream stream;
             try {
-                URL url = new URL((given_url[0] + ".ics").replace("feeds", "ical"));
+                URL url = new URL(given_url[0]);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000 /* milliseconds */);
                 conn.setConnectTimeout(15000 /* milliseconds */);

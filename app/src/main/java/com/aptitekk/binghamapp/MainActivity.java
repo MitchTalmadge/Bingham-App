@@ -40,7 +40,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsFeedSizeListener {
 
     public static final String LOG_NAME = "BinghamAppVerbose";
     public static final String PREF_NAME = "com.AptiTekk.BinghamApp";
@@ -76,42 +76,23 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
 
         // Download News & Events
+        checkForNewsUpdates();
+        checkForEventsUpdates();
+    }
+
+    public void checkForNewsUpdates() {
+        RSSNewsFeed.getNewsFeedSize(this);
+    }
+
+    public void checkForEventsUpdates() {
+        //CalendarDog.getEventsFeedSize(CalendarDog.FetchType.JSON, this);
+
         final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        int lastFeedUpdateDay = sharedPreferences.getInt("lastFeedUpdateDay", 0);
-        int lastFeedUpdateMonth = sharedPreferences.getInt("lastFeedUpdateMonth", 0);
+        int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
+        int lastEventsFeedUpdateMonth = sharedPreferences.getInt("lastEventsFeedUpdateMonth", 0);
 
-        Log.v(LOG_NAME, "lastUpdateFeedDay: " + lastFeedUpdateDay);
-        Log.v(LOG_NAME, "lastUpdateFeedMonth: " + lastFeedUpdateMonth);
-
-        final Callable<Void> newsFeedCallable = new Callable<Void>() {
-            public Void call() {
-                newsFeed = downloadingNewsFeed;
-                for (FeedListener listener : feedListeners) {
-                    if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
-                        listener.onNewsFeedDownloaded(newsFeed);
-                    }
-                }
-                // Save the feed to file...
-                try {
-                    Log.v(LOG_NAME, "Saving news feed to file...");
-                    FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "news.feed"));
-
-                    Document document = newsFeed.getDocument();
-
-                    //Converts the Document into a file
-                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                    Transformer transformer = transformerFactory.newTransformer();
-                    DOMSource source = new DOMSource(document);
-                    StreamResult result = new StreamResult(fileOutputStream);
-                    transformer.transform(source, result);
-
-                    fileOutputStream.close();
-                } catch (IOException | TransformerException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
+        Log.v(LOG_NAME, "lastEventsFeedUpdateDay: " + lastEventsFeedUpdateDay);
+        Log.v(LOG_NAME, "lastEventsFeedUpdateMonth: " + lastEventsFeedUpdateMonth);
 
         final Callable<Void> eventsFeedCallable = new Callable<Void>() {
             public Void call() {
@@ -142,31 +123,15 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        if (lastFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                || lastFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
+        if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
             Log.v(LOG_NAME, "Feeds are out of date. Downloading Feeds...");
             sharedPreferences.edit().putInt("lastFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
 
-
-            downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
             downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
                     CalendarDog.FetchType.JSON);
-        } else { // We have already downloaded the news and events today.. Lets retrieve the files and create feeds from them.
-            File newsFeedFile = new File(getFilesDir(), "news.feed");
+        } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
             File eventsFeedFile = new File(getFilesDir(), "events.feed");
-
-            if (newsFeedFile.exists()) {
-                Log.v(LOG_NAME, "Restoring news feed from file...");
-                try {
-                    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
-                    newsFeed = new RSSNewsFeed(document);
-                } catch (SAXException | IOException | ParserConfigurationException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.v(LOG_NAME, "Could not restore news feed from file.");
-                downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
-            }
 
             if (eventsFeedFile.exists()) {
                 Log.v(LOG_NAME, "Restoring events feed from file...");
@@ -190,6 +155,69 @@ public class MainActivity extends AppCompatActivity {
                 Log.v(LOG_NAME, "Could not restore events feed from file.");
                 downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
                         CalendarDog.FetchType.JSON);
+            }
+        }
+    }
+
+
+    @Override
+    public void onGetNewsFeedSize(final int newsFeedSize) {
+        final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        int lastNewsFeedUpdateSize = sharedPreferences.getInt("lastNewsFeedUpdateSize", 0);
+
+        Log.v(LOG_NAME, "lastNewsFeedUpdateSize: " + lastNewsFeedUpdateSize);
+        Log.v(LOG_NAME, "News Feed Size on Web: " + newsFeedSize);
+
+        final Callable<Void> newsFeedCallable = new Callable<Void>() {
+            public Void call() {
+                newsFeed = downloadingNewsFeed;
+                for (FeedListener listener : feedListeners) {
+                    if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
+                        listener.onNewsFeedDownloaded(newsFeed);
+                    }
+                }
+                // Save the feed to file...
+                try {
+                    Log.v(LOG_NAME, "Saving news feed to file...");
+
+                    sharedPreferences.edit().putInt("lastNewsFeedUpdateSize", newsFeedSize).apply();
+
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "news.feed"));
+                    Document document = newsFeed.getDocument();
+
+                    //Converts the Document into a file
+                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                    Transformer transformer = transformerFactory.newTransformer();
+                    DOMSource source = new DOMSource(document);
+                    StreamResult result = new StreamResult(fileOutputStream);
+                    transformer.transform(source, result);
+
+                    fileOutputStream.close();
+                } catch (IOException | TransformerException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+
+        if (lastNewsFeedUpdateSize == 0 || newsFeedSize != lastNewsFeedUpdateSize) { // If we have never downloaded the feed before or the feed on the website is a different size...
+            Log.v(LOG_NAME, "News feed is out of date. Downloading Feed...");
+
+            downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
+        } else { // We already have the latest news... Lets retrieve the file and create a feed from it.
+            File newsFeedFile = new File(getFilesDir(), "news.feed");
+
+            if (newsFeedFile.exists()) {
+                Log.v(LOG_NAME, "Restoring news feed from file...");
+                try {
+                    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
+                    newsFeed = new RSSNewsFeed(document);
+                } catch (SAXException | IOException | ParserConfigurationException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.v(LOG_NAME, "Could not restore news feed from file.");
+                downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
             }
         }
     }
@@ -246,7 +274,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void popToMainMenu() {
-        getSupportFragmentManager().popBackStack("navigation", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        //getSupportFragmentManager().popBackStack("navigation", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        for (int i = 0; i < getFragmentManager().getBackStackEntryCount(); i++) {
+            getFragmentManager().popBackStack();
+        }
     }
 
     public void setBackButtonListener(BackButtonListener listener) {

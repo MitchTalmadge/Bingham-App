@@ -64,7 +64,7 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
             messageCardFragment.setArguments(args);
 
             getFragmentManager().beginTransaction()
-                    .add(R.id.fragmentSpaceReplaceable, messageCardFragment)
+                    .add(R.id.fragmentSpaceRecycler, messageCardFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .addToBackStack("messageCard")
                     .commit();
