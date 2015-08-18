@@ -122,7 +122,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
             builder.positiveAction("OK")
                     .negativeAction("CANCEL");
             DialogFragment fragment = DialogFragment.newInstance(builder);
-            fragment.show(getFragmentManager(), null);
+            fragment.show(getChildFragmentManager(), null);
             return true;
         }
         return false;

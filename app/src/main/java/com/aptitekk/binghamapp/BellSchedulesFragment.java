@@ -21,7 +21,7 @@ public class BellSchedulesFragment extends Fragment implements BellSchedulesList
         BellSchedulesListFragment bellSchedulesListFragment = new BellSchedulesListFragment();
         bellSchedulesListFragment.addBellSchedulesListListener(this);
 
-        getFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .add(R.id.fragmentSpaceReplaceable, bellSchedulesListFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
@@ -38,7 +38,7 @@ public class BellSchedulesFragment extends Fragment implements BellSchedulesList
     public void openSchedule(Fragment scheduleToOpen) {
 
         // Replace the lists with the bell schedule, and add to backstack so that the back button will remove it.
-        getFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .replace(R.id.fragmentSpaceReplaceable, scheduleToOpen)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("openSchedule")

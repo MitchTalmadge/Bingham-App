@@ -30,23 +30,11 @@ public class LunchMenuFragment extends Fragment {
         bundle.putBoolean("useJavaScript", true);
         webViewFragment.setArguments(bundle);
 
-        getFragmentManager()
+        getChildFragmentManager()
                 .beginTransaction()
                 .add(R.id.fragmentSpaceReplaceable, webViewFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack("lunchMenu")
                 .commit();
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if (previouslyLoaded) {
-            getFragmentManager().popBackStack();
-            getFragmentManager().beginTransaction().remove(this).commit();
-        } else
-            previouslyLoaded = true;
     }
 }

@@ -37,7 +37,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         SchoolNewsListFragment schoolNewsListFragment = new SchoolNewsListFragment();
         schoolNewsListFragment.setArticleListener(this);
 
-        getFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .add(R.id.fragmentSpaceReplaceable, schoolNewsListFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null)
@@ -62,7 +62,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         bundle.putString("URL", URL);
         webViewFragment.setArguments(bundle);
 
-        getFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .replace(R.id.fragmentSpaceReplaceable, webViewFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("newsArticle")

@@ -63,7 +63,7 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
             args.putString("description", "Could not download news! Is the website down?");
             messageCardFragment.setArguments(args);
 
-            getFragmentManager().beginTransaction()
+            getChildFragmentManager().beginTransaction()
                     .add(R.id.fragmentSpaceRecycler, messageCardFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .addToBackStack("messageCard")

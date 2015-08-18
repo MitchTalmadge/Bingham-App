@@ -278,10 +278,10 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     }
 
     public void popToMainMenu() {
-        //getSupportFragmentManager().popBackStack("navigation", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        for (int i = 0; i < getFragmentManager().getBackStackEntryCount(); i++) {
+        getSupportFragmentManager().popBackStack("navigation", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        /*for (int i = 0; i < getFragmentManager().getBackStackEntryCount(); i++) {
             getFragmentManager().popBackStack();
-        }
+        }*/
     }
 
     public void setBackButtonListener(BackButtonListener listener) {

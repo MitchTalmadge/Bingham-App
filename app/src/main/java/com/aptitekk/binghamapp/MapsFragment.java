@@ -153,7 +153,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
                     ((SimpleDialog.Builder) builder).message("Room not found!")
                             .positiveAction("Ok");
                     DialogFragment fragment_ = DialogFragment.newInstance(builder);
-                    fragment_.show(getFragmentManager(), null);
+                    fragment_.show(getChildFragmentManager(), null);
                     super.onPositiveActionClicked(fragment);
                 }
 
@@ -167,7 +167,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
                     .negativeAction("CANCEL")
                     .contentView(R.layout.dialog_text_input);
             DialogFragment fragment = DialogFragment.newInstance(builder);
-            fragment.show(getFragmentManager(), null);
+            fragment.show(getChildFragmentManager(), null);
         }
         return false;
     }
@@ -206,7 +206,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
                 .scrollGesturesEnabled(true)
         ;
         mMapFragment = SupportMapFragment.newInstance(options);
-        getFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .replace(R.id.map, mMapFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
