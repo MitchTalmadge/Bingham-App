@@ -13,14 +13,15 @@ import it.gmariotti.cardslib.library.cards.topcolored.TopColoredCard;
  */
 public class MarkedCalendarEventCard extends TopColoredCard implements CalendarEventView {
 
-    TextView location;
+    View innerView;
+
+    String location;
 
     public MarkedCalendarEventCard(Context context) {
         super(context);
 
         setColorResourceId(R.color.marked_event);
         setInnerLayout(R.layout.card_calendar_event);
-        setupInnerLayout();
         setTitleOverColorResId(R.color.inverse_primary_text);
         setSubTitleOverColorResId(R.color.inverse_secondary_text);
     }
@@ -28,9 +29,10 @@ public class MarkedCalendarEventCard extends TopColoredCard implements CalendarE
     @Override
     protected void setupInnerViewElementsSecondHalf(View secondHalfView) {
         super.setupInnerViewElementsSecondHalf(secondHalfView);
+        innerView = secondHalfView;
         secondHalfView.findViewById(R.id.title).setVisibility(View.GONE);
         secondHalfView.findViewById(R.id.duration).setVisibility(View.GONE);
-        location = (TextView) secondHalfView.findViewById(R.id.location);
+        ((TextView) secondHalfView.findViewById(R.id.location)).setText(location);
     }
 
     @Override
@@ -42,10 +44,11 @@ public class MarkedCalendarEventCard extends TopColoredCard implements CalendarE
     public void setDuration(String formattedDuration) {
         this.setSubTitleOverColor(formattedDuration);
     }
-
     @Override
     public void setLocation(String location) {
-        this.location.setText(location);
+        this.location = location;
+        if(innerView != null)
+            ((TextView) innerView.findViewById(R.id.location)).setText(location);
     }
 
     @Override
@@ -60,6 +63,6 @@ public class MarkedCalendarEventCard extends TopColoredCard implements CalendarE
 
     @Override
     public String getLocation() {
-        return this.location.getText().toString();
+        return this.location;
     }
 }
