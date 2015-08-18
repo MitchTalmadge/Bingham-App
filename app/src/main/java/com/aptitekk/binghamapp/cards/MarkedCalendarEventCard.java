@@ -17,21 +17,20 @@ public class MarkedCalendarEventCard extends TopColoredCard implements CalendarE
 
     public MarkedCalendarEventCard(Context context) {
         super(context);
-        this.with(context)
-                .setColorResId(R.color.marked_event)
-                .setupSubLayoutId(R.layout.card_calendar_event)
-                .setupInnerElements(new TopColoredCard.OnSetupInnerElements() {
-                    @Override
-                    public void setupInnerViewElementsSecondHalf(View secondHalfView) {
-                        secondHalfView.findViewById(R.id.title).setVisibility(View.GONE);
-                        secondHalfView.findViewById(R.id.duration).setVisibility(View.GONE);
-                        location = (TextView) secondHalfView.findViewById(R.id.location);
-                    }
-                })
-                .build();
 
+        setColorResourceId(R.color.marked_event);
+        setInnerLayout(R.layout.card_calendar_event);
+        setupInnerLayout();
         setTitleOverColorResId(R.color.inverse_primary_text);
         setSubTitleOverColorResId(R.color.inverse_secondary_text);
+    }
+
+    @Override
+    protected void setupInnerViewElementsSecondHalf(View secondHalfView) {
+        super.setupInnerViewElementsSecondHalf(secondHalfView);
+        secondHalfView.findViewById(R.id.title).setVisibility(View.GONE);
+        secondHalfView.findViewById(R.id.duration).setVisibility(View.GONE);
+        location = (TextView) secondHalfView.findViewById(R.id.location);
     }
 
     @Override
