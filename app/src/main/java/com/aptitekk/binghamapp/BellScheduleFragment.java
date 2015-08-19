@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class BellScheduleFragment extends Fragment {
+public class BellScheduleFragment extends Fragment implements MainActivity.BackButtonListener {
 
     private ListView listView;
     private ClassPeriodAdapter listAdapter;
@@ -65,6 +65,13 @@ public class BellScheduleFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ((MainActivity) getActivity()).addBackButtonListener(this);
+    }
+
     private class ClassPeriodAdapter extends ArrayAdapter {
         private final String[] subjectNames;
         private final String[] subjectStartTimes;
@@ -93,6 +100,11 @@ public class BellScheduleFragment extends Fragment {
 
             return view;
         }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        return !getParentFragment().getChildFragmentManager().popBackStackImmediate();
     }
 
 }

@@ -158,6 +158,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                     ? new MarkedCalendarEventCard(getActivity()) : new CalendarEventCard(getActivity())); //filters will change with settings menu
             card.setTitle(eventsFeed.getEvents().get(i).getTitle());
             card.setDuration(formatDate(eventsFeed.getEvents().get(i)));
+            Log.i(MainActivity.LOG_NAME, eventsFeed.getEvents().get(i).getTitle() + eventsFeed.getEvents().get(i).getLocation());
             card.setLocation(eventsFeed.getEvents().get(i).getLocation());
             //TODO: Figure out what the ID param is for
             /*ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();

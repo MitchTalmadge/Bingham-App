@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragment.ArticleListener {
+public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragment.ArticleListener, MainActivity.BackButtonListener {
 
     private RecyclerView recyclerView;
 
@@ -40,8 +40,9 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         getChildFragmentManager().beginTransaction()
                 .add(R.id.fragmentSpaceReplaceable, schoolNewsListFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null)
                 .commit();
+
+        ((MainActivity) getActivity()).addBackButtonListener(this);
     }
 
     @Override
@@ -53,7 +54,6 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         return (cm.getActiveNetworkInfo() != null);
     }
-
 
     @Override
     public void onArticleClicked(String URL) {
@@ -67,5 +67,12 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("newsArticle")
                 .commit();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if(!getChildFragmentManager().popBackStackImmediate())
+            getFragmentManager().popBackStack();
+        return false;
     }
 }

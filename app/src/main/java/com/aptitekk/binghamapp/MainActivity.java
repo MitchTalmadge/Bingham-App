@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.concurrent.Callable;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     private ArrayList<FeedListener> feedListeners = new ArrayList<>();
 
     private Toolbar toolbar;
-    private BackButtonListener backButtonListener;
+    private ArrayList<BackButtonListener> backButtonListeners = new ArrayList<>();
     private DrawerLayout drawer;
 
     @Override
@@ -251,14 +253,30 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     @Override
     public void onBackPressed() {
         if (!closeDrawer(this.drawer)) {
-            if (this.backButtonListener != null && this.backButtonListener instanceof Fragment && ((Fragment) this.backButtonListener).isAdded()) {
-                if (this.backButtonListener.onBackPressed()) {
-                    super.onBackPressed();
+            ListIterator<BackButtonListener> listenerIterator = backButtonListeners.listIterator();
+            while(listenerIterator.hasNext()) {
+                BackButtonListener listener = listenerIterator.next();
+                if (listener != null && listener instanceof Fragment && ((Fragment) listener).isAdded()) {
+                    if (!listener.onBackPressed()) {
+                        return;
+                    }
+                } else {
+                    listenerIterator.remove();
                 }
-            } else {
-                super.onBackPressed();
             }
         }
+        super.onBackPressed();
+    }
+
+    public void addBackButtonListener(BackButtonListener listener) {
+        this.backButtonListeners.add(0, listener); // Insert listener at beginning of list so its actions are called first.
+    }
+
+    public interface BackButtonListener {
+        /**
+         * @return true if super.onBackPressed() should be called in MainActivity, false if not
+         */
+        boolean onBackPressed();
     }
 
     /**
@@ -282,17 +300,6 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
         /*for (int i = 0; i < getFragmentManager().getBackStackEntryCount(); i++) {
             getFragmentManager().popBackStack();
         }*/
-    }
-
-    public void setBackButtonListener(BackButtonListener listener) {
-        this.backButtonListener = listener;
-    }
-
-    public interface BackButtonListener {
-        /**
-         * @return true if super.onBackPressed() should be called in MainActivity, false if not
-         */
-        boolean onBackPressed();
     }
 
     public void addFeedListener(FeedListener listener) {
