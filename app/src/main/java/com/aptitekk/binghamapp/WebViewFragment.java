@@ -26,7 +26,7 @@ public class WebViewFragment extends Fragment implements MainActivity.BackButton
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_web, container, false);
 
-        ((MainActivity) getActivity()).setBackButtonListener(this);
+        ((MainActivity) getActivity()).addBackButtonListener(this);
 
         if (savedInstanceState == null && !mAlreadyLoaded) {
             mAlreadyLoaded = true;
@@ -54,7 +54,7 @@ public class WebViewFragment extends Fragment implements MainActivity.BackButton
         if (useJavaScript)
             webView.getSettings().setJavaScriptEnabled(true);
         if (POSTData != null)
-            webView.postUrl("https://skystu.jordan.k12.ut.us/scripts/wsisa.dll/WService=wsEAplus/mobilelogin.w", POSTData.getBytes());
+            webView.postUrl(URL, POSTData.getBytes());
         else
             webView.loadUrl(URL);
     }
@@ -79,8 +79,8 @@ public class WebViewFragment extends Fragment implements MainActivity.BackButton
         if (this.webView.canGoBack()) {
             this.webView.goBack();
             return false;
-        } else
-            return true;
+        }
+        return true;
     }
 
     private class CustomWebViewClient extends WebViewClient {
