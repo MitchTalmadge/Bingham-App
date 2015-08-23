@@ -5,9 +5,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progress_wheel"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_gravity="center"
+        />
+
     <it.gmariotti.cardslib.library.view.CardListView
-        android:id="@+id/cardlist"
-        card:list_card_layout_resourceID="@layout/list_card_thumbnail_layout"
+        android:id="@+id/cardListView"
+        card:list_card_layout_resourceID="@layout/native_recyclerview_material_card_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

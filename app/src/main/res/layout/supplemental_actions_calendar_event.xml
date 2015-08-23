@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/actions_padding"
+    android:gravity="right"
+    android:paddingLeft="@dimen/actions_padding_left"
+    android:paddingRight="@dimen/actions_padding_left">
+
+    <ImageButton
+        android:id="@+id/icon_calendar"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_calendar_grey600_48dp"
+        android:background="?android:selectableItemBackground"
+        style="@style/card.native.actions.button"
+        android:layout_marginRight="8dp"
+        />
+
+
+    <ImageButton
+        android:scaleType="fitCenter"
+        android:id="@+id/icon_share"
+        android:background="?android:selectableItemBackground"
+        android:src="@drawable/ic_share_variant_grey600_48dp"
+        style="@style/card.native.actions.button"
+        android:layout_marginRight="8dp"
+        />
+
+    <ImageButton
+        android:scaleType="fitCenter"
+        android:id="@+id/icon_details"
+        android:background="?android:selectableItemBackground"
+        android:src="@drawable/ic_dots_horizontal_grey600_48dp"
+        style="@style/card.native.actions.button"
+        android:layout_marginRight="8dp"
+        />
+
+</LinearLayout>

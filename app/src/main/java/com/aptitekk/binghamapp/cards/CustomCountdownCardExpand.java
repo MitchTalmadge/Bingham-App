@@ -23,21 +23,25 @@ import it.gmariotti.cardslib.library.view.CardViewNative;
 public class CustomCountdownCardExpand extends CardExpand {
 
     public static enum CountdownTarget {
-        HOLIDAY("no school"),
-        FOOTBALL("football"),
-        TENNIS("tennis"),
-        SPORTS("vs."),
-        LASTDAY("last day of school");
+        HOLIDAY("no school", ""),
+        FOOTBALL("football", "http://img.deseretnews.com/images/article/midres/648384/648384.jpg"),
+        TENNIS("tennis", "http://archive.southvalleyjournal.com/content/files/Article_Files/bhs-tennis-001-713.JPG"),
+        SPORTS("vs.", ""),
+        LASTDAY("last day of school", ""),
+        DANCE("dance", "");
 
         String value;
+        String image;
 
-        CountdownTarget(String value) {
+        CountdownTarget(String value, String image) {
             this.value = value;
+            this.image = image;
         }
 
         public String getValue() {
             return value;
         }
+        public String getImageUrl() { return image; }
     }
 
     CountdownTarget target;
@@ -118,22 +122,22 @@ public class CustomCountdownCardExpand extends CardExpand {
         StringBuilder sb = new StringBuilder(64);
         if (weeks > 0) {
             sb.append(weeks);
-            sb.append(" weeks ");
+            sb.append(" week" +((weeks == 1) ? "": "s")+" ");
         }
         if (days > 0 || (days == 0 && weeks > 0)) {
             sb.append(days);
-            sb.append(" days ");
+            sb.append(" day" +((days == 1) ? "": "s")+" ");
         }
         if (hours > 0 || (hours == 0 && days > 0)) {
             sb.append(hours);
-            sb.append(" hours ");
+            sb.append(" hour" +((hours == 1) ? "": "s")+" ");
         }
         if (minutes > 0 || (minutes == 0 && hours >0)) {
             sb.append(minutes);
-            sb.append(" minutes ");
+            sb.append(" minute" +((minutes == 1) ? "": "s")+" ");
         }
         sb.append(seconds);
-        sb.append(" seconds");
+        sb.append(" second" +((seconds == 1) ? "": "s"));
 
         return (sb.toString());
     }

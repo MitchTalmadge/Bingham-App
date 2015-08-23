@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -259,7 +260,7 @@ public class CalendarDog {
         return null;
     }
 
-    public static ArrayList<CalendarEvent> getEventsForDay(ArrayList<CalendarEvent> events, Calendar dayToMatch) {
+    public static ArrayList<CalendarEvent> getEventsForDay(List<CalendarEvent> events, Calendar dayToMatch) {
         ArrayList<CalendarEvent> result = new ArrayList<>();
         for (CalendarEvent e : events) {
             if (e.getDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
