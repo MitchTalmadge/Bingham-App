@@ -272,6 +272,27 @@ public class CalendarDog {
         return result;
     }
 
+    public static ArrayList<CalendarEvent> getEventsForDay(List<CalendarEvent> events, Calendar dayToMatch, boolean excludeABDayLabel) {
+        ArrayList<CalendarEvent> result = new ArrayList<>();
+        for (CalendarEvent e : events) {
+            if (e.getDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
+                    e.getDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
+                    e.getDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
+                if (excludeABDayLabel) {
+                    if (!(e.getTitle().equalsIgnoreCase("A Day") || e.getTitle().equalsIgnoreCase("B Day"))) {
+                        Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != A Day == " + (!e.getTitle().equalsIgnoreCase("A Day")));
+                        Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != B Day == " + (!e.getTitle().equalsIgnoreCase("B Day")));
+
+                        result.add(e);
+                    }
+                } else {
+                    result.add(e);
+                }
+            }
+        }
+        return result;
+    }
+
     public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {
         if (e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
                 e1.getDate().get(Calendar.MONTH) == e2.getDate().get(Calendar.MONTH) &&

@@ -33,8 +33,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
 import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
@@ -148,15 +151,25 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         //populate a list full of calendar card events
         ArrayList<Card> cards = new ArrayList<Card>();
         ArrayList<CardSection> sections = new ArrayList<>();
+        int eventsNotGenerated = 0;
+        LinkedHashMap<String, Integer> sectionQueue = new LinkedHashMap<>();
         this.sortedEvents = CalendarEvent.sort(eventsFeed.getEvents());
         for (int i = 0; i < eventsFeed.getEvents().size(); i++) {
             final int currentIteration = i;
             if (sortedEvents.get(i).getTitle().equals("A Day") || sortedEvents.get(i).getTitle().equals("B Day")) {
-                sections.add(new CardSection(i, SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime())
-                        + " (" + sortedEvents.get(i).getTitle() + ")"));
-            } else if (!CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate()).isEmpty()) {
+                eventsNotGenerated++;
+                if (!(CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate(), true).isEmpty())) {
+                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime())
+                            + " (" + sortedEvents.get(i).getTitle() + ")", i);
+                }
+                continue;
+            } else if (!(CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate()).isEmpty())) {
+                Log.i(MainActivity.LOG_NAME, "There are events under " + SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime()));
+                for(CalendarEvent e : CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate(), true)) {
+                    Log.i(MainActivity.LOG_NAME, e.getTitle());
+                }
                 if (!CalendarDog.isSameDay(sortedEvents.get(i), sortedEvents.get(i - 1))) {
-                    sections.add(new CardSection(i, SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime())));
+                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime()), i);
                 }
             }
             ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();
@@ -239,6 +252,18 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
             cards.add(card);
         }
 
+
+        if (eventsNotGenerated != 0) {
+            List<Map.Entry<String, Integer>> sectionQueueList = new ArrayList<>(sectionQueue.entrySet());
+            for (int i = 0; i < sectionQueue.size(); i++) {
+                Log.i(MainActivity.LOG_NAME, "Adding section " + sectionQueueList.get(i) + " to " + (sectionQueueList.get(i).getValue()-i));
+                sections.add(new CardSection(sectionQueueList.get(i).getValue() - i, sectionQueueList.get(i).getKey())); // section position = event position - map index
+            }
+        } else {
+            for (Map.Entry<String, Integer> entry : sectionQueue.entrySet())
+                sections.add(new CardSection(entry.getValue(), entry.getKey()));
+        }
+
         this.cardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
 
         CardSection[] pointer = new CardSection[sections.size()];
@@ -263,9 +288,14 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     }
 
     private String formatDate(CalendarEvent event) {
-        SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa");
+        String result = "";
+        SimpleDateFormat headerFormat = new SimpleDateFormat("MMM dd EEE hh:mmaa");
         SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
-        return (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        result = (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        String[] resultSplit = result.split(" ");
+        if (result.split(" ")[1].equalsIgnoreCase(result.split(" ")[3]))
+            result = resultSplit[0] + " " + resultSplit[1] + " " + resultSplit[4];
+        return result;
     }
     /*
     @Deprecated
