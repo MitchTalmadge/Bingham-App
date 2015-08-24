@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp;
+package com.aptitekk.binghamapp.BellSchedulesFragmentClasses;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.aptitekk.binghamapp.MainActivity;
+import com.aptitekk.binghamapp.R;
 
 public class BellScheduleFragment extends Fragment implements MainActivity.BackButtonListener {
 
@@ -42,6 +45,7 @@ public class BellScheduleFragment extends Fragment implements MainActivity.BackB
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bell_schedule, container, false);
 

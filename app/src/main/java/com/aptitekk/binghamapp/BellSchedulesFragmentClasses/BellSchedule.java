@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp;
+package com.aptitekk.binghamapp.BellSchedulesFragmentClasses;
 
 import java.text.DateFormat;
 import java.text.ParseException;

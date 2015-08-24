@@ -9,6 +9,11 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
+    <FrameLayout
+        android:id="@+id/fragmentSpaceSkyward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <RelativeLayout
         android:id="@+id/loginLayout"
         android:layout_width="match_parent"
@@ -38,7 +43,7 @@
 
                 <com.rengwuxian.materialedittext.MaterialEditText
                     android:id="@+id/usernameEditText"
-                    android:layout_width="150dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:hint="@string/username_hint"
@@ -48,7 +53,7 @@
 
                 <com.rengwuxian.materialedittext.MaterialEditText
                     android:id="@+id/passwordEditText"
-                    android:layout_width="150dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/usernameEditText"
                     android:layout_marginTop="8dp"
@@ -82,7 +87,7 @@
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Secure your Login Details"
+                android:text="@string/secure_login_details_label"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <RelativeLayout
@@ -100,20 +105,20 @@
                     android:text="@string/create_pin_label"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText1"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textView3"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText2"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -122,13 +127,13 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText1"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText3"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -137,13 +142,13 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText2"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText4"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -152,7 +157,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText3"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
@@ -167,20 +172,20 @@
                     android:text="@string/verify_pin_label"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText1V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textView4"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText2V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -189,13 +194,13 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText1V"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText3V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -204,13 +209,13 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText2V"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.rengwuxian.materialedittext.MaterialEditText
+                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
                     android:id="@+id/PINEditText4V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -219,7 +224,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/PINEditText3V"
                     android:gravity="center"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:inputType="numberPassword"
                     android:maxLength="1"
                     android:singleLine="true"

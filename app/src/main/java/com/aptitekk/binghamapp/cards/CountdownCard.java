@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.aptitekk.binghamapp.BellSchedule;
+import com.aptitekk.binghamapp.BellSchedulesFragmentClasses.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;

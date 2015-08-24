@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.concurrent.Callable;
 
@@ -74,9 +73,11 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
         drawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         this.drawer = drawerFragment.getDrawerLayout();
 
-        // Load the MainFragment
-        MainFragment mainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
+        if (savedInstanceState == null) { //First time loaded; not a killed process
+            // Load the MainFragment
+            MainFragment mainFragment = new MainFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
+        }
 
         // Download News & Events
         checkForNewsUpdates();
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     public void onBackPressed() {
         if (!closeDrawer(this.drawer)) {
             ListIterator<BackButtonListener> listenerIterator = backButtonListeners.listIterator();
-            while(listenerIterator.hasNext()) {
+            while (listenerIterator.hasNext()) {
                 BackButtonListener listener = listenerIterator.next();
                 if (listener != null && listener instanceof Fragment && ((Fragment) listener).isAdded()) {
                     if (!listener.onBackPressed()) {

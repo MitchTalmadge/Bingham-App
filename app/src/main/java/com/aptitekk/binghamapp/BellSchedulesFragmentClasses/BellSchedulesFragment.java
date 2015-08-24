@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp;
+package com.aptitekk.binghamapp.BellSchedulesFragmentClasses;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.aptitekk.binghamapp.R;
 
 public class BellSchedulesFragment extends Fragment implements BellSchedulesListFragment.BellSchedulesListListener {
 
@@ -17,14 +19,16 @@ public class BellSchedulesFragment extends Fragment implements BellSchedulesList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Add BellSchedulesListFragment to fragmentSpaceReplaceable
-        BellSchedulesListFragment bellSchedulesListFragment = new BellSchedulesListFragment();
-        bellSchedulesListFragment.addBellSchedulesListListener(this);
+        if (savedInstanceState == null) {
+            // Add BellSchedulesListFragment to fragmentSpaceReplaceable
+            BellSchedulesListFragment bellSchedulesListFragment = new BellSchedulesListFragment();
+            bellSchedulesListFragment.addBellSchedulesListListener(this);
 
-        getChildFragmentManager().beginTransaction()
-                .add(R.id.fragmentSpaceReplaceable, bellSchedulesListFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.fragmentSpaceReplaceable, bellSchedulesListFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit();
+        }
     }
 
     @Override

@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.aptitekk.binghamapp.BellSchedule;
+import com.aptitekk.binghamapp.BellSchedulesFragmentClasses.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.WebViewFragment;
@@ -293,8 +293,8 @@ public class CalendarDog {
                     e.getDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
                 if (excludeABDayLabel) {
                     if (!(e.getTitle().equalsIgnoreCase("A Day") || e.getTitle().equalsIgnoreCase("B Day"))) {
-                        Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != A Day == " + (!e.getTitle().equalsIgnoreCase("A Day")));
-                        Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != B Day == " + (!e.getTitle().equalsIgnoreCase("B Day")));
+                        //Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != A Day == " + (!e.getTitle().equalsIgnoreCase("A Day")));
+                        //Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != B Day == " + (!e.getTitle().equalsIgnoreCase("B Day")));
 
                         result.add(e);
                     }

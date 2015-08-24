@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.concurrent.Callable;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -35,7 +36,7 @@ public class RSSNewsFeed {
 
     final boolean verbose = false;
 
-    private static final String newsFeedURL = "http://www.binghamminers.org/apps/news/news_rss.jsp?id=0";
+    private static final String newsFeedURL = "http://www.binghamminers.org/apps/news/news_rss.jsp?unused="+ Calendar.getInstance().get(Calendar.MILLISECOND); //Adding unused + random number ensures a non-cached copy.
 
     public RSSNewsFeed(Callable<Void> refresh) {
         Log.i(MainActivity.LOG_NAME, "Populating Articles...\n");
@@ -76,6 +77,8 @@ public class RSSNewsFeed {
             try {
                 conn = (HttpURLConnection) new URL(url[0]).openConnection();
                 conn.setRequestMethod("HEAD");
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+                conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
                 conn.getInputStream();
                 return conn.getContentLength();
             } catch (IOException e) {

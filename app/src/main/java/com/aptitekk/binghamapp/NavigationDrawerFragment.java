@@ -19,6 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.aptitekk.binghamapp.BellSchedulesFragmentClasses.BellSchedulesFragment;
+import com.aptitekk.binghamapp.SkywardFragmentClasses.SkywardFragment;
+
 
 /**
  * A simple {@link Fragment} subclass.
