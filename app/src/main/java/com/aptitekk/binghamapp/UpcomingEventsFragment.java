@@ -2,14 +2,11 @@ package com.aptitekk.binghamapp;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,31 +14,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
 import com.rey.material.app.DatePickerDialog;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
-import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
-import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
-import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.prototypes.CardSection;
@@ -50,7 +37,7 @@ import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 
-public class UpcomingEventsFragment extends Fragment implements MainActivity.FeedListener {
+public class UpcomingEventsFragment extends Fragment implements MainActivity.FeedListener, MainActivity.BackButtonListener {
 
     //private RecyclerView recyclerView;
 
@@ -59,7 +46,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     private CardRecyclerView recyclerView;
 
     private CalendarDog eventsFeed;
-    private List<CalendarEvent> sortedEvents;
 
     private boolean showABDays = true;
 
@@ -151,118 +137,37 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         //populate a list full of calendar card events
         ArrayList<Card> cards = new ArrayList<Card>();
         ArrayList<CardSection> sections = new ArrayList<>();
-        int eventsNotGenerated = 0;
         LinkedHashMap<String, Integer> sectionQueue = new LinkedHashMap<>();
-        this.sortedEvents = CalendarEvent.sort(eventsFeed.getEvents());
+
+        int sectionOffsetIndex = 0;
+
         for (int i = 0; i < eventsFeed.getEvents().size(); i++) {
+
             final int currentIteration = i;
-            if (sortedEvents.get(i).getTitle().equals("A Day") || sortedEvents.get(i).getTitle().equals("B Day")) {
-                eventsNotGenerated++;
-                if (!(CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate(), true).isEmpty())) {
-                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime())
-                            + " (" + sortedEvents.get(i).getTitle() + ")", i);
+
+            if (this.eventsFeed.getEvents().get(i).getTitle().equals("A Day") || this.eventsFeed.getEvents().get(i).getTitle().equals("B Day")) {
+                if (!(CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true).isEmpty())) {
+                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime())
+                            + " (" + this.eventsFeed.getEvents().get(i).getTitle() + ")", sectionOffsetIndex);
                 }
                 continue;
-            } else if (!(CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate()).isEmpty())) {
-                Log.i(MainActivity.LOG_NAME, "There are events under " + SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime()));
-                for(CalendarEvent e : CalendarDog.getEventsForDay(sortedEvents, sortedEvents.get(i).getDate(), true)) {
+            } else if (!(CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate()).isEmpty())) {
+                for (CalendarEvent e : CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true)) {
                     Log.i(MainActivity.LOG_NAME, e.getTitle());
                 }
-                if (!CalendarDog.isSameDay(sortedEvents.get(i), sortedEvents.get(i - 1))) {
-                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(sortedEvents.get(i).getDate().getTime()), i);
+                if (!CalendarDog.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {
+                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime()), sectionOffsetIndex);
                 }
+
+                // The following section generates a card for the current event that we are iterating over.
+                cards.add(CalendarDog.makeCalendarCard(this, this.eventsFeed.getEvents().get(i)));
+                // END CARD GENERATION
+                sectionOffsetIndex += 1;
             }
-            ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();
-            IconSupplementalAction t1 = new IconSupplementalAction(getActivity(), R.id.icon_calendar); // calendar
-            t1.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    Intent calIntent = new Intent(Intent.ACTION_EDIT);
-                    calIntent.setType("vnd.android.cursor.item/event");
-                    calIntent.putExtra(CalendarContract.Events.TITLE, sortedEvents.get(currentIteration).getTitle());
-                    calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, sortedEvents.get(currentIteration).getLocation());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                            sortedEvents.get(currentIteration).getDate().getTimeInMillis());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                            sortedEvents.get(currentIteration).getEndTime().getTimeInMillis());
-                    getActivity().startActivity(calIntent);
-                }
-            });
-            actions.add(t1);
-
-            IconSupplementalAction t2 = new IconSupplementalAction(getActivity(), R.id.icon_share); // share
-            t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    Intent textShareIntent = new Intent(Intent.ACTION_SEND);
-                    textShareIntent.setType("text/plain");
-                    textShareIntent.putExtra(Intent.EXTRA_TEXT, sortedEvents.get(currentIteration).toString());
-                    getActivity().startActivity(Intent.createChooser(textShareIntent, "Share event with..."));
-                }
-            });
-            actions.add(t2);
-            IconSupplementalAction t3 = new IconSupplementalAction(getActivity(), R.id.icon_details); // open web view
-            t3.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    WebViewFragment webViewFragment = new WebViewFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("URL", sortedEvents.get(currentIteration).getLink());
-                    webViewFragment.setArguments(bundle);
-
-                    getChildFragmentManager().beginTransaction()
-                            .show(webViewFragment)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .addToBackStack("upcomingEvents")
-                            .commit();
-                }
-            });
-            actions.add(t3);
-
-            String imageUrl = "garbageurl.blah";
-
-            for (CustomCountdownCardExpand.CountdownTarget target : CustomCountdownCardExpand.CountdownTarget.values()) {
-                if (target.getImageUrl().equals("")) continue;
-                if (sortedEvents.get(i).getTitle().toLowerCase().contains(target.getValue())) {
-                    imageUrl = target.getImageUrl();
-                    break;
-                }
-            }
-
-            final String finalImageUrl = imageUrl;
-            MaterialLargeImageCard card =
-                    MaterialLargeImageCard.with(getActivity())
-                            .setTextOverImage(sortedEvents.get(i).getTitle())
-                            .setTitle(formatDate(sortedEvents.get(i)))
-                            .setSubTitle(sortedEvents.get(i).getLocation())
-                            .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
-                                @Override
-                                public void setupInnerViewElements(ViewGroup parent, View viewImage) {
-
-                                    //Picasso.with(getActivity()).setIndicatorsEnabled(true);  //only for debug tests
-                                    Picasso.with(getActivity())
-                                            .load(finalImageUrl)
-                                            .error(R.color.primary)
-                                            .into((ImageView) viewImage);
-                                    //((ImageView) viewImage).setImageResource(R.color.primary);
-                                }
-                            })
-                            .setupSupplementalActions(R.layout.supplemental_actions_calendar_event, actions)
-                            .build();
-            cards.add(card);
         }
 
-
-        if (eventsNotGenerated != 0) {
-            List<Map.Entry<String, Integer>> sectionQueueList = new ArrayList<>(sectionQueue.entrySet());
-            for (int i = 0; i < sectionQueue.size(); i++) {
-                Log.i(MainActivity.LOG_NAME, "Adding section " + sectionQueueList.get(i) + " to " + (sectionQueueList.get(i).getValue()-i));
-                sections.add(new CardSection(sectionQueueList.get(i).getValue() - i, sectionQueueList.get(i).getKey())); // section position = event position - map index
-            }
-        } else {
-            for (Map.Entry<String, Integer> entry : sectionQueue.entrySet())
-                sections.add(new CardSection(entry.getValue(), entry.getKey()));
-        }
+        for (Map.Entry<String, Integer> entry : sectionQueue.entrySet())
+            sections.add(new CardSection(entry.getValue(), entry.getKey()));
 
         this.cardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
 
@@ -279,23 +184,19 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     }
 
     @Override
+    public boolean onBackPressed() {
+        if (!getChildFragmentManager().popBackStackImmediate())
+            getFragmentManager().popBackStack();
+        return false;
+    }
+
+    @Override
     public void onNewsFeedDownloaded(RSSNewsFeed newsFeed) {
     }
 
     @Override
     public void onEventsFeedDownloaded(CalendarDog eventFeed) {
         populateCalendar(eventFeed);
-    }
-
-    private String formatDate(CalendarEvent event) {
-        String result = "";
-        SimpleDateFormat headerFormat = new SimpleDateFormat("MMM dd EEE hh:mmaa");
-        SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
-        result = (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
-        String[] resultSplit = result.split(" ");
-        if (result.split(" ")[1].equalsIgnoreCase(result.split(" ")[3]))
-            result = resultSplit[0] + " " + resultSplit[1] + " " + resultSplit[4];
-        return result;
     }
     /*
     @Deprecated

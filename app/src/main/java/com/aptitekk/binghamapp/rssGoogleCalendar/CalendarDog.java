@@ -1,13 +1,22 @@
 package com.aptitekk.binghamapp.rssGoogleCalendar;
 
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.aptitekk.binghamapp.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
+import com.aptitekk.binghamapp.WebViewFragment;
 import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,6 +53,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
+import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
+import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
+import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
+import it.gmariotti.cardslib.library.internal.Card;
 
 public class CalendarDog {
 
@@ -60,7 +73,7 @@ public class CalendarDog {
         ICAL
     }
 
-    ArrayList<CalendarEvent> events = new ArrayList<>();
+    List<CalendarEvent> events = new ArrayList<>();
 
     Callable<Void> refresh;
 
@@ -165,7 +178,7 @@ public class CalendarDog {
         }
     }
 
-    public static int findPositionFromDate(ArrayList<CalendarEvent> events, Date date) {
+    public static int findPositionFromDate(List<CalendarEvent> events, Date date) {
         long minDiff = -1, currentTime = date.getTime();
         int minDate = 0;
         for (int i = 0; i < events.size(); i++) {
@@ -178,7 +191,7 @@ public class CalendarDog {
         return minDate;
     }
 
-    public static Date getNearestDate(ArrayList<Date> dates, Date currentDate) {
+    public static Date getNearestDate(List<Date> dates, Date currentDate) {
         long minDiff = -1, currentTime = currentDate.getTime();
         Date minDate = null;
         for (Date date : dates) {
@@ -191,7 +204,7 @@ public class CalendarDog {
         return minDate;
     }
 
-    public static int findNextAorBDay(ArrayList<CalendarEvent> events) {
+    public static int findNextAorBDay(List<CalendarEvent> events) {
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
                 return i;
@@ -199,7 +212,7 @@ public class CalendarDog {
         return -1;
     }
 
-    public static int findNextTargetByIndex(ArrayList<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
+    public static int findNextTargetByIndex(List<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getTitle().toLowerCase().contains(target.getValue()))
                 return i;
@@ -207,7 +220,7 @@ public class CalendarDog {
         return -1;
     }
 
-    public static BellSchedule determineSchedule(Fragment fragment, ArrayList<CalendarEvent> events, Calendar dateTime) {
+    public static BellSchedule determineSchedule(Fragment fragment, List<CalendarEvent> events, Calendar dateTime) {
 
         ArrayList<CalendarEvent> eventsOfDay = getEventsForDay(events, dateTime);
 
@@ -293,6 +306,98 @@ public class CalendarDog {
         return result;
     }
 
+    public static MaterialLargeImageCard makeCalendarCard(final Fragment fragment, final CalendarEvent event) {
+        ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();
+        IconSupplementalAction t1 = new IconSupplementalAction(fragment.getActivity(), R.id.icon_calendar); // calendar
+        t1.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                Intent calIntent = new Intent(Intent.ACTION_EDIT);
+                calIntent.setType("vnd.android.cursor.item/event");
+                calIntent.putExtra(CalendarContract.Events.TITLE, event.getTitle());
+                calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
+                calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                        event.getDate().getTimeInMillis());
+                calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                        event.getEndTime().getTimeInMillis());
+                fragment.getActivity().startActivity(calIntent);
+            }
+        });
+        actions.add(t1);
+
+        IconSupplementalAction t2 = new IconSupplementalAction(fragment.getActivity(), R.id.icon_share); // share
+        t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                Intent textShareIntent = new Intent(Intent.ACTION_SEND);
+                textShareIntent.setType("text/plain");
+                textShareIntent.putExtra(Intent.EXTRA_TEXT, event.toString());
+                fragment.getActivity().startActivity(Intent.createChooser(textShareIntent, "Share event with..."));
+            }
+        });
+        actions.add(t2);
+        IconSupplementalAction t3 = new IconSupplementalAction(fragment.getActivity(), R.id.icon_details); // open web view
+        t3.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                WebViewFragment webViewFragment = new WebViewFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("URL", event.getLink());
+                webViewFragment.setArguments(bundle);
+
+                fragment.getChildFragmentManager().beginTransaction()
+                        .add(R.id.calendar_web_view_container, webViewFragment)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .addToBackStack("upcomingEvents")
+                        .commit();
+            }
+        });
+        actions.add(t3);
+
+        String imageUrl = "garbageurl.blah";
+
+        for (CustomCountdownCardExpand.CountdownTarget target : CustomCountdownCardExpand.CountdownTarget.values()) {
+            if (target.getImageUrl().equals("")) continue;
+            if (event.getTitle().toLowerCase().contains(target.getValue())) {
+                imageUrl = target.getImageUrl();
+                break;
+            }
+        }
+
+        final String finalImageUrl = imageUrl;
+        MaterialLargeImageCard card =
+                MaterialLargeImageCard.with(fragment.getActivity())
+                        .setTextOverImage(event.getTitle())
+                        .setTitle(formatDateForCard(event))
+                        .setSubTitle(event.getLocation())
+                        .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
+                            @Override
+                            public void setupInnerViewElements(ViewGroup parent, View viewImage) {
+
+                                //Picasso.with(fragment.getActivity()).setIndicatorsEnabled(true);  //only for debug tests
+                                Picasso.with(fragment.getActivity())
+                                        .load(finalImageUrl)
+                                        .error(R.color.primary_light)
+                                        .into((ImageView) viewImage);
+                                //((ImageView) viewImage).setImageResource(R.color.primary);
+                            }
+                        })
+                        .setupSupplementalActions(R.layout.supplemental_actions_calendar_event, actions)
+                        .build();
+        return card;
+    }
+
+    private static String formatDateForCard(CalendarEvent event) {
+        String result = "";
+        SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa");
+        SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz");
+        result = (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        String[] resultSplit = result.split(" ");
+        if (result.split(" ")[1].equalsIgnoreCase(result.split(" ")[3]))
+            result = resultSplit[0] + " " + resultSplit[1] + " " + resultSplit[4];
+        return result;
+    }
+
     public static boolean isSameDay(CalendarEvent e1, CalendarEvent e2) {
         if (e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
                 e1.getDate().get(Calendar.MONTH) == e2.getDate().get(Calendar.MONTH) &&
@@ -302,7 +407,7 @@ public class CalendarDog {
         return false;
     }
 
-    public ArrayList<CalendarEvent> getEvents() {
+    public List<CalendarEvent> getEvents() {
         return this.events;
     }
 
@@ -338,6 +443,7 @@ public class CalendarDog {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             buildFromJSONObject(jsonObject);
+            events = CalendarEvent.sort(events);
             try {
                 refresh.call();
             } catch (Exception e) {
@@ -474,6 +580,7 @@ public class CalendarDog {
                     //ee.printStackTrace();
                 }
             }
+            events = CalendarEvent.sort(events);
             try {
                 refresh.call();
             } catch (Exception e) {
@@ -586,6 +693,7 @@ public class CalendarDog {
 
                 }
             }
+            events = CalendarEvent.sort(events);
             try {
                 refresh.call();
             } catch (Exception e) {
