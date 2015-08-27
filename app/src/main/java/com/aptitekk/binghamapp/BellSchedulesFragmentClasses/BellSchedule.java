@@ -1,10 +1,16 @@
 package com.aptitekk.binghamapp.BellSchedulesFragmentClasses;
 
+import android.util.Log;
+
+import com.aptitekk.binghamapp.MainActivity;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class BellSchedule {
@@ -18,34 +24,46 @@ public class BellSchedule {
     private int[] subjectLengths;
 
     public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule) {
-        DateFormat df = new SimpleDateFormat("hh:mm a", Locale.US);
+        Date today = new Date();
+        DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
             try {
-                if(schedule.getScheduleName().toLowerCase().contains("warning")) // warning bell doesnt need to be in there
+                if(schedule.getSubjectNames()[i].toLowerCase().contains("warning")) // warning bell doesnt need to be in there
                     continue;
+                if((schedule.getSubjectStartTimes()[i].contains("--")) || (schedule.getSubjectEndTimes()[i].contains("--")))
+                    continue; // dont need non-existent times
                 result.add(
                         new Subject(
                                 schedule.getSubjectNames()[i],
-                                df.parse(schedule.getSubjectStartTimes()[i]),
-                                df.parse(schedule.getSubjectEndTimes()[i])));
+                                df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectStartTimes()[i]),
+                                df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
                 e.printStackTrace();
+                continue;
             }
         }
         return result;
     }
 
-    public static Subject getNextSubject(Date currentTime, ArrayList<Subject> subjects) {
+    public static Subject getNextSubject(Date currentTime, List<Subject> subjects) {
         long minDiff = -1;
         Subject minDate = null;
         for (Subject subject : subjects) {
             ArrayList<Date> dates = new ArrayList<>();
             dates.add(subject.getStartTime());
             dates.add(subject.getEndTime());
+            Date tomorrowStart = subject.getStartTime(); tomorrowStart.setTime(subject.getStartTime().getTime() + 1 * 24 * 60 * 60 * 1000);
+            Date tomorrowEnd = subject.getEndTime(); tomorrowStart.setTime(subject.getEndTime().getTime() + 1 * 24 * 60 * 60 * 1000);
+            dates.add(tomorrowStart);
+            dates.add(tomorrowEnd);
             for (Date date : dates) {
+                if(currentTime.getTime() > date.getTime()) {
+                    continue;
+                }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
                 if ((minDiff == -1) || (diff < minDiff)) {
+                    Log.i(MainActivity.LOG_NAME, "Next determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
                     minDiff = diff;
                     minDate = subject;
                 }

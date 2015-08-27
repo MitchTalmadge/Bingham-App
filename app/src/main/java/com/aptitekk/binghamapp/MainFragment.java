@@ -53,43 +53,20 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        //Create a Card
-        baseCountDownCard = new CountdownCard(getActivity());
-        //Set the card inner text
-        CardHeader header = new CardHeader(getActivity());
-        header.setTitle("Countdown");
-        //Set visible the expand/collapse button
-        header.setButtonExpandVisible(true);
-        //Add Header to card
-        baseCountDownCard.addCardHeader(header);
-
-        holidayCountDownCard = new CustomCountdownCardExpand(getActivity(), CustomCountdownCardExpand.CountdownTarget.HOLIDAY);
-        baseCountDownCard.addCardExpand(holidayCountDownCard);
-
-        baseCountDownCard.setOnClickListener(new Card.OnCardClickListener() {
-            @Override
-            public void onClick(Card card, View view) {
-                card.doToogleExpand();
-            }
-        });
-
         countDownCardView = (CardViewNative) getActivity().findViewById(R.id.countdowns);
         latestNewsCardView= (CardViewNative) getActivity().findViewById(R.id.latestnews);
         nextEventCardView = (CardViewNative) getActivity().findViewById(R.id.nextevent);
-
-
-        this.latestNewsCard = new Card(getActivity(), R.layout.news_article);
-
-        CardHeader latestNewsHeader = new CardHeader(getActivity());
-        header.setTitle("Lastest Article");
-        latestNewsCard.addCardHeader(latestNewsHeader);
-
 
         ((MainActivity) getActivity()).addFeedListener(this);
     }
 
     @Override
     public void onNewsFeedDownloaded(final RSSNewsFeed newsFeed) {
+        this.latestNewsCard = new Card(getActivity(), R.layout.news_article);
+
+        CardHeader latestNewsHeader = new CardHeader(getActivity());
+        latestNewsHeader.setTitle("Lastest Article");
+        latestNewsCard.addCardHeader(latestNewsHeader);
         latestNewsCardView.setCard(this.latestNewsCard);
 
         getView().findViewById(R.id.latestnews_progress_wheel).setVisibility(View.GONE);
@@ -121,7 +98,28 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
 
         /////////////////// COUNTDOWN /////////////////////////////////////////////////////////////
 
+        //Create a Card
+        baseCountDownCard = new CountdownCard(getActivity());
+        //Set the card inner text
+        CardHeader header = new CardHeader(getActivity());
+        header.setTitle("Countdown");
+        //Set visible the expand/collapse button
+        header.setButtonExpandVisible(true);
+        //Add Header to card
+        baseCountDownCard.addCardHeader(header);
+
+        holidayCountDownCard = new CustomCountdownCardExpand(getActivity(), CustomCountdownCardExpand.CountdownTarget.HOLIDAY);
+
         getView().findViewById(R.id.countdowns_progress_wheel).setVisibility(View.GONE);
+
+        baseCountDownCard.addCardExpand(holidayCountDownCard);
+
+        baseCountDownCard.setOnClickListener(new Card.OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                card.doToogleExpand();
+            }
+        });
 
         countDownCardView.setCard(baseCountDownCard);
         ViewToClickToExpand viewToClickToExpand =
@@ -139,6 +137,9 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
         getView().findViewById(R.id.nextevent_progress_wheel).setVisibility(View.GONE);
 
         nextEventCard = CalendarDog.makeCalendarCard(this, CalendarDog.getEventsForDay(eventsFeed.getEvents(), eventsFeed.getEvents().get(0).getDate(), true).get(0));
+        CardHeader nextEventHeader = new CardHeader(getActivity());
+        nextEventHeader.setTitle("Next Event");
+        nextEventCard.addCardHeader(nextEventHeader);
         nextEventCardView.setCard(nextEventCard);
 
 

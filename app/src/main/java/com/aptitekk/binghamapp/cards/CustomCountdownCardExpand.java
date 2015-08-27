@@ -12,6 +12,7 @@ import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import it.gmariotti.cardslib.library.internal.CardExpand;
@@ -109,8 +110,8 @@ public class CustomCountdownCardExpand extends CardExpand {
         if (millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
         }
-        long weeks = TimeUnit.MILLISECONDS.toDays(millis) / 7;
-        millis -= TimeUnit.MILLISECONDS.toDays(millis) / 7;
+        long weeks = (millis / (1000*60*60*24*7));
+        millis -= TimeUnit.DAYS.toMillis(weeks*7);
         long days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
         long hours = TimeUnit.MILLISECONDS.toHours(millis);

@@ -14,6 +14,7 @@ import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,17 +58,11 @@ public class CountdownCard extends Card {
                 closestPotentialTimes.add(closest.getStartTime());
                 closestPotentialTimes.add(closest.getEndTime());
                 Date closestTime = CalendarDog.getNearestDate(closestPotentialTimes, currentDateTime.getTime());
-
-                new CountDownTimer(closestTime.getTime(), 1000) { // adjust the milli seconds here
+                new CountDownTimer(closestTime.getTime()-currentDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
 
                     public void onTick(long millisUntilFinished) {
 
-                        timeRemaining.setText("" + String.format(FORMAT,
-                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
-                                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+                        timeRemaining.setText(CustomCountdownCardExpand.formatLongToReadableTime(millisUntilFinished));
                     }
 
                     public void onFinish() {
@@ -81,7 +76,7 @@ public class CountdownCard extends Card {
             }
         }
 
-        //IF ITS BEFORE/AFTER SCHOOL
+        //IF ITS BEFORE/AFTER SCHOOL YEAR OR WEEKENDS
         try {
             CalendarEvent nextABDay = eventsFeed.getEvents().get(CalendarDog.findNextAorBDay(eventsFeed.getEvents()));
 
@@ -95,7 +90,7 @@ public class CountdownCard extends Card {
                 }
 
                 public void onFinish() {
-                    timeRemaining.setText("done!");
+                    refresh(eventsFeed, context, cardHolder);
                 }
             }.start();
             currentPeriod.setText("To Next " + nextABDay.getTitle());
