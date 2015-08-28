@@ -17,13 +17,17 @@ public class BellSchedule {
 
     public static final BellSchedule NONE = null;
 
+    public static final char A_DAY = 'A';
+    public static final char B_DAY = 'B';
+    public static final char NONE_DAY = '-';
+
     String scheduleName;
     private String[] subjectNames;
     private String[] subjectStartTimes;
     private String[] subjectEndTimes;
     private int[] subjectLengths;
 
-    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule) {
+    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday) {
         Date today = new Date();
         DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
@@ -35,9 +39,12 @@ public class BellSchedule {
                     continue; // dont need non-existent times
                 if(schedule.getSubjectNames()[i].toLowerCase().contains("conference")) // conference time removed for student's sake
                     continue;
+                if(schedule.getSubjectNames()[i].toLowerCase().contains("announcements")) // conference time removed for student's sake
+                    continue;
                 result.add(
                         new Subject(
                                 schedule.getSubjectNames()[i],
+                                abday,
                                 df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectStartTimes()[i]),
                                 df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
@@ -76,18 +83,21 @@ public class BellSchedule {
 
     public static class Subject {
         String name;
+        char abday;
         Date startTime;
         Date endTime;
 
-        public Subject(String name, Date start, Date end) {
+        public Subject(String name, char abday, Date start, Date end) {
             this.name = name;
+            this.abday = abday;
             startTime = start;
             endTime = end;
         }
-
         public String getName() {
             return name;
         }
+
+        public char getABDay() { return abday; }
 
         public Date getStartTime() {
             return startTime;

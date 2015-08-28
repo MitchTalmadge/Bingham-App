@@ -14,14 +14,14 @@ import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
+
+import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.isItAorBDay;
 
 public class CountdownCard extends Card {
 
@@ -42,34 +42,32 @@ public class CountdownCard extends Card {
     }
 
     public void refresh(final CalendarDog eventsFeed, final Fragment context, final CardViewNative cardHolder) {
-        final String FORMAT = "%02d hours %02d minutes %02d seconds";
-
         //DETERMINE TIME
         Calendar currentDateTime = Calendar.getInstance();
+        //DETERMINE A/B DAY
+        char abday = isItAorBDay(eventsFeed.getEvents(), currentDateTime);
 
         if (currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
             BellSchedule schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), currentDateTime);
             Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
             if (schedule != null) {
-                ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule);
+                ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, abday);
 
                 BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime.getTime(), timeTable);
                 ArrayList<Date> closestPotentialTimes = new ArrayList<>();
                 closestPotentialTimes.add(closest.getStartTime());
                 closestPotentialTimes.add(closest.getEndTime());
-                Date closestTime = CalendarDog.getNearestDate(closestPotentialTimes, currentDateTime.getTime());
-                new CountDownTimer(closestTime.getTime()-currentDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
-
+                Date closestTime = CalendarDog.getNearestDate(closestPotentialTimes, currentDateTime.getTime(), true);
+                new CountDownTimer(closestTime.getTime() - currentDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
                         timeRemaining.setText(CustomCountdownCardExpand.formatLongToReadableTime(millisUntilFinished));
                     }
-
                     public void onFinish() {
                         refresh(eventsFeed, context, cardHolder);
                     }
                 }.start();
-                currentPeriod.setText("To " + closest.getName());
+                currentPeriod.setText(formatCurrentPeriod(closest.getName(), closest.getABDay()));
                 cardHolder.setVisibility(View.VISIBLE);
                 cardHolder.refreshCard(this);
                 return;
@@ -108,4 +106,25 @@ public class CountdownCard extends Card {
         timeRemaining = ((TextView) parent.findViewById(R.id.timeRemaining));
         currentPeriod = ((TextView) parent.findViewById(R.id.currentPeriod));
     }
+
+    private String formatCurrentPeriod(String rawName, char abday) {
+        Log.i(MainActivity.LOG_NAME, "rawName: "+rawName);
+        if (rawName.equals("Announcements"))
+            rawName = "1st/5th Period";
+        if (rawName.contains("/")) {
+            String[] words = rawName.split(" "); // 1st/5th --- Period
+            String[] abdayLabels = words[0].split("/");
+            switch (abday) {
+                case BellSchedule.A_DAY:
+                    return "To " + abdayLabels[0] + " " + words[1];
+                case BellSchedule.B_DAY:
+                    return "To " + abdayLabels[1] + " " + words[1];
+                default:
+                    return "To " + rawName;
+            }
+        }
+        return "To " + rawName;
+    }
+
+
 }

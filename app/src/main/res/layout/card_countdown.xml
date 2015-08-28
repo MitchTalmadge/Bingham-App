@@ -14,7 +14,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textView"
             android:layout_marginBottom="8dp"
-            android:text="First Period"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="14sp" />
 
@@ -23,7 +22,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/currentPeriod"
-            android:text="30:00"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="24sp" />
 

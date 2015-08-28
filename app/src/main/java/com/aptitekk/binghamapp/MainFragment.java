@@ -4,7 +4,6 @@ package com.aptitekk.binghamapp;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,10 @@ import android.widget.TextView;
 import com.aptitekk.binghamapp.cards.CountdownCard;
 import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
+import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+
+import java.util.Date;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -32,8 +34,11 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
     CardViewNative countDownCardView;
     CustomCountdownCardExpand holidayCountDownCard;
 
-    Card latestNewsCard;
-    CardViewNative latestNewsCardView;
+
+    View latestNewsView;
+    TextView latestNews_title;
+    TextView latestNews_description;
+    TextView latestNews_pubDate;
 
     Card nextEventCard;
     CardViewNative nextEventCardView;
@@ -54,7 +59,7 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
         super.onActivityCreated(savedInstanceState);
 
         countDownCardView = (CardViewNative) getActivity().findViewById(R.id.countdowns);
-        latestNewsCardView= (CardViewNative) getActivity().findViewById(R.id.latestnews);
+        latestNewsView = getActivity().findViewById(R.id.latestnews);
         nextEventCardView = (CardViewNative) getActivity().findViewById(R.id.nextevent);
 
         ((MainActivity) getActivity()).addFeedListener(this);
@@ -62,21 +67,16 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
 
     @Override
     public void onNewsFeedDownloaded(final RSSNewsFeed newsFeed) {
-        this.latestNewsCard = new Card(getActivity(), R.layout.news_article);
+        latestNews_title = (TextView) latestNewsView.findViewById(R.id.title);
+        latestNews_description = (TextView) latestNewsView.findViewById(R.id.description);
+        latestNews_pubDate = (TextView) latestNewsView.findViewById(R.id.pubDate);
 
-        CardHeader latestNewsHeader = new CardHeader(getActivity());
-        latestNewsHeader.setTitle("Lastest Article");
-        latestNewsCard.addCardHeader(latestNewsHeader);
-        latestNewsCardView.setCard(this.latestNewsCard);
-
-        getView().findViewById(R.id.latestnews_progress_wheel).setVisibility(View.GONE);
-
-        ((TextView) latestNewsCardView.findViewById(R.id.title)).setText(newsFeed.getNewsArticles().get(0).getTitle());
-        ((TextView) latestNewsCardView.findViewById(R.id.description)).setText(newsFeed.getNewsArticles().get(0).getDescription());
-        ((TextView) latestNewsCardView.findViewById(R.id.pubDate)).setText(newsFeed.getNewsArticles().get(0).getPubDate());
-        latestNewsCard.setOnClickListener(new Card.OnCardClickListener() {
+        latestNews_title.setText(newsFeed.getNewsArticles().get(0).getTitle());
+        latestNews_description.setText(newsFeed.getNewsArticles().get(0).getDescription());
+        latestNews_pubDate.setText(newsFeed.getNewsArticles().get(0).getPubDate());
+        latestNewsView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(Card card, View view) {
+            public void onClick(View view) {
                 WebViewFragment webViewFragment = new WebViewFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("URL", newsFeed.getNewsArticles().get(0).getLink());
@@ -89,7 +89,6 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
                         .commit();
             }
         });
-        latestNewsCard.notifyDataSetChanged();
     }
 
     @Override
@@ -136,18 +135,20 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
 
         getView().findViewById(R.id.nextevent_progress_wheel).setVisibility(View.GONE);
 
-        nextEventCard = CalendarDog.makeCalendarCard(this, CalendarDog.getEventsForDay(eventsFeed.getEvents(), eventsFeed.getEvents().get(0).getDate(), true).get(0));
+        //find if event if has already happened today
+        CalendarEvent trueNextEvent = CalendarDog.getNextEvent(eventsFeed.getEvents(), new Date(), true);
+
+        nextEventCard = CalendarDog.makeCalendarCard(this, trueNextEvent);
         CardHeader nextEventHeader = new CardHeader(getActivity());
         nextEventHeader.setTitle("Next Event");
         nextEventCard.addCardHeader(nextEventHeader);
         nextEventCardView.setCard(nextEventCard);
 
-
     }
 
     @Override
     public boolean onBackPressed() {
-        if(!getChildFragmentManager().popBackStackImmediate())
+        if (!getChildFragmentManager().popBackStackImmediate())
             getFragmentManager().popBackStack();
         return false;
     }

@@ -36,21 +36,15 @@
                     android:progressDrawable="@drawable/circular_progress_bar" />
             </it.gmariotti.cardslib.library.view.CardViewNative>
 
-            <it.gmariotti.cardslib.library.view.CardViewNative
-                android:id="@+id/latestnews"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                card_view:cardUseCompatPadding="true">
+                android:text="Latest Article"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <ProgressBar
-                    android:id="@+id/latestnews_progress_wheel"
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:progressDrawable="@drawable/circular_progress_bar" />
-            </it.gmariotti.cardslib.library.view.CardViewNative>
-
+            <include
+                android:id="@+id/latestnews"
+                layout="@layout/news_article"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

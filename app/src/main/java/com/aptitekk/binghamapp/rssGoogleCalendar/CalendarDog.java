@@ -108,6 +108,16 @@ public class CalendarDog {
         }
     }
 
+    public List<CalendarEvent> getEvents() {
+        return this.events;
+    }
+
+    private void logDebug(String msg) {
+        if (verbose) {
+            Log.i(MainActivity.LOG_NAME, msg);
+        }
+    }
+
     private static String generateJSONURL() {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
@@ -191,15 +201,33 @@ public class CalendarDog {
         return minDate;
     }
 
-    public static Date getNearestDate(List<Date> dates, Date currentDate) {
+    public static Date getNearestDate(List<Date> dates, Date currentDate, boolean skipPastEvents) {
         long minDiff = -1, currentTime = currentDate.getTime();
         Date minDate = null;
         for (Date date : dates) {
-            if (currentTime > date.getTime()) {
-
+            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
                 continue;
             }
             long diff = Math.abs(currentTime - date.getTime());
+            if ((minDiff == -1) || (diff < minDiff)) {
+                minDiff = diff;
+                minDate = date;
+            }
+        }
+        return minDate;
+    }
+
+    public static CalendarEvent getNextEvent(List<CalendarEvent> events, Date currentDate, boolean excludeABDayLabel) {
+        long minDiff = -1, currentTime = currentDate.getTime();
+        CalendarEvent minDate = null;
+        for (CalendarEvent date : events) {
+            if (((date.getTitle().contains("A Day")) || (date.getTitle().contains("B Day"))) && excludeABDayLabel) {
+                continue;
+            }
+            if (currentTime > date.getDate().getTimeInMillis()) { // Skip any Dates that have already past
+                continue;
+            }
+            long diff = Math.abs(currentTime - date.getDate().getTimeInMillis());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
                 minDate = date;
@@ -214,6 +242,18 @@ public class CalendarDog {
                 return i;
         }
         return -1;
+    }
+
+    public static char isItAorBDay(List<CalendarEvent> sortedEvents, Calendar currentDateTime) {
+        for (CalendarEvent event : sortedEvents) {
+            if (CalendarEvent.eventMatchesDay(event, currentDateTime)) {
+                if (event.getTitle().contains("A Day"))
+                    return BellSchedule.A_DAY;
+                else if(event.getTitle().contains("B Day"))
+                    return BellSchedule.B_DAY;
+            }
+        }
+        return BellSchedule.NONE_DAY;
     }
 
     public static int findNextTargetByIndex(List<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
@@ -239,7 +279,7 @@ public class CalendarDog {
 
                 //DETERMINE MORNING/AFTERNOON
                 int timeOfDay = e.getDate().get(Calendar.HOUR_OF_DAY);
-                if((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
+                if ((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
                     return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[4], fragment.getResources().getStringArray(R.array.assemblyBellSchedule4));
                 } else if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
                     schedule = "Morning (" + schedule.replace("AM", "") + ")";
@@ -272,14 +312,10 @@ public class CalendarDog {
                 if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) { // Friday schedule
                     return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
                 } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
-                    BellSchedule regularDay = new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
-                    String rawEndDay = regularDay.getSubjectEndTimes()[regularDay.getSubjectEndTimes().length - 1];
                     try {
-                        Date endTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa").parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay);
-                        if (dateTime.getTime().after(endTime)) {
-                            endTime = null;
-                            rawEndDay = null;
-                            regularDay = null;
+                        if (!isSchoolInSession(new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0],
+                                                                fragment.getResources().getStringArray(R.array.regularBellSchedule0)),
+                                dateTime)) {
                             return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
                         }
                     } catch (ParseException e1) {
@@ -293,6 +329,15 @@ public class CalendarDog {
 
         }
         return null;
+    }
+
+    public static boolean isSchoolInSession(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
+        String rawEndDay = regularSchedule.getSubjectEndTimes()[regularSchedule.getSubjectEndTimes().length - 1];
+        Date endTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
+        if (dateTime.getTime().after(endTime)) {
+            return false;
+        }
+        return true;
     }
 
     public static ArrayList<CalendarEvent> getEventsForDay(List<CalendarEvent> events, Calendar dayToMatch) {
@@ -427,16 +472,6 @@ public class CalendarDog {
             return true;
         }
         return false;
-    }
-
-    public List<CalendarEvent> getEvents() {
-        return this.events;
-    }
-
-    private void logDebug(String msg) {
-        if (verbose) {
-            Log.i(MainActivity.LOG_NAME, msg);
-        }
     }
 
     private class FetchJSONTask extends AsyncTask<String, Void, JSONObject> {
