@@ -129,8 +129,8 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
 
         if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
                 || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
-            Log.v(LOG_NAME, "Feeds are out of date. Downloading Feeds...");
-            sharedPreferences.edit().putInt("lastFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
+            Log.v(LOG_NAME, "Events feed is out of date. Downloading events...");
+            sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
 
             downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
                     CalendarDog.FetchType.JSON);

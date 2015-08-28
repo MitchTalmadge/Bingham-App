@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -143,8 +142,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
 
         for (int i = 0; i < eventsFeed.getEvents().size(); i++) {
 
-            final int currentIteration = i;
-
             if (this.eventsFeed.getEvents().get(i).getTitle().equals("A Day") || this.eventsFeed.getEvents().get(i).getTitle().equals("B Day")) {
                 if (!(CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true).isEmpty())) {
                     sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime())
@@ -155,6 +152,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 for (CalendarEvent e : CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true)) {
                     Log.i(MainActivity.LOG_NAME, e.getTitle());
                 }
+
                 if (!CalendarDog.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {
                     sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime()), sectionOffsetIndex);
                 }
