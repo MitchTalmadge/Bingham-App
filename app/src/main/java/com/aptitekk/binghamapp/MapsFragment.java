@@ -34,6 +34,7 @@ import com.rey.material.app.SimpleDialog;
 import com.rey.material.widget.EditText;
 import com.rey.material.widget.FloatingActionButton;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -263,9 +264,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
     private void updateOverlays() {
         if (showFirstFloor) {
             if (firstFloorOverlay == null) {
-                Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_1);
-                BitmapFactory.Options o2 = new BitmapFactory.Options();
-                o2.inSampleSize = 1;
+                InputStream is = this.getResources().openRawResource(R.raw.map_floor_1);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                new BitmapFactory.Options().inSampleSize = 1;
                 BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
                 GroundOverlayOptions firstFloor = new GroundOverlayOptions()
                         .image(image)
@@ -275,9 +276,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
             }
         } else {
             if (secondFloorMainOverlay == null && secondFloorVocOverlay == null) {
-                Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2);
-                BitmapFactory.Options o2 = new BitmapFactory.Options();
-                o2.inSampleSize = 1;
+                InputStream is = this.getResources().openRawResource(R.raw.map_floor_2);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                new BitmapFactory.Options().inSampleSize = 1;
                 BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(bitmap);
                 GroundOverlayOptions secondFloor = new GroundOverlayOptions()
                         .image(image)
@@ -285,10 +286,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
                         .transparency(0.3f);
                 secondFloorMainOverlay = map.addGroundOverlay(secondFloor);
 
-                Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.map_floor_2_voc);
-                BitmapFactory.Options o = new BitmapFactory.Options();
-                o.inSampleSize = 1;
-                BitmapDescriptor image2 = BitmapDescriptorFactory.fromBitmap(bitmap2);
+                is = this.getResources().openRawResource(R.raw.map_floor_2_voc);
+                Bitmap bitmap_voc = BitmapFactory.decodeStream(is);
+                new BitmapFactory.Options().inSampleSize = 1;
+                BitmapDescriptor image2 = BitmapDescriptorFactory.fromBitmap(bitmap_voc);
                 GroundOverlayOptions secondFloor1 = new GroundOverlayOptions()
                         .image(image2)
                         .position(secondFloorVocPos, secondFloorVocWidth, secondFloorVocHeight)
