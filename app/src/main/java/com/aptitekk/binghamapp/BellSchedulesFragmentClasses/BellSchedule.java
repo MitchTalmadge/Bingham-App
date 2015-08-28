@@ -33,6 +33,8 @@ public class BellSchedule {
                     continue;
                 if((schedule.getSubjectStartTimes()[i].contains("--")) || (schedule.getSubjectEndTimes()[i].contains("--")))
                     continue; // dont need non-existent times
+                if(schedule.getSubjectNames()[i].toLowerCase().contains("conference")) // conference time removed for student's sake
+                    continue;
                 result.add(
                         new Subject(
                                 schedule.getSubjectNames()[i],

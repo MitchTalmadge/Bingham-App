@@ -50,6 +50,7 @@ public class CountdownCard extends Card {
         if (currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && currentDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
             BellSchedule schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), currentDateTime);
+            Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
             if (schedule != null) {
                 ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule);
 
@@ -61,7 +62,6 @@ public class CountdownCard extends Card {
                 new CountDownTimer(closestTime.getTime()-currentDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
 
                     public void onTick(long millisUntilFinished) {
-
                         timeRemaining.setText(CustomCountdownCardExpand.formatLongToReadableTime(millisUntilFinished));
                     }
 

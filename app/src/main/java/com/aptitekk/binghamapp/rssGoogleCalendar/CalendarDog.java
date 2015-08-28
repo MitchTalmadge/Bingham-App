@@ -195,6 +195,10 @@ public class CalendarDog {
         long minDiff = -1, currentTime = currentDate.getTime();
         Date minDate = null;
         for (Date date : dates) {
+            if (currentTime > date.getTime()) {
+
+                continue;
+            }
             long diff = Math.abs(currentTime - date.getTime());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
@@ -235,7 +239,9 @@ public class CalendarDog {
 
                 //DETERMINE MORNING/AFTERNOON
                 int timeOfDay = e.getDate().get(Calendar.HOUR_OF_DAY);
-                if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
+                if((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
+                    return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[4], fragment.getResources().getStringArray(R.array.assemblyBellSchedule4));
+                } else if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
                     schedule = "Morning (" + schedule.replace("AM", "") + ")";
                 } else if ((timeOfDay >= 12 && timeOfDay < 16) || schedule.contains("PM")) { // AFTERNOON
                     schedule = "Afternoon (" + schedule.replace("PM", "") + ")";
@@ -243,7 +249,7 @@ public class CalendarDog {
                     return null;
                 }
                 for (int i = 0; i < fragment.getResources().getStringArray(R.array.assemblyBellSchedules).length; i++) {
-                    if (fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {
+                    if (fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {// if string matches name
                         String[] scheduleTimeArray = null;
                         switch (i) {
                             case 0:
@@ -262,9 +268,25 @@ public class CalendarDog {
                         return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i], scheduleTimeArray);
                     }
                 }
-            } else if (e.getTitle().contains("A Day") || e.getTitle().contains("B Day")) {
-                if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+            } else if (e.getTitle().contains("A Day") || e.getTitle().contains("B Day")) { // Just a regular day
+                if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) { // Friday schedule
                     return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
+                } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
+                    BellSchedule regularDay = new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
+                    String rawEndDay = regularDay.getSubjectEndTimes()[regularDay.getSubjectEndTimes().length - 1];
+                    try {
+                        Date endTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa").parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay);
+                        if (dateTime.getTime().after(endTime)) {
+                            endTime = null;
+                            rawEndDay = null;
+                            regularDay = null;
+                            return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
+                        }
+                    } catch (ParseException e1) {
+                        e1.printStackTrace();
+                        Log.e(MainActivity.LOG_NAME, "Reverting to regular schedule");
+                    }
+
                 }
                 return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
             }
