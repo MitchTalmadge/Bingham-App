@@ -500,7 +500,6 @@ public class CalendarDog {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             buildFromJSONObject(jsonObject);
-            events = CalendarEvent.sort(events);
             try {
                 refresh.call();
             } catch (Exception e) {
@@ -557,6 +556,8 @@ public class CalendarDog {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        events = CalendarEvent.sort(events);
     }
 
     private class FetchICalTask extends AsyncTask<String, Integer, ICalendar> {
