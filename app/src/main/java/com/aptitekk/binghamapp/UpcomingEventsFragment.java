@@ -124,16 +124,6 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
         //Hide progress wheel
         getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-        /*//Show Recycler View
-        recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(llm);
-
-        RVAdapter adapter = new RVAdapter(eventsFeed.getEvents());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setVisibility(View.VISIBLE);*/
-
         //populate a list full of calendar card events
         ArrayList<Card> cards = new ArrayList<Card>();
         ArrayList<CardSection> sections = new ArrayList<>();
@@ -155,9 +145,11 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
                 for (CalendarEvent e : CalendarDog.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true)) {
                     Log.i(MainActivity.LOG_NAME, e.getTitle());
                 }
-                if (!CalendarDog.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {
-                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime()), sectionOffsetIndex);
-                }
+                try {
+                    if (!CalendarDog.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {
+                        sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime()), sectionOffsetIndex);
+                    }
+                } catch(ArrayIndexOutOfBoundsException ignored) {} // No events prior to
 
                 // The following section generates a card for the current event that we are iterating over.
                 cards.add(CalendarDog.makeCalendarCard(this, this.eventsFeed.getEvents().get(i)));
