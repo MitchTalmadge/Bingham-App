@@ -13,7 +13,9 @@ import android.widget.TextView;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssnewsfeed.NewsArticle;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
+import com.aptitekk.binghamapp.rssnewsfeed.newsFeeds.Announcements;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
     }
 
     @Override
-    public void onNewsFeedDownloaded(RSSNewsFeed newsFeed) {
+    public void onNewsFeedDownloaded(NewsFeed newsFeed) {
         populateNewsFeed(newsFeed);
     }
 
@@ -50,34 +52,37 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
     public void onEventsFeedDownloaded(CalendarDog eventFeed) {
     }
 
-    public void populateNewsFeed(RSSNewsFeed newsFeed) {
+    public void populateNewsFeed(NewsFeed newsFeed) {
 
-        //Hide progress wheel
-        getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
+        if(newsFeed instanceof Announcements) {
 
-        if (newsFeed.getNewsArticles().isEmpty()) {
-            //Show Website Down Fragment
-            MessageCardFragment messageCardFragment = new MessageCardFragment();
-            Bundle args = new Bundle();
-            args.putString("title", "Unable to retrieve news!");
-            args.putString("description", "Could not download news! Is the website down?");
-            messageCardFragment.setArguments(args);
+            //Hide progress wheel
+            getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);
 
-            getChildFragmentManager().beginTransaction()
-                    .add(R.id.fragmentSpaceRecycler, messageCardFragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .addToBackStack("messageCard")
-                    .commit();
-        } else {
-            //Show Recycler View
-            recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
-            recyclerView.setHasFixedSize(true);
-            LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-            recyclerView.setLayoutManager(llm);
+            if (newsFeed.getArticles().isEmpty()) {
+                //Show Website Down Fragment
+                MessageCardFragment messageCardFragment = new MessageCardFragment();
+                Bundle args = new Bundle();
+                args.putString("title", "Unable to retrieve news!");
+                args.putString("description", "Could not download news! Is the website down?");
+                messageCardFragment.setArguments(args);
 
-            RVAdapter adapter = new RVAdapter(newsFeed.getNewsArticles());
-            recyclerView.setAdapter(adapter);
-            recyclerView.setVisibility(View.VISIBLE);
+                getChildFragmentManager().beginTransaction()
+                        .add(R.id.fragmentSpaceRecycler, messageCardFragment)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .addToBackStack("messageCard")
+                        .commit();
+            } else {
+                //Show Recycler View
+                recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
+                recyclerView.setHasFixedSize(true);
+                LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+                recyclerView.setLayoutManager(llm);
+
+                RVAdapter adapter = new RVAdapter(newsFeed.getArticles());
+                recyclerView.setAdapter(adapter);
+                recyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 

@@ -16,12 +16,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,23 +34,20 @@ import java.util.Calendar;
 import java.util.ListIterator;
 import java.util.concurrent.Callable;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsFeedSizeListener {
+public class MainActivity extends AppCompatActivity implements RSSNewsFeedManager.NewsFeedSizeListener {
 
     public static final String LOG_NAME = "BinghamAppVerbose";
     public static final String PREF_NAME = "com.AptiTekk.BinghamApp";
 
-    public static RSSNewsFeed newsFeed;
+    public static RSSNewsFeedManager newsFeeds;
     public static CalendarDog eventsFeed;
 
-    private RSSNewsFeed downloadingNewsFeed;
     private CalendarDog downloadingEventsFeed;
 
     private ArrayList<FeedListener> feedListeners = new ArrayList<>();
@@ -79,13 +76,17 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
             getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
         }
 
+        // Set up news feed manager
+        newsFeeds = new RSSNewsFeedManager();
+
         // Download News & Events
         checkForNewsUpdates();
         checkForEventsUpdates();
     }
 
     public void checkForNewsUpdates() {
-        RSSNewsFeed.getNewsFeedSize(this);
+        for (NewsFeed newsFeed : newsFeeds.getNewsFeeds())
+            RSSNewsFeedManager.getNewsFeedSize(this, newsFeed);
     }
 
     public void checkForEventsUpdates() {
@@ -164,66 +165,68 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     }
 
 
+    public class NewsFeedRefreshCallable implements Callable<Void> {
+
+        NewsFeed newsFeed;
+        SharedPreferences sharedPreferences;
+        ArrayList<FeedListener> feedListeners;
+        int newsFeedSize;
+
+        public NewsFeedRefreshCallable(NewsFeed newsFeed,
+                                       SharedPreferences sharedPreferences,
+                                       ArrayList<FeedListener> feedListeners,
+                                       int newsFeedSize) {
+            this.newsFeed = newsFeed;
+            this.sharedPreferences = sharedPreferences;
+            this.feedListeners = feedListeners;
+            this.newsFeedSize = newsFeedSize;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            for (FeedListener listener : feedListeners) {
+                if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
+                    listener.onNewsFeedDownloaded(newsFeed);
+                }
+            }
+            // Save the feed to file...
+            try {
+                Log.v(LOG_NAME, "Saving news feed to file...");
+
+                sharedPreferences.edit().putInt(newsFeed.getPreferencesTag(), newsFeedSize).apply();
+
+                FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), newsFeed.getFileName()));
+                Document document = newsFeed.getDocument();
+
+                //Converts the Document into a file
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                Transformer transformer = transformerFactory.newTransformer();
+                DOMSource source = new DOMSource(document);
+                StreamResult result = new StreamResult(fileOutputStream);
+                transformer.transform(source, result);
+
+                fileOutputStream.close();
+            } catch (IOException | TransformerException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
     @Override
-    public void onGetNewsFeedSize(final int newsFeedSize) {
+    public void onGetNewsFeedSize(final int newsFeedSize, NewsFeed newsFeed) {
         final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        int lastNewsFeedUpdateSize = sharedPreferences.getInt("lastNewsFeedUpdateSize", 0);
+        int lastNewsFeedUpdateSize = sharedPreferences.getInt(newsFeed.getPreferencesTag(), 0);
 
         Log.v(LOG_NAME, "lastNewsFeedUpdateSize: " + lastNewsFeedUpdateSize);
         Log.v(LOG_NAME, "News Feed Size on Web: " + newsFeedSize);
 
-        final Callable<Void> newsFeedCallable = new Callable<Void>() {
-            public Void call() {
-                newsFeed = downloadingNewsFeed;
-                for (FeedListener listener : feedListeners) {
-                    if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
-                        listener.onNewsFeedDownloaded(newsFeed);
-                    }
-                }
-                // Save the feed to file...
-                try {
-                    Log.v(LOG_NAME, "Saving news feed to file...");
 
-                    sharedPreferences.edit().putInt("lastNewsFeedUpdateSize", newsFeedSize).apply();
+        final Callable<Void> newsFeedCallable = new NewsFeedRefreshCallable(newsFeed,
+                sharedPreferences, feedListeners, newsFeedSize);
 
-                    FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "news.feed"));
-                    Document document = newsFeed.getDocument();
-
-                    //Converts the Document into a file
-                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                    Transformer transformer = transformerFactory.newTransformer();
-                    DOMSource source = new DOMSource(document);
-                    StreamResult result = new StreamResult(fileOutputStream);
-                    transformer.transform(source, result);
-
-                    fileOutputStream.close();
-                } catch (IOException | TransformerException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-
-        if (lastNewsFeedUpdateSize == 0 || newsFeedSize != lastNewsFeedUpdateSize) { // If we have never downloaded the feed before or the feed on the website is a different size...
-            Log.v(LOG_NAME, "News feed is out of date. Downloading Feed...");
-
-            downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
-        } else { // We already have the latest news... Lets retrieve the file and create a feed from it.
-            File newsFeedFile = new File(getFilesDir(), "news.feed");
-
-            if (newsFeedFile.exists()) {
-                Log.v(LOG_NAME, "Restoring news feed from file...");
-                try {
-                    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
-                    newsFeed = new RSSNewsFeed(document);
-                } catch (SAXException | IOException | ParserConfigurationException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.v(LOG_NAME, "Could not restore news feed from file.");
-                downloadingNewsFeed = new RSSNewsFeed(newsFeedCallable);
-            }
-        }
+        newsFeeds.determineRetrieval(newsFeed, lastNewsFeedUpdateSize,
+                newsFeedSize, newsFeedCallable, getFilesDir());
     }
 
     @Override
@@ -308,8 +311,9 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
             this.feedListeners.add(listener);
 
         // If the listener was late to the party, send them what we already got
-        if (newsFeed != null) {
-            listener.onNewsFeedDownloaded(newsFeed);
+        for(NewsFeed newsFeed : newsFeeds.getNewsFeeds()) {
+            if(newsFeed.isReady())
+                listener.onNewsFeedDownloaded(newsFeed);
         }
 
         if (eventsFeed != null) {
@@ -318,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeed.NewsF
     }
 
     public interface FeedListener {
-        void onNewsFeedDownloaded(RSSNewsFeed newsFeed);
+        void onNewsFeedDownloaded(NewsFeed newsFeed);
 
         void onEventsFeedDownloaded(CalendarDog eventsFeed);
     }

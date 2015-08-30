@@ -17,7 +17,8 @@ import android.view.ViewGroup;
 
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
 import com.rey.material.app.DatePickerDialog;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
@@ -182,7 +183,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Fee
     }
 
     @Override
-    public void onNewsFeedDownloaded(RSSNewsFeed newsFeed) {
+    public void onNewsFeedDownloaded(NewsFeed newsFeed) {
     }
 
     @Override

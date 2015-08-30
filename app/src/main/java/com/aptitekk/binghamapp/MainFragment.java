@@ -13,7 +13,10 @@ import com.aptitekk.binghamapp.cards.CountdownCard;
 import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
+import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
+import com.aptitekk.binghamapp.rssnewsfeed.newsFeeds.Announcements;
+import com.aptitekk.binghamapp.rssnewsfeed.newsFeeds.Prospector;
 
 import java.util.Date;
 
@@ -66,29 +69,32 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
     }
 
     @Override
-    public void onNewsFeedDownloaded(final RSSNewsFeed newsFeed) {
+    public void onNewsFeedDownloaded(final NewsFeed newsFeed) {
         latestNews_title = (TextView) latestNewsView.findViewById(R.id.title);
         latestNews_description = (TextView) latestNewsView.findViewById(R.id.description);
         latestNews_pubDate = (TextView) latestNewsView.findViewById(R.id.pubDate);
+        
+        if(newsFeed instanceof Announcements) {
 
-        latestNews_title.setText(newsFeed.getNewsArticles().get(0).getTitle());
-        latestNews_description.setText(newsFeed.getNewsArticles().get(0).getDescription());
-        latestNews_pubDate.setText(newsFeed.getNewsArticles().get(0).getPubDate());
-        latestNewsView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                WebViewFragment webViewFragment = new WebViewFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString("URL", newsFeed.getNewsArticles().get(0).getLink());
-                webViewFragment.setArguments(bundle);
+            latestNews_title.setText(newsFeed.getArticles().get(0).getTitle());
+            latestNews_description.setText(newsFeed.getArticles().get(0).getDescription());
+            latestNews_pubDate.setText(newsFeed.getArticles().get(0).getPubDate());
+            latestNewsView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    WebViewFragment webViewFragment = new WebViewFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("URL", newsFeed.getArticles().get(0).getLink());
+                    webViewFragment.setArguments(bundle);
 
-                getChildFragmentManager().beginTransaction()
-                        .add(R.id.calendar_web_view_container, webViewFragment)
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .addToBackStack("main")
-                        .commit();
-            }
-        });
+                    getChildFragmentManager().beginTransaction()
+                            .add(R.id.calendar_web_view_container, webViewFragment)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                            .addToBackStack("main")
+                            .commit();
+                }
+            });
+        }
     }
 
     @Override

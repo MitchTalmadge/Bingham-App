@@ -27,6 +27,15 @@ public class BellSchedule {
     private String[] subjectEndTimes;
     private int[] subjectLengths;
 
+    public static char toggleABDay(char abDay) {
+        if(abDay == A_DAY) {
+            return B_DAY;
+        } else if(abDay == B_DAY) {
+            return A_DAY;
+        }
+        return NONE_DAY;
+    }
+
     public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday) {
         Date today = new Date();
         DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
