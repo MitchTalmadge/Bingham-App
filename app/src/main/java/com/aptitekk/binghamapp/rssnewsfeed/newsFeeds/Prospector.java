@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
  */
 public class Prospector extends NewsFeed {
 
-    final String name = "Bingham Prospector";
+    final String name = "Prospector";
     final String url = "http://binghamprospector.org/feed/";
 
     public Prospector(Callable<Void> refresh) {

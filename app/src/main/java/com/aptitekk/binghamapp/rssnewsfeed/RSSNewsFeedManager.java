@@ -66,7 +66,7 @@ public class RSSNewsFeedManager {
                 e.printStackTrace();
             }
         } else { // We already have the latest news... Lets retrieve the file and create a feed from it.
-            File newsFeedFile = new File(directory, "news.feed");
+            File newsFeedFile = new File(directory, newsFeed.getFileName());
 
             if (newsFeedFile.exists()) {
                 Log.v(MainActivity.LOG_NAME, "Restoring news feed from file...");

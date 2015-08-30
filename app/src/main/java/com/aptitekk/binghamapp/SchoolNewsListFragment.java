@@ -25,8 +25,14 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
 
     private ArticleListener articleListener;
 
+    private Class<? extends NewsFeed> newsFeedClass = Announcements.class;
+
     public SchoolNewsListFragment() {
         // Required empty public constructor
+    }
+
+    public void setFeed(Class<? extends NewsFeed> newsFeedClass) {
+        this.newsFeedClass = newsFeedClass;
     }
 
     @Override
@@ -54,7 +60,7 @@ public class SchoolNewsListFragment extends Fragment implements MainActivity.Fee
 
     public void populateNewsFeed(NewsFeed newsFeed) {
 
-        if(newsFeed instanceof Announcements) {
+        if(newsFeedClass.isInstance(newsFeed)) {
 
             //Hide progress wheel
             getView().findViewById(R.id.progress_wheel).setVisibility(View.GONE);

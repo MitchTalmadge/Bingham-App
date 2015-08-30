@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  */
 public class Announcements extends NewsFeed{
 
-    final String name = "Bingham Announcements";
+    final String name = "Announcements";
     final String url = "http://www.binghamminers.org/apps/news/news_rss.jsp?unused=" + Calendar.getInstance().get(Calendar.MILLISECOND);
 
     public Announcements(Callable<Void> refresh) {
