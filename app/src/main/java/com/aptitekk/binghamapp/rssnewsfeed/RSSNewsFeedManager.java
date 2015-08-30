@@ -91,17 +91,6 @@ public class RSSNewsFeedManager {
     public NewsFeed[] getNewsFeeds() {
         return newsFeeds;
     }
-    public List<NewsArticle> getNewsArticles(NewsFeed feed) {
-        return feed.getArticles();
-    }
-    public NewsFeed getNewsFeedByName(String name) {
-        for(NewsFeed feed : newsFeeds) {
-            if(feed.getName().contains(name)) {
-                return feed;
-            }
-        }
-        return null;
-    }
 
     /**
      * Gets the size of the news feed on the web.
