@@ -52,12 +52,12 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         super.onViewCreated(view, savedInstanceState);
 
         CharSequence[] titles = new CharSequence[MainActivity.newsFeeds.getNewsFeeds().length];
-        for(int i = 0; i<MainActivity.newsFeeds.getNewsFeeds().length; i++) {
+        for (int i = 0; i < MainActivity.newsFeeds.getNewsFeeds().length; i++) {
             titles[i] = MainActivity.newsFeeds.getNewsFeeds()[i].getName();
         }
 
         // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles fot the Tabs and Number Of Tabs.
-        adapter =  new ViewPagerAdapter(getFragmentManager(), titles);
+        adapter = new ViewPagerAdapter(getFragmentManager(), titles);
 
         // Assigning ViewPager View and setting the adapter
         pager = (ViewPager) view.findViewById(R.id.pager);
@@ -100,7 +100,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
 
     @Override
     public boolean onBackPressed() {
-        if(!getChildFragmentManager().popBackStackImmediate())
+        if (!getChildFragmentManager().popBackStackImmediate())
             getFragmentManager().popBackStack();
         return false;
     }
@@ -112,7 +112,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
 
 
         // Build a Constructor and assign the passed Values to appropriate values in the class
-        public ViewPagerAdapter(FragmentManager fm,CharSequence mTitles[]) {
+        public ViewPagerAdapter(FragmentManager fm, CharSequence mTitles[]) {
             super(fm);
 
             this.Titles = mTitles;
@@ -124,13 +124,12 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         @Override
         public Fragment getItem(int position) {
 
-            if(position == 0) // if the position is 0 we are returning the First tab
+            if (position == 0) // if the position is 0 we are returning the First tab
             {
                 SchoolNewsListFragment announcements = new SchoolNewsListFragment();
                 announcements.setFeed(Announcements.class);
                 return announcements;
-            }
-            else             // As we are having 2 tabs if the position is now 0 it must be 1 so we are returning second tab
+            } else             // As we are having 2 tabs if the position is now 0 it must be 1 so we are returning second tab
             {
                 SchoolNewsListFragment prospector = new SchoolNewsListFragment();
                 prospector.setFeed(Prospector.class);
