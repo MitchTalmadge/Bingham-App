@@ -36,7 +36,7 @@ public class BellSchedule {
         return NONE_DAY;
     }
 
-    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday, Date day) {
+    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday, Date dayToAssign) {
         DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
@@ -53,8 +53,8 @@ public class BellSchedule {
                         new Subject(
                                 schedule.getSubjectNames()[i],
                                 abday,
-                                df.parse(SimpleDateFormat.getDateInstance().format(day) + " " +schedule.getSubjectStartTimes()[i]),
-                                df.parse(SimpleDateFormat.getDateInstance().format(day) + " " +schedule.getSubjectEndTimes()[i])));
+                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " +schedule.getSubjectStartTimes()[i]),
+                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " +schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
                 e.printStackTrace();
                 continue;
@@ -63,7 +63,7 @@ public class BellSchedule {
         return result;
     }
 
-    public static Subject getNextSubject(Date currentTime, List<Subject> subjects) {
+    public static Subject getNextSubject(Date currentTime, List<Subject> subjects, boolean ignorePastSubjects) {
         long minDiff = -1;
         Subject minDate = null;
         for (Subject subject : subjects) {
@@ -71,12 +71,33 @@ public class BellSchedule {
             dates.add(subject.getStartTime());
             dates.add(subject.getEndTime());
             for (Date date : dates) {
-                if(currentTime.getTime() > date.getTime()) {
+                if((currentTime.getTime() > date.getTime()) && ignorePastSubjects) {
                     continue;
                 }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
                 if ((minDiff == -1) || (diff < minDiff)) {
                     Log.i(MainActivity.LOG_NAME, "Next determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
+                    minDiff = diff;
+                    minDate = subject;
+                }
+            }
+        }
+        return minDate;
+    }
+
+    public static Subject getPreviousSubject(Date currentTime, List<Subject> subjects) {
+        long minDiff = -1;
+        Subject minDate = null;
+        for (Subject subject : subjects) {
+            ArrayList<Date> dates = new ArrayList<>();
+            dates.add(subject.getStartTime());
+            dates.add(subject.getEndTime());
+            for (Date date : dates) {
+                if((currentTime.getTime() < date.getTime())) {
+                    continue;
+                }
+                long diff = Math.abs(currentTime.getTime() - date.getTime());
+                if ((minDiff == -1) || (diff < minDiff)) {
                     minDiff = diff;
                     minDate = subject;
                 }

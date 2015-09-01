@@ -224,6 +224,23 @@ public class CalendarDog {
         return minDate;
     }
 
+    public static Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
+        long minDiff = -1, currentTime = currentDate.getTime();
+        Date minDate = null;
+        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
+        for (Date date : times) {
+            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
+                continue;
+            }
+            long diff = Math.abs(currentTime - date.getTime());
+            if ((minDiff == -1) || (diff < minDiff)) {
+                minDiff = diff;
+                minDate = date;
+            }
+        }
+        return minDate;
+    }
+
     public static Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents, boolean endTimePointer) {
         long minDiff = -1, currentTime = currentDate.getTime();
         Date minDate = null;
@@ -342,7 +359,7 @@ public class CalendarDog {
                     return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
                 } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
                     try {
-                        if (!isSchoolInSession(new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0],
+                        if (!hasSchoolEndedForDay(new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0],
                                         fragment.getResources().getStringArray(R.array.regularBellSchedule0)),
                                 dateTime)) {
                             return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
@@ -360,8 +377,8 @@ public class CalendarDog {
         return null;
     }
 
-    public static boolean isSchoolInSession(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
-        String rawEndDay = regularSchedule.getSubjectEndTimes()[regularSchedule.getSubjectEndTimes().length - 1];
+    public static boolean hasSchoolEndedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
+        String rawEndDay = regularSchedule.getSubjectEndTimes()[regularSchedule.getSubjectEndTimes().length - 1]; //GRAB END TIME
         Date endTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
         if (dateTime.getTime().after(endTime)) {
             return false;

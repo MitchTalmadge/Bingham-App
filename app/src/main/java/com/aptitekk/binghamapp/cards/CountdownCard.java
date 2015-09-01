@@ -25,7 +25,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.isItAorBDay;
-import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.isSchoolInSession;
+import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.hasSchoolEndedForDay;
 
 public class CountdownCard extends Card {
 
@@ -48,7 +48,10 @@ public class CountdownCard extends Card {
         public String getValue() {
             return value;
         }
-        public String getImageUrl() { return image; }
+
+        public String getImageUrl() {
+            return image;
+        }
     }
 
     TextView timeRemaining;
@@ -83,9 +86,10 @@ public class CountdownCard extends Card {
         if (targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
             BellSchedule schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), targetDateTime);
+            BellSchedule todaySchedule = schedule;
             // IS SCHOOL OUT THOUGH?
             try {
-                if (!isSchoolInSession(schedule, targetDateTime)) {
+                if (!hasSchoolEndedForDay(schedule, targetDateTime)) {
                     Calendar tomorrow = targetDateTime;
                     tomorrow.add(Calendar.DATE, 1);
                     schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), tomorrow);
@@ -99,12 +103,26 @@ public class CountdownCard extends Card {
             Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
             if (schedule != null) {
                 ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, abday, targetDateTime.getTime());
-                BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable);
+                BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable, true);
                 final Date closestTime = CalendarDog.getNearestDateBySubject(closest, currentDateTime, true, isTimeEndTime);
+
+                Date closestPastTime;
+                if (tomorrowClosest) {
+                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(todaySchedule,
+                            abday, Calendar.getInstance().getTime()));
+                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                } else {
+                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, timeTable);
+                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                }
+                final Date finalClosestPastTime = closestPastTime;
                 new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
-                        progress.setProgress((int) (((closestTime.getTime() - currentDateTime.getTime() - millisUntilFinished)
-                                / (closestTime.getTime() - currentDateTime.getTime()))*100));
+                        long top = (closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
+                        long bottom = (closestTime.getTime() - finalClosestPastTime.getTime());
+                        int percent = (int) Math.round(((double) top / bottom)*100);
+                        Log.i(MainActivity.LOG_NAME, top + "/" + bottom + " *100 = " + percent + "%");
+                        progress.setProgress(percent);
                         timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
                     }
 
@@ -180,8 +198,8 @@ public class CountdownCard extends Card {
         if (millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
         }
-        long weeks = (millis / (1000*60*60*24*7));
-        millis -= TimeUnit.DAYS.toMillis(weeks*7);
+        long weeks = (millis / (1000 * 60 * 60 * 24 * 7));
+        millis -= TimeUnit.DAYS.toMillis(weeks * 7);
         long days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
@@ -193,22 +211,22 @@ public class CountdownCard extends Card {
         StringBuilder sb = new StringBuilder(64);
         if (weeks > 0) {
             sb.append(weeks);
-            sb.append(" week" +((weeks == 1) ? "": "s")+" ");
+            sb.append(" week" + ((weeks == 1) ? "" : "s") + " ");
         }
         if (days > 0 || (days == 0 && weeks > 0)) {
             sb.append(days);
-            sb.append(" day" +((days == 1) ? "": "s")+" ");
+            sb.append(" day" + ((days == 1) ? "" : "s") + " ");
         }
         if (hours > 0 || (hours == 0 && days > 0)) {
             sb.append(hours);
-            sb.append(" hour" +((hours == 1) ? "": "s")+" ");
+            sb.append(" hour" + ((hours == 1) ? "" : "s") + " ");
         }
-        if (minutes > 0 || (minutes == 0 && hours >0)) {
+        if (minutes > 0 || (minutes == 0 && hours > 0)) {
             sb.append(minutes);
-            sb.append(" minute" +((minutes == 1) ? "": "s")+" ");
+            sb.append(" minute" + ((minutes == 1) ? "" : "s") + " ");
         }
         sb.append(seconds);
-        sb.append(" second" +((seconds == 1) ? "": "s"));
+        sb.append(" second" + ((seconds == 1) ? "" : "s"));
 
         return (sb.toString());
     }
