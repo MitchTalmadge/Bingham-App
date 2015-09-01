@@ -104,7 +104,7 @@ public class CountdownCard extends Card {
                 new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
                         progress.setProgress((int) (((closestTime.getTime() - currentDateTime.getTime() - millisUntilFinished)
-                                / (closestTime.getTime() - currentDateTime.getTime())*100)));
+                                / (closestTime.getTime() - currentDateTime.getTime()))*100));
                         timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
                     }
 
@@ -113,7 +113,7 @@ public class CountdownCard extends Card {
                     }
                 }.start();
                 currentPeriod.setText(formatCurrentPeriod(closest.getName(), closest.getABDay(), isTimeEndTime, tomorrowClosest));
-                abDayLabel.setText(abday);
+                abDayLabel.setText(String.valueOf(abday));
                 cardHolder.setVisibility(View.VISIBLE);
                 cardHolder.refreshCard(this);
                 return;
@@ -138,7 +138,7 @@ public class CountdownCard extends Card {
                 }
             }.start();
             currentPeriod.setText("To Next " + nextABDay.getTitle());
-            abDayLabel.setText(abday);
+            abDayLabel.setText(String.valueOf(abday));
         } catch (ArrayIndexOutOfBoundsException e) {
             abDayLabel.setText(":(");
             currentPeriod.setText("Check if you can see the calendar events!");
