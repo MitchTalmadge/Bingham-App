@@ -47,6 +47,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+
+        <receiver android:name=".Widget.CountdownWidgetProvider">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"></action>
+            </intent-filter>
+
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_countdown_info"></meta-data>
+
+        </receiver>
     </application>
 
 </manifest>

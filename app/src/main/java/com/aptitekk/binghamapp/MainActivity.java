@@ -96,9 +96,6 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
         int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
         int lastEventsFeedUpdateMonth = sharedPreferences.getInt("lastEventsFeedUpdateMonth", 0);
 
-        Log.v(LOG_NAME, "lastEventsFeedUpdateDay: " + lastEventsFeedUpdateDay);
-        Log.v(LOG_NAME, "lastEventsFeedUpdateMonth: " + lastEventsFeedUpdateMonth);
-
         final Callable<Void> eventsFeedCallable = new Callable<Void>() {
             public Void call() {
                 eventsFeed = downloadingEventsFeed;
@@ -128,40 +125,8 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
             }
         };
 
-        if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
-            Log.v(LOG_NAME, "Events feed is out of date. Downloading events...");
-            sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
-
-            downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
-                    CalendarDog.FetchType.JSON);
-        } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
-            File eventsFeedFile = new File(getFilesDir(), "events.feed");
-
-            if (eventsFeedFile.exists()) {
-                Log.v(LOG_NAME, "Restoring events feed from file...");
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(eventsFeedFile));
-                    String line;
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String ls = System.getProperty("line.separator");
-
-                    while ((line = reader.readLine()) != null) {
-                        stringBuilder.append(line);
-                        stringBuilder.append(ls);
-                    }
-
-                    JSONObject jsonObject = new JSONObject(stringBuilder.toString());
-                    eventsFeed = new CalendarDog(jsonObject);
-                } catch (JSONException | IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.v(LOG_NAME, "Could not restore events feed from file.");
-                downloadingEventsFeed = new CalendarDog(eventsFeedCallable,
-                        CalendarDog.FetchType.JSON);
-            }
-        }
+        eventsFeed = CalendarDog.determineRetrieval(sharedPreferences, lastEventsFeedUpdateDay, lastEventsFeedUpdateMonth,
+                eventsFeedCallable, getFilesDir());
     }
 
 
@@ -316,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
                 listener.onNewsFeedDownloaded(newsFeed);
         }
 
-        if (eventsFeed != null) {
+        if (eventsFeed.isReady()) {
             listener.onEventsFeedDownloaded(eventsFeed);
         }
     }

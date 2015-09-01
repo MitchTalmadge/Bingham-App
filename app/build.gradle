@@ -34,4 +34,5 @@ dependencies {
     compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.1.0'
     compile 'com.android.support:support-v4:22.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.github.lzyzsd:circleprogress:1.1.0@aar'
 }

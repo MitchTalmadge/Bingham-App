@@ -1,6 +1,7 @@
 package com.aptitekk.binghamapp.rssGoogleCalendar;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -15,7 +16,7 @@ import com.aptitekk.binghamapp.BellSchedulesFragmentClasses.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.WebViewFragment;
-import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
+import com.aptitekk.binghamapp.cards.CountdownCard;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -28,6 +29,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -83,6 +86,8 @@ public class CalendarDog {
     public final static String BINGHAM_GOOGLE_CALENDAR_XML = "https://www.google.com/calendar/feeds/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic";
     public final static String BINGHAM_GOOGLE_CALENDAR_ICAL = "https://www.google.com/calendar/ical/jordandistrict.org_o4d9atn49tbcvmc29451bailf0%40group.calendar.google.com/public/basic.ics";
 
+    boolean ready = false;
+
     public CalendarDog(Callable<Void> refresh, FetchType type) {
         BINGHAM_GOOGLE_CALENDAR = generateJSONURL();
         Log.i(MainActivity.LOG_NAME, "Populating Calendar...\n");
@@ -111,6 +116,8 @@ public class CalendarDog {
     public List<CalendarEvent> getEvents() {
         return this.events;
     }
+
+    public boolean isReady() { return this.ready; }
 
     private void logDebug(String msg) {
         if (verbose) {
@@ -217,6 +224,28 @@ public class CalendarDog {
         return minDate;
     }
 
+    public static Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents, boolean endTimePointer) {
+        long minDiff = -1, currentTime = currentDate.getTime();
+        Date minDate = null;
+        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
+        for (Date date : times) {
+            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
+                continue;
+            }
+            long diff = Math.abs(currentTime - date.getTime());
+            if ((minDiff == -1) || (diff < minDiff)) {
+                minDiff = diff;
+                minDate = date;
+
+                if(date.equals(times[1]))
+                    endTimePointer = true;
+                else
+                    endTimePointer = false;
+            }
+        }
+        return minDate;
+    }
+
     public static CalendarEvent getNextEvent(List<CalendarEvent> events, Date currentDate, boolean excludeABDayLabel) {
         long minDiff = -1, currentTime = currentDate.getTime();
         CalendarEvent minDate = null;
@@ -249,14 +278,14 @@ public class CalendarDog {
             if (CalendarEvent.eventMatchesDay(event, currentDateTime)) {
                 if (event.getTitle().contains("A Day"))
                     return BellSchedule.A_DAY;
-                else if(event.getTitle().contains("B Day"))
+                else if (event.getTitle().contains("B Day"))
                     return BellSchedule.B_DAY;
             }
         }
         return BellSchedule.NONE_DAY;
     }
 
-    public static int findNextTargetByIndex(List<CalendarEvent> events, CustomCountdownCardExpand.CountdownTarget target) {
+    public static int findNextTargetByIndex(List<CalendarEvent> events, CountdownCard.CountdownTarget target) {
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getTitle().toLowerCase().contains(target.getValue()))
                 return i;
@@ -314,7 +343,7 @@ public class CalendarDog {
                 } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
                     try {
                         if (!isSchoolInSession(new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0],
-                                                                fragment.getResources().getStringArray(R.array.regularBellSchedule0)),
+                                        fragment.getResources().getStringArray(R.array.regularBellSchedule0)),
                                 dateTime)) {
                             return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
                         }
@@ -423,7 +452,7 @@ public class CalendarDog {
 
         String imageUrl = "garbageurl.blah";
 
-        for (CustomCountdownCardExpand.CountdownTarget target : CustomCountdownCardExpand.CountdownTarget.values()) {
+        for (CountdownCard.CountdownTarget target : CountdownCard.CountdownTarget.values()) {
             if (target.getImageUrl().equals("")) continue;
             if (event.getTitle().toLowerCase().contains(target.getValue())) {
                 imageUrl = target.getImageUrl();
@@ -472,6 +501,53 @@ public class CalendarDog {
             return true;
         }
         return false;
+    }
+
+    public static CalendarDog determineRetrieval(SharedPreferences sharedPreferences,
+                                                   int lastEventsFeedUpdateDay,
+                                                   int lastEventsFeedUpdateMonth, Callable<Void> eventsFeedCallable,
+                                                   File directory) {
+
+
+        Log.v(MainActivity.LOG_NAME, "lastEventsFeedUpdateDay: " + lastEventsFeedUpdateDay);
+        Log.v(MainActivity.LOG_NAME, "lastEventsFeedUpdateMonth: " + lastEventsFeedUpdateMonth);
+
+
+        if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
+            Log.v(MainActivity.LOG_NAME, "Events feed is out of date. Downloading events...");
+            sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
+
+            return new CalendarDog(eventsFeedCallable,
+                    CalendarDog.FetchType.JSON);
+        } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
+            File eventsFeedFile = new File(directory, "events.feed");
+
+            if (eventsFeedFile.exists()) {
+                Log.v(MainActivity.LOG_NAME, "Restoring events feed from file...");
+                try {
+                    BufferedReader reader = new BufferedReader(new FileReader(eventsFeedFile));
+                    String line;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String ls = System.getProperty("line.separator");
+
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                        stringBuilder.append(ls);
+                    }
+
+                    JSONObject jsonObject = new JSONObject(stringBuilder.toString());
+                    return new CalendarDog(jsonObject);
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.v(MainActivity.LOG_NAME, "Could not restore events feed from file.");
+                return new CalendarDog(eventsFeedCallable,
+                        CalendarDog.FetchType.JSON);
+            }
+        }
+        return null;
     }
 
     private class FetchJSONTask extends AsyncTask<String, Void, JSONObject> {
@@ -558,8 +634,10 @@ public class CalendarDog {
         }
 
         events = CalendarEvent.sort(events);
+        ready = true;
     }
 
+    @Deprecated
     private class FetchICalTask extends AsyncTask<String, Integer, ICalendar> {
 
         int percentProgress;
@@ -648,6 +726,7 @@ public class CalendarDog {
         }
     }
 
+    @Deprecated
     private class FetchXMLTask extends AsyncTask<String, Void, Document> {
 
         @Override

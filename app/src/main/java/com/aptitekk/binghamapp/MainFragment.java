@@ -10,13 +10,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.aptitekk.binghamapp.cards.CountdownCard;
-import com.aptitekk.binghamapp.cards.CustomCountdownCardExpand;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
 import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
 import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
 import com.aptitekk.binghamapp.rssnewsfeed.newsFeeds.Announcements;
-import com.aptitekk.binghamapp.rssnewsfeed.newsFeeds.Prospector;
 
 import java.util.Date;
 
@@ -35,7 +32,6 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
 
     CountdownCard baseCountDownCard;
     CardViewNative countDownCardView;
-    CustomCountdownCardExpand holidayCountDownCard;
 
 
     View latestNewsView;
@@ -113,11 +109,8 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
         //Add Header to card
         baseCountDownCard.addCardHeader(header);
 
-        holidayCountDownCard = new CustomCountdownCardExpand(getActivity(), CustomCountdownCardExpand.CountdownTarget.HOLIDAY);
 
         getView().findViewById(R.id.countdowns_progress_wheel).setVisibility(View.GONE);
-
-        baseCountDownCard.addCardExpand(holidayCountDownCard);
 
         baseCountDownCard.setOnClickListener(new Card.OnCardClickListener() {
             @Override
@@ -133,7 +126,6 @@ public class MainFragment extends Fragment implements MainActivity.FeedListener,
         baseCountDownCard.setViewToClickToExpand(viewToClickToExpand);
 
         baseCountDownCard.refresh(this.eventsFeed, this, countDownCardView);
-        holidayCountDownCard.refresh(this.eventsFeed, this, countDownCardView);
 
         baseCountDownCard.notifyDataSetChanged();
 

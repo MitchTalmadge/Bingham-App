@@ -36,8 +36,7 @@ public class BellSchedule {
         return NONE_DAY;
     }
 
-    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday) {
-        Date today = new Date();
+    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday, Date day) {
         DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
@@ -54,8 +53,8 @@ public class BellSchedule {
                         new Subject(
                                 schedule.getSubjectNames()[i],
                                 abday,
-                                df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectStartTimes()[i]),
-                                df.parse(SimpleDateFormat.getDateInstance().format(today) + " " +schedule.getSubjectEndTimes()[i])));
+                                df.parse(SimpleDateFormat.getDateInstance().format(day) + " " +schedule.getSubjectStartTimes()[i]),
+                                df.parse(SimpleDateFormat.getDateInstance().format(day) + " " +schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
                 e.printStackTrace();
                 continue;
@@ -71,10 +70,6 @@ public class BellSchedule {
             ArrayList<Date> dates = new ArrayList<>();
             dates.add(subject.getStartTime());
             dates.add(subject.getEndTime());
-            Date tomorrowStart = subject.getStartTime(); tomorrowStart.setTime(subject.getStartTime().getTime() + 1 * 24 * 60 * 60 * 1000);
-            Date tomorrowEnd = subject.getEndTime(); tomorrowStart.setTime(subject.getEndTime().getTime() + 1 * 24 * 60 * 60 * 1000);
-            dates.add(tomorrowStart);
-            dates.add(tomorrowEnd);
             for (Date date : dates) {
                 if(currentTime.getTime() > date.getTime()) {
                     continue;
