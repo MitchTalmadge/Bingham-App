@@ -15,8 +15,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/PROGRESS_BAR"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"
             android:layout_centerHorizontal="true"/>
 
 
@@ -52,8 +50,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/abdayLabel"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="24sp"
             android:gravity="center"
             android:layout_centerHorizontal="true" />
 
