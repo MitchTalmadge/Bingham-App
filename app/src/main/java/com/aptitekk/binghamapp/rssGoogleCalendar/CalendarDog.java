@@ -230,6 +230,7 @@ public class CalendarDog {
         Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
         for (Date date : times) {
             if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
+                Log.i(MainActivity.LOG_NAME, "Skipped event " + subject.getName() + " at " + subject.getStartTime());
                 continue;
             }
             long diff = Math.abs(currentTime - date.getTime());

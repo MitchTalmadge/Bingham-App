@@ -131,15 +131,18 @@ public class CountdownCard extends Card {
                     BellSchedule yesterdaySchedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), yesterday);
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
                             abday, yesterday.getTime()));
-                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false); // TODO: Have getPreviousSubject return closest date to resolve redundancy
                 }
                 final Date finalClosestPastTime = closestPastTime;
+                if(finalClosestPastTime.getTime() == 0) {
+                    Log.e(MainActivity.LOG_NAME, "closestPastTime is 0!!!");
+                }
                 new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
-                        long top = (closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
-                        long bottom = (closestTime.getTime() - finalClosestPastTime.getTime());
+                        long top = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
+                        long bottom = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime());
                         int percent = (int) Math.round(((double) top / bottom)*100);
-                        //Log.i(MainActivity.LOG_NAME, top + "/" + bottom + " *100 = " + percent + "%");
+                        Log.i(MainActivity.LOG_NAME, top + "/" + bottom + " *100 = " + percent + "%");
                         progress.setProgress(percent);
                         timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
                     }
