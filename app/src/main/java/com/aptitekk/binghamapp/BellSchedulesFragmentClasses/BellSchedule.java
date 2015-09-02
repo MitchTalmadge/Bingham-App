@@ -28,9 +28,9 @@ public class BellSchedule {
     private int[] subjectLengths;
 
     public static char toggleABDay(char abDay) {
-        if(abDay == A_DAY) {
+        if (abDay == A_DAY) {
             return B_DAY;
-        } else if(abDay == B_DAY) {
+        } else if (abDay == B_DAY) {
             return A_DAY;
         }
         return NONE_DAY;
@@ -41,20 +41,20 @@ public class BellSchedule {
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
             try {
-                if(schedule.getSubjectNames()[i].toLowerCase().contains("warning")) // warning bell doesnt need to be in there
+                if (schedule.getSubjectNames()[i].toLowerCase().contains("warning")) // warning bell doesnt need to be in there
                     continue;
-                if((schedule.getSubjectStartTimes()[i].contains("--")) || (schedule.getSubjectEndTimes()[i].contains("--")))
+                if ((schedule.getSubjectStartTimes()[i].contains("--")) || (schedule.getSubjectEndTimes()[i].contains("--")))
                     continue; // dont need non-existent times
-                if(schedule.getSubjectNames()[i].toLowerCase().contains("conference")) // conference time removed for student's sake
+                if (schedule.getSubjectNames()[i].toLowerCase().contains("conference")) // conference time removed for student's sake
                     continue;
-                if(schedule.getSubjectNames()[i].toLowerCase().contains("announcements")) // conference time removed for student's sake
+                if (schedule.getSubjectNames()[i].toLowerCase().contains("announcements")) // conference time removed for student's sake
                     continue;
                 result.add(
                         new Subject(
                                 schedule.getSubjectNames()[i],
                                 abday,
-                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " +schedule.getSubjectStartTimes()[i]),
-                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " +schedule.getSubjectEndTimes()[i])));
+                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectStartTimes()[i]),
+                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
                 e.printStackTrace();
                 continue;
@@ -71,7 +71,7 @@ public class BellSchedule {
             dates.add(subject.getStartTime());
             dates.add(subject.getEndTime());
             for (Date date : dates) {
-                if((currentTime.getTime() > date.getTime()) && ignorePastSubjects) {
+                if ((currentTime.getTime() > date.getTime()) && ignorePastSubjects) {
                     continue;
                 }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
@@ -93,15 +93,17 @@ public class BellSchedule {
             dates.add(subject.getStartTime());
             dates.add(subject.getEndTime());
             for (Date date : dates) {
-                if((currentTime.getTime() < date.getTime())) {
+                if ((currentTime.getTime() < date.getTime())) { //If it is in the future, continue
                     continue;
                 }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
                 if ((minDiff == -1) || (diff < minDiff)) {
+                    Log.i(MainActivity.LOG_NAME, "Previous determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
                     minDiff = diff;
                     minDate = subject;
                 }
             }
+
         }
         return minDate;
     }
@@ -118,11 +120,14 @@ public class BellSchedule {
             startTime = start;
             endTime = end;
         }
+
         public String getName() {
             return name;
         }
 
-        public char getABDay() { return abday; }
+        public char getABDay() {
+            return abday;
+        }
 
         public Date getStartTime() {
             return startTime;

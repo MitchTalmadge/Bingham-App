@@ -127,9 +127,10 @@ public class CountdownCard extends Card {
                     Log.i(MainActivity.LOG_NAME, "Yesterday is the closest previous schedule");
                     Calendar yesterday = targetDateTime;
                     yesterday.add(Calendar.DATE, -1);
+                    Log.i(MainActivity.LOG_NAME, "Yesterday is " + yesterday.getTime().toString());
                     BellSchedule yesterdaySchedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), yesterday);
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
-                            abday, Calendar.getInstance().getTime()));
+                            abday, yesterday.getTime()));
                     closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
                 }
                 final Date finalClosestPastTime = closestPastTime;

@@ -392,7 +392,8 @@ public class CalendarDog {
             }
 
         }
-        return null;
+        Log.e(MainActivity.LOG_NAME, "No schedule was determined, loading regular weekday schedule.");
+        return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
     }
 
     public static boolean hasSchoolStartedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
