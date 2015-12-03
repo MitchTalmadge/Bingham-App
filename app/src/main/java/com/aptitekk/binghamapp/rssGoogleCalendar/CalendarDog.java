@@ -230,6 +230,7 @@ public class CalendarDog {
         Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
         for (Date date : times) {
             if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
+                Log.i(MainActivity.LOG_NAME, "Skipped event " + subject.getName() + " at " + subject.getStartTime());
                 continue;
             }
             long diff = Math.abs(currentTime - date.getTime());
@@ -241,7 +242,8 @@ public class CalendarDog {
         return minDate;
     }
 
-    public static Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents, boolean endTimePointer) {
+    public static MultipleReturn getNearestDateBySubjectIsEndTime(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
+        boolean endTimePointer = false;
         long minDiff = -1, currentTime = currentDate.getTime();
         Date minDate = null;
         Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
@@ -260,7 +262,24 @@ public class CalendarDog {
                     endTimePointer = false;
             }
         }
-        return minDate;
+        return new MultipleReturn(minDate, endTimePointer);
+    }
+
+    public static class MultipleReturn {
+        Object first;
+        Object second;
+
+        public MultipleReturn(Object first, Object second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public Object getFirst() {
+            return first;
+        }
+        public Object getSecond() {
+            return second;
+        }
     }
 
     public static CalendarEvent getNextEvent(List<CalendarEvent> events, Date currentDate, boolean excludeABDayLabel) {
@@ -374,7 +393,17 @@ public class CalendarDog {
             }
 
         }
-        return null;
+        Log.e(MainActivity.LOG_NAME, "No schedule was determined, loading regular weekday schedule.");
+        return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
+    }
+
+    public static boolean hasSchoolStartedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
+        String rawStartDay = regularSchedule.getSubjectStartTimes()[0]; //GRAB Start TIME
+        Date startTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawStartDay + " MDT");
+        if (dateTime.getTime().before(startTime)) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean hasSchoolEndedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {

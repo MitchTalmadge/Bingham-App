@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
+import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.hasSchoolStartedForDay;
 import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.isItAorBDay;
 import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.hasSchoolEndedForDay;
 
@@ -80,8 +81,9 @@ public class CountdownCard extends Card {
         //DETERMINE A/B DAY
         char abday = isItAorBDay(eventsFeed.getEvents(), targetDateTime);
         //CREATE POINTER IF IT IS THE END OF PERIOD
-        boolean isTimeEndTime = false;
+        boolean isTimeEndTime;
         boolean tomorrowClosest = false;
+        boolean schoolStartedForDay = false;
 
         if (targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
@@ -97,6 +99,9 @@ public class CountdownCard extends Card {
                     targetDateTime = tomorrow;
                     tomorrowClosest = true;
                 }
+                if(hasSchoolStartedForDay(schedule, targetDateTime)) {
+                    schoolStartedForDay = true;
+                }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -104,22 +109,38 @@ public class CountdownCard extends Card {
             if (schedule != null) {
                 ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, abday, targetDateTime.getTime());
                 BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable, true);
-                final Date closestTime = CalendarDog.getNearestDateBySubject(closest, currentDateTime, true, isTimeEndTime);
+                CalendarDog.MultipleReturn response = CalendarDog.getNearestDateBySubjectIsEndTime(closest, currentDateTime, true);
+                final Date closestTime = (Date) response.getFirst();
+                isTimeEndTime = (boolean) response.getSecond();
 
                 Date closestPastTime;
-                if (tomorrowClosest) {
+                if (tomorrowClosest) { // The previous end time may have been from today if school ended
+                    Log.i(MainActivity.LOG_NAME, "Today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(todaySchedule,
                             abday, Calendar.getInstance().getTime()));
                     closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
-                } else {
+                } else if(schoolStartedForDay) { // if school has started
+                    Log.i(MainActivity.LOG_NAME, "Earlier class periods of today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, timeTable);
                     closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                } else { // pull yesterdays schedule
+                    Log.i(MainActivity.LOG_NAME, "Yesterday is the closest previous schedule");
+                    Calendar yesterday = targetDateTime;
+                    yesterday.add(Calendar.DATE, -1);
+                    Log.i(MainActivity.LOG_NAME, "Yesterday is " + yesterday.getTime().toString());
+                    BellSchedule yesterdaySchedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), yesterday);
+                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
+                            abday, yesterday.getTime()));
+                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false); // TODO: Have getPreviousSubject return closest date to resolve redundancy
                 }
                 final Date finalClosestPastTime = closestPastTime;
+                if(finalClosestPastTime.getTime() == 0) {
+                    Log.e(MainActivity.LOG_NAME, "closestPastTime is 0!!!");
+                }
                 new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
-                        long top = (closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
-                        long bottom = (closestTime.getTime() - finalClosestPastTime.getTime());
+                        long top = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
+                        long bottom = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime());
                         int percent = (int) Math.round(((double) top / bottom)*100);
                         Log.i(MainActivity.LOG_NAME, top + "/" + bottom + " *100 = " + percent + "%");
                         progress.setProgress(percent);
