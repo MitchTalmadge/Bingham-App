@@ -154,17 +154,9 @@ public class RSSNewsFeedManager {
 
         ArrayList<NewsArticle> result = new ArrayList<>();
 
-        //optional, but recommended
-        //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
         document.getDocumentElement().normalize();
 
-        //logInfo("Root element :" + document.getDocumentElement().getNodeName());
-
-        //logInfo("Title : " + document.getElementsByTagName("title").item(0).getTextContent());
-
         NodeList nList = document.getElementsByTagName("item");
-
-        //logInfo("----------------------------");
 
         for (int temp = 0; temp < nList.getLength(); temp++) {
 
