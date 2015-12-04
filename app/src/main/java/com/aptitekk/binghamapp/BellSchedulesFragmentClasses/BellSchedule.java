@@ -37,7 +37,7 @@ public class BellSchedule {
     }
 
     public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday, Date dayToAssign) {
-        DateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
+        DateFormat df = new SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
             try {

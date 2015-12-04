@@ -32,7 +32,7 @@ public class RSSNewsFeedManager {
 
     private static NewsFeedSizeListener newsFeedSizeListener;
 
-    final boolean verbose = false;
+    final static boolean verbose = true;
 
     public static final Class<? extends NewsFeed>[] NEWS_FEED_CLASSES = new Class[]{Announcements.class, Prospector.class};
     NewsFeed[] newsFeeds = new NewsFeed[NEWS_FEED_CLASSES.length];
@@ -141,7 +141,7 @@ public class RSSNewsFeedManager {
         }
     }
 
-    private void logInfo(String msg) {
+    private static void logInfo(String msg) {
         if (verbose) {
             Log.i(MainActivity.LOG_NAME, msg);
         }
@@ -170,23 +170,23 @@ public class RSSNewsFeedManager {
 
             Node nNode = nList.item(temp);
 
-            //logInfo("Current Element : " + nNode.getNodeName());
+            logInfo("Current Element : " + nNode.getNodeName());
 
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
                 Element eElement = (Element) nNode;
 
-                //logInfo("Title : " + eElement.getElementsByTagName("title").item(0).getTextContent());
-                //logInfo("Link : " + eElement.getElementsByTagName("link").item(0).getTextContent());
-                //logInfo("guid  : " + eElement.getElementsByTagName("guid").item(0).getTextContent());
-                //logInfo("Description : " + eElement.getElementsByTagName("description").item(0).getTextContent());
-                //logInfo("pubDate : " + eElement.getElementsByTagName("pubDate").item(0).getTextContent() + "\n");
+                Node articleTitleNode = eElement.getElementsByTagName("title").item(0);
+                Node articleLinkNode = eElement.getElementsByTagName("link").item(0);
+                Node articleGuidNode = eElement.getElementsByTagName("guid").item(0);
+                Node articleDescriptionNode = eElement.getElementsByTagName("description").item(0);
+                Node articlePublishDateNode = eElement.getElementsByTagName("pubDate").item(0);
 
-                result.add(new NewsArticle(eElement.getElementsByTagName("title").item(0).getTextContent(),
-                        eElement.getElementsByTagName("link").item(0).getTextContent(),
-                        eElement.getElementsByTagName("guid").item(0).getTextContent(),
-                        eElement.getElementsByTagName("description").item(0).getTextContent(),
-                        eElement.getElementsByTagName("pubDate").item(0).getTextContent()));
+                result.add(new NewsArticle(articleTitleNode != null ? articleTitleNode.getTextContent() : null,
+                        articleLinkNode != null ? articleLinkNode.getTextContent() : null,
+                        articleGuidNode != null ? articleGuidNode.getTextContent() : null,
+                        articleDescriptionNode != null ? articleDescriptionNode.getTextContent() : null,
+                        articlePublishDateNode != null ? articlePublishDateNode.getTextContent() : null));
 
             }
         }

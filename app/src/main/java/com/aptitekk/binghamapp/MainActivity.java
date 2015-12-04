@@ -90,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
     }
 
     public void checkForEventsUpdates() {
-        //CalendarDog.getEventsFeedSize(CalendarDog.FetchType.JSON, this);
-
         final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
         int lastEventsFeedUpdateMonth = sharedPreferences.getInt("lastEventsFeedUpdateMonth", 0);

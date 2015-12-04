@@ -9,6 +9,16 @@ public class NewsArticle {
 	String pubDate;
 	
 	public NewsArticle(String title, String link, String guid, String description, String pubDate) {
+		if(title == null)
+			title = "N/A";
+		if(link == null)
+			link = "N/A";
+		if(guid == null)
+			guid = "N/A";
+		if(description == null)
+			description = "N/A";
+		if(pubDate == null)
+			pubDate = "N/A";
 		this.title = title;
 		this.link = link;
 		this.guid = guid;

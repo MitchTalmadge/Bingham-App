@@ -399,7 +399,7 @@ public class CalendarDog {
 
     public static boolean hasSchoolStartedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
         String rawStartDay = regularSchedule.getSubjectStartTimes()[0]; //GRAB Start TIME
-        Date startTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawStartDay + " MDT");
+        Date startTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawStartDay + " MDT");
         if (dateTime.getTime().before(startTime)) {
             return false;
         }
@@ -408,7 +408,7 @@ public class CalendarDog {
 
     public static boolean hasSchoolEndedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
         String rawEndDay = regularSchedule.getSubjectEndTimes()[regularSchedule.getSubjectEndTimes().length - 1]; //GRAB END TIME
-        Date endTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
+        Date endTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
         if (dateTime.getTime().after(endTime)) {
             return false;
         }

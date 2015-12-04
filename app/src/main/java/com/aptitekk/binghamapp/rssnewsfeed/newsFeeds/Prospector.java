@@ -2,6 +2,7 @@ package com.aptitekk.binghamapp.rssnewsfeed.newsFeeds;
 
 import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
 
+import java.util.Calendar;
 import java.util.concurrent.Callable;
 
 /**
@@ -10,7 +11,7 @@ import java.util.concurrent.Callable;
 public class Prospector extends NewsFeed {
 
     final String name = "Prospector";
-    final String url = "http://binghamprospector.org/feed/";
+    final String url = "http://binghamprospector.org/feed?unused=" + Calendar.getInstance().get(Calendar.MILLISECOND);
 
     public Prospector(Callable<Void> refresh) {
         super(refresh);
