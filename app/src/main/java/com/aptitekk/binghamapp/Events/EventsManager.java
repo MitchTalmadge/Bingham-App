@@ -38,11 +38,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
 
 import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
 import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
@@ -51,7 +51,21 @@ import it.gmariotti.cardslib.library.internal.Card;
 
 public class EventsManager {
 
-    public final static String FILE_NAME = "events.cache";
+    public static URL EVENTS_CALENDAR_URL;
+
+    static {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
+        String timeZone = TimeZone.getDefault().getID();
+        try {
+            EVENTS_CALENDAR_URL = new URL("https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
+                    "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public final static String EVENTS_FILE_NAME = "events.cache";
 
     private MainActivity mainActivity;
 
@@ -59,13 +73,7 @@ public class EventsManager {
 
     private JSONObject jsonObject;
 
-    public JSONObject getJSONObject() {
-        return jsonObject;
-    }
-
-    List<Event> events;
-
-    public static String BINGHAM_GOOGLE_CALENDAR = generateJSONURL();
+    List<Event> eventsList;
 
     public EventsManager(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -81,13 +89,13 @@ public class EventsManager {
             if (!eventsUpdateListeners.contains(listener))
                 eventsUpdateListeners.add(listener);
 
-            if (this.events != null)
+            if (this.eventsList != null)
                 listener.onEventsUpdated(this); //If the events list is already populated, notify the listener immediately.
         }
     }
 
     /**
-     * Notifies all listeners of an update to the events.
+     * Notifies all listeners of an update to the eventsList.
      */
     protected void notifyListenersOfUpdate() {
         for (EventsUpdateListener listener : eventsUpdateListeners) {
@@ -97,18 +105,13 @@ public class EventsManager {
         }
     }
 
-    public List<Event> getEvents() {
-        return this.events;
+    public List<Event> getEventsList() {
+        return this.eventsList;
     }
 
-    private static String generateJSONURL() {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
-        String timeZone = TimeZone.getDefault().getID();
-        return "https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
-                "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk";
-    }
-
+    /**
+     * Checks for updates to the Events by determining if they have already been downloaded today or not.
+     */
     public void checkForUpdates() {
         final SharedPreferences sharedPreferences = mainActivity.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE);
         int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
@@ -123,7 +126,7 @@ public class EventsManager {
             sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
             downloadEventsFromWeb();
         } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
-            File eventsFeedFile = new File(mainActivity.getFilesDir(), FILE_NAME);
+            File eventsFeedFile = new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME);
 
             if (eventsFeedFile.exists()) {
                 MainActivity.logVerbose("Restoring Events Feed from file...");
@@ -150,47 +153,58 @@ public class EventsManager {
         }
     }
 
+    /**
+     * Downloads the Events from the Web and saves them to a file.
+     */
     private void downloadEventsFromWeb() {
         MainActivity.logVerbose("Downloading Events from Web...");
-        try {
-            WebFileDownloader.downloadFromURLAsJSONObject(new URL(BINGHAM_GOOGLE_CALENDAR), new WebFileDownloaderAdapter() {
-                @Override
-                public void fileDownloadedAsJSONObject(URL url, JSONObject jsonObject) {
-                    MainActivity.logVerbose("Events have been Downloaded.");
-                    // Save the events to file...
-                    try {
-                        MainActivity.logVerbose("Saving Events to file...");
-                        FileOutputStream fileOutputStream = new FileOutputStream(new File(mainActivity.getFilesDir(), FILE_NAME));
+        WebFileDownloader.downloadFromURLAsJSONObject(EVENTS_CALENDAR_URL, new WebFileDownloaderAdapter() {
+            @Override
+            public void fileDownloadedAsJSONObject(URL url, JSONObject jsonObject) {
+                MainActivity.logVerbose("Events have been Downloaded.");
+                // Save the events to file...
+                try {
+                    MainActivity.logVerbose("Saving Events to file...");
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME));
 
-                        if (jsonObject != null) {
-                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
-                            outputStreamWriter.write(jsonObject.toString());
+                    if (jsonObject != null) {
+                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
+                        outputStreamWriter.write(jsonObject.toString());
 
-                            outputStreamWriter.close();
-                            fileOutputStream.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        outputStreamWriter.close();
+                        fileOutputStream.close();
                     }
-
-                    updateEvents(jsonObject);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            });
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+
+                updateEvents(jsonObject);
+            }
+        });
     }
 
+    /**
+     * Updates the Events lists and notifies all listeners of an update.
+     *
+     * @param jsonObject The jsonObject to build the eventsList from.
+     */
     private void updateEvents(JSONObject jsonObject) {
-        buildFromJSONObject(jsonObject);
+        this.jsonObject = jsonObject;
+        buildEventsList();
         notifyListenersOfUpdate();
     }
 
-    public static int findPositionFromDate(List<Event> events, Date date) {
+    /**
+     * Determines the scroll position of a given date.
+     *
+     * @param date The date we want to scroll to
+     * @return The position of the event on the given date.
+     */
+    public int findPositionFromDate(Date date) {
         long minDiff = -1, currentTime = date.getTime();
         int minDate = 0;
-        for (int i = 0; i < events.size(); i++) {
-            long diff = Math.abs(currentTime - events.get(i).getDate().getTime().getTime());
+        for (int i = 0; i < eventsList.size(); i++) {
+            long diff = Math.abs(currentTime - eventsList.get(i).getEventDate().getTime().getTime());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
                 minDate = i;
@@ -271,36 +285,36 @@ public class EventsManager {
         }
     }
 
-    public static Event getNextEvent(List<Event> events, Date currentDate, boolean excludeABDayLabel) {
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Event minDate = null;
-        for (Event date : events) {
-            if (((date.getTitle().contains("A Day")) || (date.getTitle().contains("B Day"))) && excludeABDayLabel) {
-                continue;
+    public Event getNextEvent(Date date, boolean excludeABDayLabel) {
+        long minDiff = -1, currentTime = date.getTime();
+        Event nextEvent = null;
+        for (Event event : eventsList) {
+            if (((event.getTitle().contains("A Day")) || (event.getTitle().contains("B Day"))) && excludeABDayLabel) {
+                continue; //Skip A and B day Events
             }
-            if (currentTime > date.getDate().getTimeInMillis()) { // Skip any Dates that have already past
-                continue;
+            if (currentTime > event.getEventDate().getTimeInMillis()) {
+                continue; // Skip any Events that have already passed
             }
-            long diff = Math.abs(currentTime - date.getDate().getTimeInMillis());
+            long diff = Math.abs(currentTime - event.getEventDate().getTimeInMillis());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
-                minDate = date;
+                nextEvent = event;
             }
         }
-        return minDate;
+        return nextEvent;
     }
 
-    public static int findNextAorBDay(List<Event> events) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i).getTitle().contains("A Day") || events.get(i).getTitle().contains("B Day"))
+    public int findNextAorBDay() {
+        for (int i = 0; i < eventsList.size(); i++) {
+            if (eventsList.get(i).getTitle().contains("A Day") || eventsList.get(i).getTitle().contains("B Day"))
                 return i;
         }
         return -1;
     }
 
-    public static char isItAorBDay(List<Event> sortedEvents, Calendar currentDateTime) {
-        for (Event event : sortedEvents) {
-            if (Event.eventMatchesDay(event, currentDateTime)) {
+    public char isItAorBDay(Calendar date) {
+        for (Event event : eventsList) {
+            if (event.isOnDate(date)) {
                 if (event.getTitle().contains("A Day"))
                     return BellSchedule.A_DAY;
                 else if (event.getTitle().contains("B Day"))
@@ -310,17 +324,17 @@ public class EventsManager {
         return BellSchedule.NONE_DAY;
     }
 
-    public static int findNextTargetByIndex(List<Event> events, CountdownCard.CountdownTarget target) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i).getTitle().toLowerCase().contains(target.getValue()))
+    public int findNextTargetByIndex(CountdownCard.CountdownTarget target) {
+        for (int i = 0; i < eventsList.size(); i++) {
+            if (eventsList.get(i).getTitle().toLowerCase().contains(target.getValue()))
                 return i;
         }
         return -1;
     }
 
-    public static BellSchedule determineSchedule(Fragment fragment, List<Event> events, Calendar dateTime) {
+    public BellSchedule determineSchedule(Calendar dateTime) {
 
-        ArrayList<Event> eventsOfDay = getEventsForDay(events, dateTime);
+        ArrayList<Event> eventsOfDay = getEventsForDay(dateTime);
 
         if (eventsOfDay.isEmpty())
             return null;
@@ -332,9 +346,9 @@ public class EventsManager {
                 String schedule = e.getTitle().toLowerCase().split("-")[1].split("assembly")[0].replaceFirst("\\s+$", "");
 
                 //DETERMINE MORNING/AFTERNOON
-                int timeOfDay = e.getDate().get(Calendar.HOUR_OF_DAY);
+                int timeOfDay = e.getEventDate().get(Calendar.HOUR_OF_DAY);
                 if ((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
-                    return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[4], fragment.getResources().getStringArray(R.array.assemblyBellSchedule4));
+                    return new BellSchedule(mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[4], mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule4));
                 } else if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
                     schedule = "Morning (" + schedule.replace("AM", "") + ")";
                 } else if ((timeOfDay >= 12 && timeOfDay < 16) || schedule.contains("PM")) { // AFTERNOON
@@ -342,35 +356,35 @@ public class EventsManager {
                 } else {
                     return null;
                 }
-                for (int i = 0; i < fragment.getResources().getStringArray(R.array.assemblyBellSchedules).length; i++) {
-                    if (fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {// if string matches name
+                for (int i = 0; i < mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules).length; i++) {
+                    if (mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {// if string matches name
                         String[] scheduleTimeArray = null;
                         switch (i) {
                             case 0:
-                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule0);
+                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule0);
                                 break;
                             case 1:
-                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule1);
+                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule1);
                                 break;
                             case 2:
-                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule2);
+                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule2);
                                 break;
                             case 3:
-                                scheduleTimeArray = fragment.getResources().getStringArray(R.array.assemblyBellSchedule3);
+                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule3);
                                 break;
                         }
-                        return new BellSchedule(fragment.getResources().getStringArray(R.array.assemblyBellSchedules)[i], scheduleTimeArray);
+                        return new BellSchedule(mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[i], scheduleTimeArray);
                     }
                 }
             } else if (e.getTitle().contains("A Day") || e.getTitle().contains("B Day")) { // Just a regular day
                 if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) { // Friday schedule
-                    return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
+                    return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[1], mainActivity.getResources().getStringArray(R.array.regularBellSchedule1));
                 } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
                     try {
-                        if (!hasSchoolEndedForDay(new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0],
-                                        fragment.getResources().getStringArray(R.array.regularBellSchedule0)),
+                        if (!hasSchoolEndedForDay(new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0],
+                                        mainActivity.getResources().getStringArray(R.array.regularBellSchedule0)),
                                 dateTime)) {
-                            return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[1], fragment.getResources().getStringArray(R.array.regularBellSchedule1));
+                            return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[1], mainActivity.getResources().getStringArray(R.array.regularBellSchedule1));
                         }
                     } catch (ParseException e1) {
                         e1.printStackTrace();
@@ -378,12 +392,12 @@ public class EventsManager {
                     }
 
                 }
-                return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
+                return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
             }
 
         }
         MainActivity.logVerbose("No schedule was determined, loading regular weekday schedule.");
-        return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
+        return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
     }
 
     public static boolean hasSchoolStartedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
@@ -398,29 +412,26 @@ public class EventsManager {
         return !dateTime.getTime().after(endTime);
     }
 
-    public static ArrayList<Event> getEventsForDay(List<Event> events, Calendar dayToMatch) {
+    public ArrayList<Event> getEventsForDay(Calendar dayToMatch) {
         ArrayList<Event> result = new ArrayList<>();
-        for (Event e : events) {
-            if (e.getDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
-                    e.getDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
-                    e.getDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
+        for (Event e : eventsList) {
+            if (e.getEventDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
+                    e.getEventDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
+                    e.getEventDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
                 result.add(e);
             }
         }
         return result;
     }
 
-    public static ArrayList<Event> getEventsForDay(List<Event> events, Calendar dayToMatch, boolean excludeABDayLabel) {
+    public ArrayList<Event> getEventsForDay(Calendar dayToMatch, boolean excludeABDayLabel) {
         ArrayList<Event> result = new ArrayList<>();
-        for (Event e : events) {
-            if (e.getDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
-                    e.getDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
-                    e.getDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
+        for (Event e : eventsList) {
+            if (e.getEventDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
+                    e.getEventDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
+                    e.getEventDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
                 if (excludeABDayLabel) {
                     if (!(e.getTitle().equalsIgnoreCase("A Day") || e.getTitle().equalsIgnoreCase("B Day"))) {
-                        //Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != A Day == " + (!e.getTitle().equalsIgnoreCase("A Day")));
-                        //Log.i(MainActivity.LOG_NAME, "\"" + e.getTitle() + "\" != B Day == " + (!e.getTitle().equalsIgnoreCase("B Day")));
-
                         result.add(e);
                     }
                 } else {
@@ -442,7 +453,7 @@ public class EventsManager {
                 calIntent.putExtra(CalendarContract.Events.TITLE, event.getTitle());
                 calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
                 calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                        event.getDate().getTimeInMillis());
+                        event.getEventDate().getTimeInMillis());
                 calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
                         event.getEndTime().getTimeInMillis());
                 fragment.getActivity().startActivity(calIntent);
@@ -479,17 +490,16 @@ public class EventsManager {
         });
         actions.add(t3);
 
-        String imageUrl = "garbageurl.blah";
+        int imageDrawableId = -1;
 
         for (CountdownCard.CountdownTarget target : CountdownCard.CountdownTarget.values()) {
-            if (target.getImageUrl().equals("")) continue;
             if (event.getTitle().toLowerCase().contains(target.getValue())) {
-                imageUrl = target.getImageUrl();
+                imageDrawableId = target.getImageDrawableId();
                 break;
             }
         }
 
-        final String finalImageUrl = imageUrl;
+        final int finalImageDrawableId = imageDrawableId;
         return MaterialLargeImageCard.with(fragment.getActivity())
                 .setTextOverImage(event.getTitle())
                 .setTitle(formatDateForCard(event))
@@ -500,7 +510,7 @@ public class EventsManager {
 
                         //Picasso.with(fragment.getActivity()).setIndicatorsEnabled(true);  //only for debug tests
                         Picasso.with(fragment.getActivity())
-                                .load(finalImageUrl)
+                                .load(finalImageDrawableId)
                                 .error(R.color.primary_light)
                                 .into((ImageView) viewImage);
                         //((ImageView) viewImage).setImageResource(R.color.primary);
@@ -514,31 +524,16 @@ public class EventsManager {
         String result;
         SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa", Locale.US);
         SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz", Locale.US);
-        result = (headerFormat.format(event.getDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        result = (headerFormat.format(event.getEventDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
         String[] resultSplit = result.split(" ");
         if (result.split(" ")[1].equalsIgnoreCase(result.split(" ")[3]))
             result = resultSplit[0] + " " + resultSplit[1] + " " + resultSplit[4];
         return result;
     }
 
-    public static boolean isSameDay(Event e1, Event e2) {
-        return e1.getDate().get(Calendar.YEAR) == e2.getDate().get(Calendar.YEAR) &&
-                e1.getDate().get(Calendar.MONTH) == e2.getDate().get(Calendar.MONTH) &&
-                e1.getDate().get(Calendar.DAY_OF_MONTH) == e2.getDate().get(Calendar.DAY_OF_MONTH);
-    }
-
-    public static EventsManager determineRetrieval(SharedPreferences sharedPreferences,
-                                                   int lastEventsFeedUpdateDay,
-                                                   int lastEventsFeedUpdateMonth, Callable<Void> eventsFeedCallable,
-                                                   File directory) {
-
-
-        return null;
-    }
-
-    private void buildFromJSONObject(JSONObject jsonObject) {
-        this.jsonObject = jsonObject;
-        events = new ArrayList<>();
+    private void buildEventsList() {
+        //Recreate eventsList variable
+        this.eventsList = new ArrayList<>();
 
         try {
             JSONArray arr = jsonObject.getJSONArray("items");
@@ -570,24 +565,43 @@ public class EventsManager {
                     format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                     endTimeFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                 }
-                try {
-                    date.setTime(format.parse(rawStartTime.replace("T", " ")));
-                    endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
-                    events.add(new Event(summary,
-                            date,
-                            endTime,
-                            location,
-                            link
-                    ));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                date.setTime(format.parse(rawStartTime.replace("T", " ")));
+                endTime.setTime(endTimeFormat.parse(rawEndTime.replace("T", " ")));
+                eventsList.add(new Event(summary,
+                        date,
+                        endTime,
+                        location,
+                        link
+                ));
             }
-        } catch (JSONException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
 
-        events = Event.sort(events);
+        sortEvents();
+    }
+
+    private void sortEvents() {
+        Collections.sort(eventsList, new EventComparator());
+    }
+
+    public static class EventComparator implements Comparator<Event> {
+        @Override
+        public int compare(Event event1, Event event2) {
+            //Put A/B Day Labels at the top of each day.
+            if (event1.getTitle().equalsIgnoreCase("A Day") || event1.getTitle().equalsIgnoreCase("B Day")) {
+                if (event1.isOnDate(event2.getEventDate())) {
+                    return -1;
+                }
+            }
+            if (event2.getTitle().equalsIgnoreCase("A Day") || event2.getTitle().equalsIgnoreCase("B Day")) {
+                if (event2.isOnDate(event1.getEventDate())) {
+                    return 1;
+                }
+            }
+
+            return event1.getEventDate().compareTo(event2.getEventDate());
+        }
     }
 
 }

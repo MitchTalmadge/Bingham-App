@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,9 +41,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
     private CardArrayAdapter cardArrayAdapter;
     private CardListView listView;
 
-    private EventsManager eventsFeed;
-
-    private boolean showABDays = true;
+    private EventsManager eventsManager;
 
     public UpcomingEventsFragment() {
         // Required empty public constructor
@@ -95,8 +92,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
                 public void onPositiveActionClicked(DialogFragment fragment) {
                     DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
                     Date date = dialog.getCalendar().getTime();
-                    listView.smoothScrollToPosition(EventsManager.findPositionFromDate(eventsFeed.getEvents(), date));
-                    MainActivity.logVerbose(eventsFeed.getEvents().get(EventsManager.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
+                    listView.smoothScrollToPosition(eventsManager.findPositionFromDate(date));
+                    MainActivity.logVerbose(eventsManager.getEventsList().get(eventsManager.findPositionFromDate(date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
 
@@ -114,8 +111,8 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
         return false;
     }
 
-    public void populateCalendar(EventsManager eventsFeed) {
-        this.eventsFeed = eventsFeed;
+    public void populateCalendar(EventsManager eventsManager) {
+        this.eventsManager = eventsManager;
 
         //Hide progress wheel
         if(getView() != null)
@@ -128,26 +125,26 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
 
         int sectionOffsetIndex = 0;
 
-        for (int i = 0; i < eventsFeed.getEvents().size(); i++) {
+        for (int i = 0; i < eventsManager.getEventsList().size(); i++) {
 
-            if (this.eventsFeed.getEvents().get(i).getTitle().equals("A Day") || this.eventsFeed.getEvents().get(i).getTitle().equals("B Day")) {
-                if (!(EventsManager.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true).isEmpty())) {
-                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime())
-                            + " (" + this.eventsFeed.getEvents().get(i).getTitle() + ")", sectionOffsetIndex);
+            if (eventsManager.getEventsList().get(i).getTitle().equals("A Day") || this.eventsManager.getEventsList().get(i).getTitle().equals("B Day")) {
+                if (!(eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true).isEmpty())) {
+                    sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsManager.getEventsList().get(i).getEventDate().getTime())
+                            + " (" + this.eventsManager.getEventsList().get(i).getTitle() + ")", sectionOffsetIndex);
                 }
-            } else if (!(EventsManager.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate()).isEmpty())) {
-                for (Event e : EventsManager.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true)) {
+            } else if (!(eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate()).isEmpty())) {
+                for (Event e : eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true)) {
                     MainActivity.logVerbose(e.getTitle());
                 }
                 try {
-                    if (!EventsManager.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {
-                        sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsFeed.getEvents().get(i).getDate().getTime()), sectionOffsetIndex);
+                    if (!this.eventsManager.getEventsList().get(i).isOnDate(this.eventsManager.getEventsList().get(i - 1).getEventDate())) {
+                        sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsManager.getEventsList().get(i).getEventDate().getTime()), sectionOffsetIndex);
                     }
                 } catch (ArrayIndexOutOfBoundsException ignored) {
                 } // No events prior to
 
                 // The following section generates a card for the current event that we are iterating over.
-                cards.add(EventsManager.makeCalendarCard(this, this.eventsFeed.getEvents().get(i)));
+                cards.add(EventsManager.makeCalendarCard(this, this.eventsManager.getEventsList().get(i)));
                 // END CARD GENERATION
                 sectionOffsetIndex += 1;
             }

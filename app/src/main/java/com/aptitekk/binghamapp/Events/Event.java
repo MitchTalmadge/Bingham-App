@@ -3,24 +3,20 @@ package com.aptitekk.binghamapp.Events;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 public class Event {
 
     String title;
-    Calendar date;
+    Calendar eventDate;
     Calendar endTime;
     String location;
     String link;
 
-    boolean dateLabelVisible = true;
-
     public Event(String title, Calendar date, Calendar endTime, String location, String link) {
         this.title = title;
-        this.date = date;
+        this.eventDate = date;
         this.endTime = endTime;
         this.location = location;
         this.link = link;
@@ -30,8 +26,8 @@ public class Event {
         return title;
     }
 
-    public Calendar getDate() {
-        return date;
+    public Calendar getEventDate() {
+        return eventDate;
     }
 
     public Calendar getEndTime() {
@@ -46,34 +42,27 @@ public class Event {
         return link;
     }
 
-    public boolean isDateLabelVisible() {
-        return dateLabelVisible;
-    }
-
-    public void setDateLabelVisible(boolean v) {
-        this.dateLabelVisible = v;
-    }
-
+    @Override
     public String toString() {
         String dateStamp;
         String location = "";
         String title = this.getTitle();
 
         //Format Date
-        if (SimpleDateFormat.getDateTimeInstance().format(this.getDate().getTime()).equalsIgnoreCase(
+        if (SimpleDateFormat.getDateTimeInstance().format(this.getEventDate().getTime()).equalsIgnoreCase(
                 SimpleDateFormat.getDateTimeInstance().format(this.getEndTime().getTime()))) {
-            dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getDate().getTime()) + " at " +
-                    new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getDate().getTime()).toLowerCase());
+            dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " at " +
+                    new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase());
 
         } else {
-            if (new SimpleDateFormat("MMM dd", Locale.US).format(this.getDate().getTime()).equalsIgnoreCase(
+            if (new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()).equalsIgnoreCase(
                     new SimpleDateFormat("MMM dd", Locale.US).format(this.getEndTime().getTime()))) {
-                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getDate().getTime()) + " from " +
-                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getDate().getTime()).toLowerCase() + " to " +
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase() + " to " +
                         new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEndTime().getTime()).toLowerCase());
             } else {
-                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getDate().getTime()) + " from " +
-                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getDate().getTime()).toLowerCase() + " to " +
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase() + " to " +
                         new SimpleDateFormat("MMM dd", Locale.US).format(this.getEndTime().getTime()) + " " +
                         new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEndTime().getTime()).toLowerCase());
             }
@@ -101,46 +90,11 @@ public class Event {
         return title + location + dateStamp;
     }
 
-    public static List<Event> sort(List<Event> e) {
-        Collections.sort(e, new CalendarEventComparator());
-        return e;
-    }
-
-    public static class CalendarEventComparator implements Comparator<Event> {
-        @Override
-        public int compare(Event o1, Event o2) {
-            //Put A/B Day Labels at the top of each day.
-            if (o1.getTitle().equalsIgnoreCase("A Day") || o1.getTitle().equalsIgnoreCase("B Day")) {
-                if (eventMatchesDay(o1, o2.getDate())) {
-                    return -1;
-                }
-            }
-            if (o2.getTitle().equalsIgnoreCase("A Day") || o2.getTitle().equalsIgnoreCase("B Day")) {
-                if (eventMatchesDay(o2, o1.getDate())) {
-                    return 1;
-                }
-            }
-
-            return o1.getDate().compareTo(o2.getDate());
-        }
-    }
-
-    public static List<Event> eventsMatchesDay(List<Event> e, Calendar day) {
-        List<Event> result = new ArrayList<>();
-        for (Event event : e) {
-            if (event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
-                    event.getDate().get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
-                    event.getDate().get(Calendar.YEAR) == day.get(Calendar.YEAR)) {
-                result.add(event);
-            }
-        }
-        return result;
-    }
-
-    public static boolean eventMatchesDay(Event event, Calendar day) {
-        return event.getDate().get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
-                event.getDate().get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
-                event.getDate().get(Calendar.YEAR) == day.get(Calendar.YEAR);
+    public boolean isOnDate(Calendar date)
+    {
+        return eventDate.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH) &&
+                eventDate.get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
+                eventDate.get(Calendar.YEAR) == date.get(Calendar.YEAR);
     }
 
 }

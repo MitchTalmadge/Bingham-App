@@ -139,7 +139,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
         getView().findViewById(R.id.nextevent_progress_wheel).setVisibility(View.GONE);
 
         //find if event if has already happened today
-        Event trueNextEvent = EventsManager.getNextEvent(eventsManager.getEvents(), new Date(), true);
+        Event trueNextEvent = eventsManager.getNextEvent(new Date(), true);
 
         nextEventCard = EventsManager.makeCalendarCard(this, trueNextEvent);
         CardHeader nextEventHeader = new CardHeader(getActivity());
