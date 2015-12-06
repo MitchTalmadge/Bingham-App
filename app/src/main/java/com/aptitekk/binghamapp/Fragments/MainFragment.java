@@ -28,9 +28,6 @@ import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class MainFragment extends Fragment implements MainActivity.BackButtonListener, NewsFeedUpdateListener, EventsUpdateListener {
 
     CountdownCard baseCountDownCard;
@@ -56,12 +53,12 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        countDownCardView = (CardViewNative) getActivity().findViewById(R.id.countdowns);
-        latestNewsView = getActivity().findViewById(R.id.latestnews);
-        nextEventCardView = (CardViewNative) getActivity().findViewById(R.id.nextevent);
+        countDownCardView = (CardViewNative) view.findViewById(R.id.countdowns);
+        latestNewsView = view.findViewById(R.id.latestnews);
+        nextEventCardView = (CardViewNative) view.findViewById(R.id.nextevent);
 
         ((MainActivity) getActivity()).getNewsFeedManager().addNewsFeedUpdateListener(this);
         ((MainActivity) getActivity()).getEventsManager().addEventsUpdateListener(this);
@@ -105,7 +102,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
 
     @Override
     public void onEventsUpdated(EventsManager eventsManager) {
-        /////////////////// COUNTDOWN /////////////////////////////////////////////////////////////
+        /////////////////// COUNTDOWN ////////////////////////
 
         //Create a Card
         baseCountDownCard = new CountdownCard(getActivity());
@@ -137,7 +134,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
 
         baseCountDownCard.notifyDataSetChanged();
 
-        //////////////// NEXT EVENT ///////////////////////////////////////////////////////////////
+        //////////////// NEXT EVENT //////////////////////////
 
         getView().findViewById(R.id.nextevent_progress_wheel).setVisibility(View.GONE);
 

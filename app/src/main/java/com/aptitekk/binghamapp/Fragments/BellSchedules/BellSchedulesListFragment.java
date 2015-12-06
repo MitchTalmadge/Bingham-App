@@ -41,7 +41,7 @@ public class BellSchedulesListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.v(MainActivity.LOG_NAME, "Creating List");
+        MainActivity.logVerbose("Creating Bell Schedules List");
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bell_schedules, container, false);

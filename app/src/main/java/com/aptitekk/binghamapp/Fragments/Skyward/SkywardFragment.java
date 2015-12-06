@@ -169,7 +169,7 @@ public class SkywardFragment extends Fragment implements View.OnClickListener, P
 
     @Override
     public void onHttpTransactionComplete(String response) {
-        Log.v(MainActivity.LOG_NAME, "Response: " + response);
+        MainActivity.logVerbose("Response: " + response);
     }
 
     @Override

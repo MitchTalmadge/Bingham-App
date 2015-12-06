@@ -1,7 +1,6 @@
 package com.aptitekk.binghamapp.News;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import com.aptitekk.binghamapp.MainActivity;
 
@@ -16,8 +15,6 @@ import java.util.ArrayList;
  * News Feed Manager
  */
 public class NewsFeedManager {
-
-    final static boolean verbose = true;
 
     private MainActivity mainActivity;
 
@@ -34,10 +31,10 @@ public class NewsFeedManager {
      * Creates a new NewsFeed list and populates it with the default NewsFeeds
      */
     private void initializeFeeds() {
-        Log.i(MainActivity.LOG_NAME, "Initializing NewsFeeds...\n");
+        MainActivity.logInfo("Initializing NewsFeeds...");
         newsFeeds = new ArrayList<>();
 
-        for(NewsFeedType feedType : NewsFeedType.values()) //Add all feed types from NewsFeedType enum.
+        for (NewsFeedType feedType : NewsFeedType.values()) //Add all feed types from NewsFeedType enum.
             newsFeeds.add(new NewsFeed(this, feedType));
     }
 
@@ -48,20 +45,15 @@ public class NewsFeedManager {
         return newsFeeds;
     }
 
-    private static void logInfo(String msg) {
-        if (verbose) {
-            Log.i(MainActivity.LOG_NAME, msg);
-        }
-    }
-
     /**
      * Adds a NewsFeedUpdateListener if not already added (Must be instanceof Fragment)
      *
      * @param listener the listener to add.
      */
     public void addNewsFeedUpdateListener(NewsFeedUpdateListener listener) {
-        if (!newsFeedUpdateListeners.contains(listener) && listener instanceof Fragment) {
-            newsFeedUpdateListeners.add(listener);
+        if (listener instanceof Fragment) {
+            if (!newsFeedUpdateListeners.contains(listener))
+                newsFeedUpdateListeners.add(listener);
 
             for (NewsFeed feed : newsFeeds)
                 if (feed.getArticlesList() != null)
@@ -97,7 +89,7 @@ public class NewsFeedManager {
 
             Node nNode = nList.item(temp);
 
-            logInfo("Current Element : " + nNode.getNodeName());
+            MainActivity.logVerbose("Current Element : " + nNode.getNodeName());
 
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 

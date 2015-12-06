@@ -107,7 +107,7 @@ public class CountdownCard extends Card {
             }
 
             if (schedule != null) {
-                Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
+                MainActivity.logVerbose("Schedule determined for day: " + schedule.getScheduleName());
                 ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, abday, targetDateTime.getTime());
                 BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable, true);
                 EventsManager.MultipleReturn response = EventsManager.getNearestDateBySubjectIsEndTime(closest, currentDateTime, true);
@@ -116,18 +116,18 @@ public class CountdownCard extends Card {
 
                 Date closestPastTime;
                 if (tomorrowClosest) { // The previous end time may have been from today if school ended
-                    Log.i(MainActivity.LOG_NAME, "Today is the closest previous schedule");
+                    MainActivity.logVerbose("Today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(todaySchedule,
                             abday, Calendar.getInstance().getTime()));
                     closestPastTime = EventsManager.getNearestDateBySubject(closestPast, currentDateTime, false);
                 } else if(schoolStartedForDay) { // if school has started
-                    Log.i(MainActivity.LOG_NAME, "Earlier class periods of today is the closest previous schedule");
+                    MainActivity.logVerbose("Earlier class periods of today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, timeTable);
                     closestPastTime = EventsManager.getNearestDateBySubject(closestPast, currentDateTime, false);
                 } else { // pull yesterdays schedule
-                    Log.i(MainActivity.LOG_NAME, "Yesterday is the closest previous schedule");
+                    MainActivity.logVerbose("Yesterday is the closest previous schedule");
                     targetDateTime.add(Calendar.DATE, -1); //Yesterday
-                    Log.i(MainActivity.LOG_NAME, "Yesterday is " + targetDateTime.getTime().toString());
+                    MainActivity.logVerbose("Yesterday is " + targetDateTime.getTime().toString());
                     BellSchedule yesterdaySchedule = EventsManager.determineSchedule(context, eventsFeed.getEvents(), targetDateTime);
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
                             abday, targetDateTime.getTime()));
@@ -135,14 +135,14 @@ public class CountdownCard extends Card {
                 }
                 final Date finalClosestPastTime = closestPastTime;
                 if(finalClosestPastTime.getTime() == 0) {
-                    Log.e(MainActivity.LOG_NAME, "closestPastTime is 0!!!");
+                    MainActivity.logVerbose("closestPastTime is 0!!!");
                 }
                 new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
                     public void onTick(long millisUntilFinished) {
                         long top = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
                         long bottom = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime());
                         int percent = (int) Math.round(((double) top / bottom)*100);
-                        Log.i(MainActivity.LOG_NAME, top + "/" + bottom + " *100 = " + percent + "%");
+                        MainActivity.logVerbose(top + "/" + bottom + " *100 = " + percent + "%");
                         progress.setProgress(percent);
                         timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
                     }
@@ -163,7 +163,7 @@ public class CountdownCard extends Card {
         try {
             Event nextABDay = eventsFeed.getEvents().get(EventsManager.findNextAorBDay(eventsFeed.getEvents()));
 
-            Log.i(MainActivity.LOG_NAME, nextABDay.toString() + " of " + nextABDay.getDate().get(Calendar.YEAR));
+            MainActivity.logVerbose(nextABDay.toString() + " of " + nextABDay.getDate().get(Calendar.YEAR));
 
             new CountDownTimer(nextABDay.getDate().getTimeInMillis() - targetDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
 
@@ -197,7 +197,7 @@ public class CountdownCard extends Card {
     }
 
     private String formatCurrentPeriod(String rawName, char abday, boolean isEndTime, boolean tomorrow) {
-        Log.i(MainActivity.LOG_NAME, "rawName: " + rawName);
+        MainActivity.logVerbose("rawName: " + rawName);
         if (rawName.equals("Announcements"))
             rawName = "1st/5th Period";
         if (rawName.contains("/")) {

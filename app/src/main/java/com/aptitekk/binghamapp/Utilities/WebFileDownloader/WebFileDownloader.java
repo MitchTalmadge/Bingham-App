@@ -28,22 +28,22 @@ import javax.xml.parsers.ParserConfigurationException;
 public class WebFileDownloader {
 
     public static void downloadFromURLAsDocument(URL url, WebFileDownloaderListener listener) {
-        Log.i(MainActivity.LOG_NAME, "Downloading Document from " + url.toString());
+        MainActivity.logVerbose("Downloading Document from " + url.toString());
         new DownloadAsDocumentTask(url, listener).execute();
     }
 
     public static void downloadFromURLAsStream(URL url, WebFileDownloaderListener listener) {
-        Log.i(MainActivity.LOG_NAME, "Downloading Stream from " + url.toString());
+        MainActivity.logVerbose("Downloading Stream from " + url.toString());
         new DownloadAsStreamTask(url, listener).execute();
     }
 
     public static void downloadFromURLAsJSONObject(URL url, WebFileDownloaderListener listener) {
-        Log.i(MainActivity.LOG_NAME, "Downloading JSON Object from " + url.toString());
+        MainActivity.logVerbose("Downloading JSON Object from " + url.toString());
         new DownloadAsJSONObjectTask(url, listener).execute();
     }
 
     public static void getFileSizeFromURL(URL url, WebFileDownloaderListener listener) {
-        Log.i(MainActivity.LOG_NAME, "Determining file size of " + url.toString());
+        MainActivity.logVerbose("Determining file size of " + url.toString());
         new getFileSizeTask(url, listener).execute();
     }
 

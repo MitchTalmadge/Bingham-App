@@ -25,7 +25,8 @@ import java.util.ListIterator;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String LOG_NAME = "BinghamAppVerbose";
+    public static final String LOG_NAME_INFO = "BinghamAppInfo";
+    public static final String LOG_NAME_VERBOSE = "BinghamAppVerbose";
     public static final String PREF_NAME = "com.AptiTekk.BinghamApp";
 
     private NewsFeedManager newsFeedManager;
@@ -55,11 +56,12 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
         }
 
-        // Set up NewsFeedManager
-        this.newsFeedManager = new NewsFeedManager(this);
+        logInfo("Setting Up Managers...");
 
-        //Set up EventsManager
+        this.newsFeedManager = new NewsFeedManager(this);
         this.eventsManager = new EventsManager(this);
+
+        logInfo("Checking for Updates...");
 
         // Download News & Events
         checkForNewsUpdates();
@@ -75,11 +77,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void checkForNewsUpdates() {
+        logVerbose("Checking for News Updates...");
         for (NewsFeed newsFeed : newsFeedManager.getNewsFeeds())
             newsFeed.checkForUpdates();
     }
 
     public void checkForEventsUpdates() {
+        logVerbose("Checking for Events Updates...");
         eventsManager.checkForUpdates();
     }
 
@@ -168,11 +172,21 @@ public class MainActivity extends AppCompatActivity {
     public static void listFragments(FragmentManager manager) {
         if (manager != null) {
             int count = manager.getBackStackEntryCount();
-            Log.i(LOG_NAME, "*----------------");
-            Log.i(LOG_NAME, "*Backstack Count: " + count);
+            logInfo("*----------------");
+            logInfo("*Backstack Count: " + count);
             for (int i = 0; i < count; i++) {
-                Log.i(LOG_NAME, "*" + i + ": " + manager.getBackStackEntryAt(i));
+                logInfo("*" + i + ": " + manager.getBackStackEntryAt(i));
             }
         }
+    }
+
+    public static void logInfo(String message)
+    {
+        Log.i(LOG_NAME_INFO, message);
+    }
+
+    public static void logVerbose(String message)
+    {
+        Log.i(LOG_NAME_VERBOSE, message);
     }
 }

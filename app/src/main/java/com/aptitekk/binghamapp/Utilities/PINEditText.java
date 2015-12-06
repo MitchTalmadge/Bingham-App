@@ -75,7 +75,7 @@ public class PINEditText extends MaterialEditText {
 
         @Override
         public boolean sendKeyEvent(KeyEvent event) {
-            Log.v(MainActivity.LOG_NAME, "Key Pressed! " + event.getAction() + " .. " + event.getKeyCode());
+            MainActivity.logVerbose("Key Pressed! " + event.getAction() + " .. " + event.getKeyCode());
             if (event.getAction() == KeyEvent.ACTION_DOWN
                     && event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
                 if (length() == 0) {

@@ -96,7 +96,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
                     DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
                     Date date = dialog.getCalendar().getTime();
                     listView.smoothScrollToPosition(EventsManager.findPositionFromDate(eventsFeed.getEvents(), date));
-                    Log.i(MainActivity.LOG_NAME, eventsFeed.getEvents().get(EventsManager.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
+                    MainActivity.logVerbose(eventsFeed.getEvents().get(EventsManager.findPositionFromDate(eventsFeed.getEvents(), date)).getTitle());
                     super.onPositiveActionClicked(fragment);
                 }
 
@@ -137,7 +137,7 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
                 }
             } else if (!(EventsManager.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate()).isEmpty())) {
                 for (Event e : EventsManager.getEventsForDay(this.eventsFeed.getEvents(), this.eventsFeed.getEvents().get(i).getDate(), true)) {
-                    Log.i(MainActivity.LOG_NAME, e.getTitle());
+                    MainActivity.logVerbose(e.getTitle());
                 }
                 try {
                     if (!EventsManager.isSameDay(this.eventsFeed.getEvents().get(i), this.eventsFeed.getEvents().get(i - 1))) {

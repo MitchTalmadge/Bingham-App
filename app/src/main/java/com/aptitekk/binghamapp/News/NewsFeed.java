@@ -2,7 +2,6 @@ package com.aptitekk.binghamapp.News;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.Utilities.WebFileDownloader.WebFileDownloader;
@@ -70,10 +69,11 @@ public class NewsFeed {
     /**
      * Checks for updates to the NewsFeed and will download if:<br>
      * 1. The file size is inconsistent, or<br>
-     * 2. The file size returns null (0 or -1)<br>
+     * 2. The file size returns null (size <= 0)<br>
      * If the file size is not null and is consistent, the feed will be restored from a cached copy.
      */
     public void checkForUpdates() {
+        MainActivity.logVerbose("Checking for Updates for "+ feedName + " News Feed...");
         WebFileDownloader.getFileSizeFromURL(feedUrl, new WebFileDownloaderAdapter() {
             @Override
             public void fileSizeDetermined(URL url, int fileSizeInBytes) {
@@ -82,18 +82,19 @@ public class NewsFeed {
                 final SharedPreferences sharedPreferences = manager.getMainActivity().getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE);
                 int lastNewsFeedUpdateSize = sharedPreferences.getInt(getPreferencesTag(), 0);
 
-                Log.v(MainActivity.LOG_NAME, "lastNewsFeedUpdateSize: " + lastNewsFeedUpdateSize);
-                Log.v(MainActivity.LOG_NAME, "News Feed Size on Web: " + fileSizeInBytes);
+                MainActivity.logVerbose("File size determined for "+ feedName + " News Feed:");
+                MainActivity.logVerbose("News Feed Size in Storage: " + lastNewsFeedUpdateSize);
+                MainActivity.logVerbose("News Feed Size on Web: " + fileSizeInBytes);
 
-                if (lastNewsFeedUpdateSize == 0 || fileSizeInBytes != lastNewsFeedUpdateSize) { // If we have never downloaded the feed before or the feed on the website is a different size...
-                    Log.v(MainActivity.LOG_NAME, "News feed is out of date. Downloading Feed...");
+                if (lastNewsFeedUpdateSize <= 0 || fileSizeInBytes != lastNewsFeedUpdateSize) { // If we have never downloaded the feed before or the feed on the website is a different size...
+                    MainActivity.logVerbose("News feed is out of date. Downloading Feed...");
 
                     downloadNewsFeedFromWeb();
                 } else { // We already have the latest news... Lets retrieve the file and create a feed from it.
                     File newsFeedFile = new File(manager.getMainActivity().getFilesDir(), getFileName());
 
                     if (newsFeedFile.exists()) {
-                        Log.v(MainActivity.LOG_NAME, "Restoring news feed from file...");
+                        MainActivity.logVerbose("Restoring News Feed from file...");
                         try {
                             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
                             updateFeed(document);
@@ -101,7 +102,7 @@ public class NewsFeed {
                             e.printStackTrace();
                         }
                     } else {
-                        Log.v(MainActivity.LOG_NAME, "Could not restore news feed from file.");
+                        MainActivity.logVerbose("Could not restore News Feed from file. Downloading Feed...");
                         downloadNewsFeedFromWeb();
                     }
                 }
@@ -113,13 +114,14 @@ public class NewsFeed {
      * Downloads the NewsFeed from the web and saves it to a file.
      */
     public void downloadNewsFeedFromWeb() {
-        Log.i(MainActivity.LOG_NAME, "Downloading news feed for " + feedName);
+        MainActivity.logVerbose("Downloading " + feedName + " News Feed from Web...");
         WebFileDownloader.downloadFromURLAsDocument(feedUrl, new WebFileDownloaderAdapter() {
             @Override
             public void fileDownloadedAsDocument(URL url, Document document) {
+                MainActivity.logVerbose(feedName + " News Feed has been Downloaded.");
                 // Save the feed to file...
                 try {
-                    Log.v(MainActivity.LOG_NAME, "Saving news feed for " + feedName + " to file...");
+                    MainActivity.logVerbose("Saving " + feedName + " News Feed to file...");
 
                     manager.getMainActivity().getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE).edit().putInt(getPreferencesTag(), fileSizeOnWeb).apply();
 

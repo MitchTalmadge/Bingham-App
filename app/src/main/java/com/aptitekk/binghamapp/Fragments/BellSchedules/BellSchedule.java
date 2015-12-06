@@ -74,7 +74,7 @@ public class BellSchedule {
                 }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
                 if ((minDiff == -1) || (diff < minDiff)) {
-                    Log.i(MainActivity.LOG_NAME, "Next determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
+                    MainActivity.logVerbose("Next determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
                     minDiff = diff;
                     minDate = subject;
                 }
@@ -96,7 +96,7 @@ public class BellSchedule {
                 }
                 long diff = Math.abs(currentTime.getTime() - date.getTime());
                 if ((minDiff == -1) || (diff < minDiff)) {
-                    Log.i(MainActivity.LOG_NAME, "Previous determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
+                    MainActivity.logVerbose("Previous determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
                     minDiff = diff;
                     minDate = subject;
                 }

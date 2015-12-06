@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -78,8 +77,9 @@ public class EventsManager {
      * @param listener the listener to add.
      */
     public void addEventsUpdateListener(EventsUpdateListener listener) {
-        if (!eventsUpdateListeners.contains(listener) && listener instanceof Fragment) {
-            eventsUpdateListeners.add(listener);
+        if (listener instanceof Fragment) {
+            if (!eventsUpdateListeners.contains(listener))
+                eventsUpdateListeners.add(listener);
 
             if (this.events != null)
                 listener.onEventsUpdated(this); //If the events list is already populated, notify the listener immediately.
@@ -114,19 +114,19 @@ public class EventsManager {
         int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
         int lastEventsFeedUpdateMonth = sharedPreferences.getInt("lastEventsFeedUpdateMonth", 0);
 
-        Log.v(MainActivity.LOG_NAME, "lastEventsFeedUpdateDay: " + lastEventsFeedUpdateDay);
-        Log.v(MainActivity.LOG_NAME, "lastEventsFeedUpdateMonth: " + lastEventsFeedUpdateMonth);
+        MainActivity.logVerbose("Last Events Feed Update Day: " + lastEventsFeedUpdateDay);
+        MainActivity.logVerbose("Last Events Feed Update Month: " + lastEventsFeedUpdateMonth);
 
         if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
                 || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
-            Log.v(MainActivity.LOG_NAME, "Events feed is out of date. Downloading events...");
+            MainActivity.logVerbose("Events Feed is out of date. Downloading Events...");
             sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
             downloadEventsFromWeb();
         } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
             File eventsFeedFile = new File(mainActivity.getFilesDir(), FILE_NAME);
 
             if (eventsFeedFile.exists()) {
-                Log.v(MainActivity.LOG_NAME, "Restoring events feed from file...");
+                MainActivity.logVerbose("Restoring Events Feed from file...");
                 try {
                     BufferedReader reader = new BufferedReader(new FileReader(eventsFeedFile));
                     String line;
@@ -144,20 +144,22 @@ public class EventsManager {
                     e.printStackTrace();
                 }
             } else {
-                Log.v(MainActivity.LOG_NAME, "Could not restore events feed from file.");
+                MainActivity.logVerbose("Could not restore Events Feed from file.");
                 downloadEventsFromWeb();
             }
         }
     }
 
     private void downloadEventsFromWeb() {
+        MainActivity.logVerbose("Downloading Events from Web...");
         try {
             WebFileDownloader.downloadFromURLAsJSONObject(new URL(BINGHAM_GOOGLE_CALENDAR), new WebFileDownloaderAdapter() {
                 @Override
                 public void fileDownloadedAsJSONObject(URL url, JSONObject jsonObject) {
+                    MainActivity.logVerbose("Events have been Downloaded.");
                     // Save the events to file...
                     try {
-                        Log.v(MainActivity.LOG_NAME, "Saving events to file...");
+                        MainActivity.logVerbose("Saving Events to file...");
                         FileOutputStream fileOutputStream = new FileOutputStream(new File(mainActivity.getFilesDir(), FILE_NAME));
 
                         if (jsonObject != null) {
@@ -219,7 +221,7 @@ public class EventsManager {
         Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
         for (Date date : times) {
             if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                Log.i(MainActivity.LOG_NAME, "Skipped event " + subject.getName() + " at " + subject.getStartTime());
+                MainActivity.logVerbose("Skipped event " + subject.getName() + " at " + subject.getStartTime());
                 continue;
             }
             long diff = Math.abs(currentTime - date.getTime());
@@ -372,7 +374,7 @@ public class EventsManager {
                         }
                     } catch (ParseException e1) {
                         e1.printStackTrace();
-                        Log.e(MainActivity.LOG_NAME, "Reverting to regular schedule");
+                        MainActivity.logVerbose("Reverting to regular schedule");
                     }
 
                 }
@@ -380,7 +382,7 @@ public class EventsManager {
             }
 
         }
-        Log.e(MainActivity.LOG_NAME, "No schedule was determined, loading regular weekday schedule.");
+        MainActivity.logVerbose("No schedule was determined, loading regular weekday schedule.");
         return new BellSchedule(fragment.getResources().getStringArray(R.array.regularBellSchedules)[0], fragment.getResources().getStringArray(R.array.regularBellSchedule0));
     }
 
