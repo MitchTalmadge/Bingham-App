@@ -105,7 +105,7 @@
                     android:text="@string/create_pin_label"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText1"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText2"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText3"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -148,7 +148,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText4"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                     android:text="@string/verify_pin_label"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText1V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -185,7 +185,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText2V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -200,7 +200,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText3V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
@@ -215,7 +215,7 @@
                     android:singleLine="true"
                     android:textSize="20dp" />
 
-                <com.aptitekk.binghamapp.SkywardFragmentClasses.PINEditText
+                <com.aptitekk.binghamapp.Utilities.PINEditText
                     android:id="@+id/PINEditText4V"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"

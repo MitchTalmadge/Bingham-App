@@ -2,7 +2,6 @@ package com.aptitekk.binghamapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,42 +14,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
-import com.aptitekk.binghamapp.rssnewsfeed.NewsFeed;
-import com.aptitekk.binghamapp.rssnewsfeed.RSSNewsFeedManager;
+import com.aptitekk.binghamapp.Events.EventsManager;
+import com.aptitekk.binghamapp.Fragments.MainFragment;
+import com.aptitekk.binghamapp.Fragments.NavigationDrawerFragment;
+import com.aptitekk.binghamapp.News.NewsFeed;
+import com.aptitekk.binghamapp.News.NewsFeedManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.ListIterator;
-import java.util.concurrent.Callable;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-public class MainActivity extends AppCompatActivity implements RSSNewsFeedManager.NewsFeedSizeListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_NAME = "BinghamAppVerbose";
     public static final String PREF_NAME = "com.AptiTekk.BinghamApp";
 
-    public static RSSNewsFeedManager newsFeeds;
-    public static CalendarDog eventsFeed;
-
-    private CalendarDog downloadingEventsFeed;
-
-    private ArrayList<FeedListener> feedListeners = new ArrayList<>();
+    private NewsFeedManager newsFeedManager;
+    private EventsManager eventsManager;
 
     private Toolbar toolbar;
     private ArrayList<BackButtonListener> backButtonListeners = new ArrayList<>();
@@ -76,120 +55,32 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
             getSupportFragmentManager().beginTransaction().add(R.id.fragmentSpaceMain, mainFragment).commit();
         }
 
-        // Set up news feed manager
-        newsFeeds = new RSSNewsFeedManager();
+        // Set up NewsFeedManager
+        this.newsFeedManager = new NewsFeedManager(this);
+
+        //Set up EventsManager
+        this.eventsManager = new EventsManager(this);
 
         // Download News & Events
         checkForNewsUpdates();
         checkForEventsUpdates();
     }
 
+    public NewsFeedManager getNewsFeedManager() {
+        return newsFeedManager;
+    }
+
+    public EventsManager getEventsManager() {
+        return eventsManager;
+    }
+
     public void checkForNewsUpdates() {
-        for (NewsFeed newsFeed : newsFeeds.getNewsFeeds())
-            RSSNewsFeedManager.getNewsFeedSize(this, newsFeed);
+        for (NewsFeed newsFeed : newsFeedManager.getNewsFeeds())
+            newsFeed.checkForUpdates();
     }
 
     public void checkForEventsUpdates() {
-        final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        int lastEventsFeedUpdateDay = sharedPreferences.getInt("lastEventsFeedUpdateDay", 0);
-        int lastEventsFeedUpdateMonth = sharedPreferences.getInt("lastEventsFeedUpdateMonth", 0);
-
-        final Callable<Void> eventsFeedCallable = new Callable<Void>() {
-            public Void call() {
-                eventsFeed = downloadingEventsFeed;
-                for (FeedListener listener : feedListeners) {
-                    if (listener != null && (listener instanceof Fragment && !((Fragment) listener).isDetached())) {
-                        listener.onEventsFeedDownloaded(eventsFeed);
-                    }
-                }
-                // Save the feed to file...
-                try {
-                    Log.v(LOG_NAME, "Saving events feed to file...");
-                    FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), "events.feed"));
-
-                    if (eventsFeed.getJSONObject() != null) {
-                        String jsonString = eventsFeed.getJSONObject().toString();
-
-                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
-                        outputStreamWriter.write(jsonString);
-
-                        outputStreamWriter.close();
-                        fileOutputStream.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-
-        eventsFeed = CalendarDog.determineRetrieval(sharedPreferences, lastEventsFeedUpdateDay, lastEventsFeedUpdateMonth,
-                eventsFeedCallable, getFilesDir());
-    }
-
-
-    public class NewsFeedRefreshCallable implements Callable<Void> {
-
-        NewsFeed newsFeed;
-        SharedPreferences sharedPreferences;
-        ArrayList<FeedListener> feedListeners;
-        int newsFeedSize;
-
-        public NewsFeedRefreshCallable(NewsFeed newsFeed,
-                                       SharedPreferences sharedPreferences,
-                                       ArrayList<FeedListener> feedListeners,
-                                       int newsFeedSize) {
-            this.newsFeed = newsFeed;
-            this.sharedPreferences = sharedPreferences;
-            this.feedListeners = feedListeners;
-            this.newsFeedSize = newsFeedSize;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            for (FeedListener listener : feedListeners) {
-                if (listener != null && (listener instanceof Fragment && ((Fragment) listener).isAdded())) {
-                    listener.onNewsFeedDownloaded(newsFeed);
-                }
-            }
-            // Save the feed to file...
-            try {
-                Log.v(LOG_NAME, "Saving news feed to file...");
-
-                sharedPreferences.edit().putInt(newsFeed.getPreferencesTag(), newsFeedSize).apply();
-
-                FileOutputStream fileOutputStream = new FileOutputStream(new File(getFilesDir(), newsFeed.getFileName()));
-                Document document = newsFeed.getDocument();
-
-                //Converts the Document into a file
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(document);
-                StreamResult result = new StreamResult(fileOutputStream);
-                transformer.transform(source, result);
-
-                fileOutputStream.close();
-            } catch (IOException | TransformerException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    @Override
-    public void onGetNewsFeedSize(final int newsFeedSize, NewsFeed newsFeed) {
-        final SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        int lastNewsFeedUpdateSize = sharedPreferences.getInt(newsFeed.getPreferencesTag(), 0);
-
-        Log.v(LOG_NAME, "lastNewsFeedUpdateSize: " + lastNewsFeedUpdateSize);
-        Log.v(LOG_NAME, "News Feed Size on Web: " + newsFeedSize);
-
-
-        final Callable<Void> newsFeedCallable = new NewsFeedRefreshCallable(newsFeed,
-                sharedPreferences, feedListeners, newsFeedSize);
-
-        newsFeeds.determineRetrieval(newsFeed, lastNewsFeedUpdateSize,
-                newsFeedSize, newsFeedCallable, getFilesDir());
+        eventsManager.checkForUpdates();
     }
 
     @Override
@@ -267,27 +158,6 @@ public class MainActivity extends AppCompatActivity implements RSSNewsFeedManage
         /*for (int i = 0; i < getFragmentManager().getBackStackEntryCount(); i++) {
             getFragmentManager().popBackStack();
         }*/
-    }
-
-    public void addFeedListener(FeedListener listener) {
-        if (!this.feedListeners.contains(listener))
-            this.feedListeners.add(listener);
-
-        // If the listener was late to the party, send them what we already got
-        for(NewsFeed newsFeed : newsFeeds.getNewsFeeds()) {
-            if(newsFeed.isReady())
-                listener.onNewsFeedDownloaded(newsFeed);
-        }
-
-        if (eventsFeed.isReady()) {
-            listener.onEventsFeedDownloaded(eventsFeed);
-        }
-    }
-
-    public interface FeedListener {
-        void onNewsFeedDownloaded(NewsFeed newsFeed);
-
-        void onEventsFeedDownloaded(CalendarDog eventsFeed);
     }
 
     public static int pixelsToDP(int pixels, Context context) {

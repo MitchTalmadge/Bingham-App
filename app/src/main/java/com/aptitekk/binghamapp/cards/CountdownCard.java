@@ -8,11 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.aptitekk.binghamapp.BellSchedulesFragmentClasses.BellSchedule;
+import com.aptitekk.binghamapp.Fragments.BellSchedules.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
-import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog;
-import com.aptitekk.binghamapp.rssGoogleCalendar.CalendarEvent;
+import com.aptitekk.binghamapp.Events.EventsManager;
+import com.aptitekk.binghamapp.Events.Event;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
 import java.text.ParseException;
@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
-import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.hasSchoolStartedForDay;
-import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.isItAorBDay;
-import static com.aptitekk.binghamapp.rssGoogleCalendar.CalendarDog.hasSchoolEndedForDay;
+import static com.aptitekk.binghamapp.Events.EventsManager.hasSchoolStartedForDay;
+import static com.aptitekk.binghamapp.Events.EventsManager.isItAorBDay;
+import static com.aptitekk.binghamapp.Events.EventsManager.hasSchoolEndedForDay;
 
 public class CountdownCard extends Card {
 
@@ -74,7 +74,7 @@ public class CountdownCard extends Card {
         this.setTitle("Time Remaining");
     }
 
-    public void refresh(final CalendarDog eventsFeed, final Fragment context, final CardViewNative cardHolder) {
+    public void refresh(final EventsManager eventsFeed, final Fragment context, final CardViewNative cardHolder) {
         //DETERMINE TIME
         final Date currentDateTime = new Date();
         Calendar targetDateTime = Calendar.getInstance(); // by default, todays datetime
@@ -87,14 +87,14 @@ public class CountdownCard extends Card {
 
         if (targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             //PARSE ALL SCHEDULE TIMES
-            BellSchedule schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), targetDateTime);
+            BellSchedule schedule = EventsManager.determineSchedule(context, eventsFeed.getEvents(), targetDateTime);
             BellSchedule todaySchedule = schedule;
             // IS SCHOOL OUT THOUGH?
             try {
                 if (!hasSchoolEndedForDay(schedule, targetDateTime)) {
                     Calendar tomorrow = targetDateTime;
                     tomorrow.add(Calendar.DATE, 1);
-                    schedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), tomorrow);
+                    schedule = EventsManager.determineSchedule(context, eventsFeed.getEvents(), tomorrow);
                     abday = isItAorBDay(eventsFeed.getEvents(), tomorrow);
                     targetDateTime = tomorrow;
                     tomorrowClosest = true;
@@ -105,11 +105,12 @@ public class CountdownCard extends Card {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
+
             if (schedule != null) {
+                Log.i(MainActivity.LOG_NAME, "Schedule determined for day: " + schedule.getScheduleName());
                 ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, abday, targetDateTime.getTime());
                 BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable, true);
-                CalendarDog.MultipleReturn response = CalendarDog.getNearestDateBySubjectIsEndTime(closest, currentDateTime, true);
+                EventsManager.MultipleReturn response = EventsManager.getNearestDateBySubjectIsEndTime(closest, currentDateTime, true);
                 final Date closestTime = (Date) response.getFirst();
                 isTimeEndTime = (boolean) response.getSecond();
 
@@ -118,20 +119,19 @@ public class CountdownCard extends Card {
                     Log.i(MainActivity.LOG_NAME, "Today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(todaySchedule,
                             abday, Calendar.getInstance().getTime()));
-                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                    closestPastTime = EventsManager.getNearestDateBySubject(closestPast, currentDateTime, false);
                 } else if(schoolStartedForDay) { // if school has started
                     Log.i(MainActivity.LOG_NAME, "Earlier class periods of today is the closest previous schedule");
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, timeTable);
-                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false);
+                    closestPastTime = EventsManager.getNearestDateBySubject(closestPast, currentDateTime, false);
                 } else { // pull yesterdays schedule
                     Log.i(MainActivity.LOG_NAME, "Yesterday is the closest previous schedule");
-                    Calendar yesterday = targetDateTime;
-                    yesterday.add(Calendar.DATE, -1);
-                    Log.i(MainActivity.LOG_NAME, "Yesterday is " + yesterday.getTime().toString());
-                    BellSchedule yesterdaySchedule = CalendarDog.determineSchedule(context, eventsFeed.getEvents(), yesterday);
+                    targetDateTime.add(Calendar.DATE, -1); //Yesterday
+                    Log.i(MainActivity.LOG_NAME, "Yesterday is " + targetDateTime.getTime().toString());
+                    BellSchedule yesterdaySchedule = EventsManager.determineSchedule(context, eventsFeed.getEvents(), targetDateTime);
                     BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
-                            abday, yesterday.getTime()));
-                    closestPastTime = CalendarDog.getNearestDateBySubject(closestPast, currentDateTime, false); // TODO: Have getPreviousSubject return closest date to resolve redundancy
+                            abday, targetDateTime.getTime()));
+                    closestPastTime = EventsManager.getNearestDateBySubject(closestPast, currentDateTime, false); // TODO: Have getPreviousSubject return closest date to resolve redundancy
                 }
                 final Date finalClosestPastTime = closestPastTime;
                 if(finalClosestPastTime.getTime() == 0) {
@@ -161,7 +161,7 @@ public class CountdownCard extends Card {
 
         //IF ITS BEFORE/AFTER SCHOOL YEAR OR WEEKENDS
         try {
-            CalendarEvent nextABDay = eventsFeed.getEvents().get(CalendarDog.findNextAorBDay(eventsFeed.getEvents()));
+            Event nextABDay = eventsFeed.getEvents().get(EventsManager.findNextAorBDay(eventsFeed.getEvents()));
 
             Log.i(MainActivity.LOG_NAME, nextABDay.toString() + " of " + nextABDay.getDate().get(Calendar.YEAR));
 
@@ -232,22 +232,22 @@ public class CountdownCard extends Card {
         StringBuilder sb = new StringBuilder(64);
         if (weeks > 0) {
             sb.append(weeks);
-            sb.append(" week" + ((weeks == 1) ? "" : "s") + " ");
+            sb.append(" week").append((weeks == 1) ? "" : "s").append(" ");
         }
         if (days > 0 || (days == 0 && weeks > 0)) {
             sb.append(days);
-            sb.append(" day" + ((days == 1) ? "" : "s") + " ");
+            sb.append(" day").append((days == 1) ? "" : "s").append(" ");
         }
         if (hours > 0 || (hours == 0 && days > 0)) {
             sb.append(hours);
-            sb.append(" hour" + ((hours == 1) ? "" : "s") + " ");
+            sb.append(" hour").append((hours == 1) ? "" : "s").append(" ");
         }
         if (minutes > 0 || (minutes == 0 && hours > 0)) {
             sb.append(minutes);
-            sb.append(" minute" + ((minutes == 1) ? "" : "s") + " ");
+            sb.append(" minute").append((minutes == 1) ? "" : "s").append(" ");
         }
         sb.append(seconds);
-        sb.append(" second" + ((seconds == 1) ? "" : "s"));
+        sb.append(" second").append((seconds == 1) ? "" : "s");
 
         return (sb.toString());
     }
