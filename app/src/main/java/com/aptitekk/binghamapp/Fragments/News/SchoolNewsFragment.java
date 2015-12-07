@@ -56,7 +56,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
             i++;
         }
 
-        // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles fot the Tabs and Number Of Tabs.
+        // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles for the Tabs, and Number Of Tabs.
         adapter = new ViewPagerAdapter(getFragmentManager(), titles);
 
         // Assigning ViewPager View and setting the adapter
@@ -77,11 +77,6 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
 
         // Setting the ViewPager For the SlidingTabsLayout
         tabs.setViewPager(pager);
-    }
-
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        return (cm.getActiveNetworkInfo() != null);
     }
 
     @Override
