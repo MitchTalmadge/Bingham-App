@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp.View;
+package com.aptitekk.binghamapp.Views.SlidingTab;
 
 import android.content.Context;
 import android.graphics.Typeface;

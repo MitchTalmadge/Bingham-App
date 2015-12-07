@@ -1,13 +1,10 @@
 package com.aptitekk.binghamapp.Fragments.News;
 
 
-import android.content.Context;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +13,14 @@ import android.view.ViewGroup;
 import com.aptitekk.binghamapp.Fragments.HelperFragments.WebViewFragment;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.News.NewsFeed;
-import com.aptitekk.binghamapp.News.NewsFeedType;
 import com.aptitekk.binghamapp.R;
-import com.aptitekk.binghamapp.View.SlidingTabLayout;
+import com.aptitekk.binghamapp.Views.SlidingTab.SlidingTabLayout;
+import com.aptitekk.binghamapp.Views.SlidingTab.ViewPagerAdapter;
+
+import java.util.TreeMap;
 
 
-public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragment.ArticleListener, MainActivity.BackButtonListener {
+public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragment.ArticleClickedListener, MainActivity.BackButtonListener {
 
     ViewPager pager;
     ViewPagerAdapter adapter;
@@ -49,22 +48,23 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        CharSequence[] titles = new CharSequence[((MainActivity) getActivity()).getNewsFeedManager().getNewsFeeds().size()];
-        int i = 0;
+        TreeMap<CharSequence, Fragment> fragmentTitleMap = new TreeMap<>();
+
         for (NewsFeed feed : ((MainActivity) getActivity()).getNewsFeedManager().getNewsFeeds()) {
-            titles[i] = feed.getFeedName();
-            i++;
+            SchoolNewsListFragment fragment = new SchoolNewsListFragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt("NewsFeedType", feed.getFeedType().ordinal());
+            fragment.setArguments(bundle);
+            fragment.setArticleClickedListener(this);
+
+            fragmentTitleMap.put(feed.getFeedName(), fragment);
         }
 
-        // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles for the Tabs, and Number Of Tabs.
-        adapter = new ViewPagerAdapter(this,
-                getFragmentManager(), titles);
+        adapter = new ViewPagerAdapter(getFragmentManager(), fragmentTitleMap);
 
-        // Assigning ViewPager View and setting the adapter
         pager = (ViewPager) view.findViewById(R.id.pager);
         pager.setAdapter(adapter);
 
-        // Assigning the Sliding Tab Layout View
         tabs = (SlidingTabLayout) view.findViewById(R.id.tabs);
         tabs.setDistributeEvenly(true); // To make the Tabs Fixed set this true, This makes the tabs Space Evenly in Available width
 
@@ -72,7 +72,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.primary_light);
+                return ContextCompat.getColor(getActivity(), R.color.primary_light);
             }
         });
 
@@ -99,48 +99,5 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         if (!getChildFragmentManager().popBackStackImmediate())
             getFragmentManager().popBackStack();
         return false;
-    }
-
-    public class ViewPagerAdapter extends FragmentStatePagerAdapter {
-
-        CharSequence[] Titles; // This will Store the Titles of the Tabs which are Going to be passed when ViewPagerAdapter is created
-        int NumbOfTabs; // Store the number of tabs, this will also be passed when the ViewPagerAdapter is created
-        private SchoolNewsFragment schoolNewsFragment;
-
-
-        // Build a Constructor and assign the passed Values to appropriate values in the class
-        public ViewPagerAdapter(SchoolNewsFragment schoolNewsFramgent, FragmentManager fm, CharSequence mTitles[]) {
-            super(fm);
-
-            schoolNewsFragment = schoolNewsFramgent;
-            this.Titles = mTitles;
-            this.NumbOfTabs = mTitles.length;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-
-            SchoolNewsListFragment fragment = new SchoolNewsListFragment();
-            Bundle bundle = new Bundle();
-            bundle.putInt("NewsFeedType", position);
-            fragment.setArguments(bundle);
-            fragment.setArticleListener(this.schoolNewsFragment);
-
-            return fragment;
-        }
-
-        // This method return the titles for the Tabs in the Tab Strip
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return Titles[position];
-        }
-
-        // This method return the Number of tabs for the tabs Strip
-
-        @Override
-        public int getCount() {
-            return NumbOfTabs;
-        }
     }
 }

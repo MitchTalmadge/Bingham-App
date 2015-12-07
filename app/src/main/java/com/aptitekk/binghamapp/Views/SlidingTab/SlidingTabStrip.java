@@ -1,4 +1,4 @@
-package com.aptitekk.binghamapp.View;
+package com.aptitekk.binghamapp.Views.SlidingTab;
 
 import android.R;
 import android.content.Context;

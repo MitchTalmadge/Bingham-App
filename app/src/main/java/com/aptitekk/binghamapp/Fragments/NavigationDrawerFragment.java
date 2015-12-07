@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -243,13 +244,13 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
             textView.setText((String) getItem(position));
 
             if (position == selectedItem) {
-                textView.setTextColor(getContext().getResources().getColor(R.color.primary));
+                textView.setTextColor(ContextCompat.getColor(getActivity(), R.color.primary));
                 textView.setTypeface(Typeface.DEFAULT_BOLD);
-                imageView.setColorFilter(getContext().getResources().getColor(R.color.primary));
+                imageView.setColorFilter(ContextCompat.getColor(getActivity(), R.color.primary));
             } else {
-                textView.setTextColor(getContext().getResources().getColor(R.color.secondary_text));
+                textView.setTextColor(ContextCompat.getColor(getActivity(), R.color.secondary_text));
                 textView.setTypeface(Typeface.DEFAULT);
-                imageView.setColorFilter(getContext().getResources().getColor(R.color.secondary_text));
+                imageView.setColorFilter(ContextCompat.getColor(getActivity(), R.color.secondary_text));
             }
 
             return view;

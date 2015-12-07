@@ -24,7 +24,7 @@ import java.util.List;
 public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateListener {
 
     private RecyclerView recyclerView;
-    private ArticleListener articleListener;
+    private ArticleClickedListener articleClickedListener;
     private NewsFeedType newsFeedType;
 
     public SchoolNewsListFragment() {
@@ -141,15 +141,15 @@ public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateLi
     }
 
     public void onArticleClick(String URL) {
-        if (articleListener != null)
-            articleListener.onArticleClicked(URL);
+        if (articleClickedListener != null)
+            articleClickedListener.onArticleClicked(URL);
     }
 
-    public void setArticleListener(ArticleListener articleListener) {
-        this.articleListener = articleListener;
+    public void setArticleClickedListener(ArticleClickedListener articleClickedListener) {
+        this.articleClickedListener = articleClickedListener;
     }
 
-    protected interface ArticleListener {
+    protected interface ArticleClickedListener {
 
         void onArticleClicked(String URL);
 
