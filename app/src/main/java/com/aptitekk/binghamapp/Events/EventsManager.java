@@ -95,7 +95,7 @@ public class EventsManager {
     }
 
     /**
-     * Notifies all listeners of an update to the eventsList.
+     * Notifies all listeners of an update to the EventsList.
      */
     protected void notifyListenersOfUpdate() {
         for (EventsUpdateListener listener : eventsUpdateListeners) {
@@ -184,9 +184,9 @@ public class EventsManager {
     }
 
     /**
-     * Updates the Events lists and notifies all listeners of an update.
+     * Updates the EventsList and notifies all listeners of an update.
      *
-     * @param jsonObject The jsonObject to build the eventsList from.
+     * @param jsonObject The jsonObject to build the EventsList from.
      */
     private void updateEvents(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
