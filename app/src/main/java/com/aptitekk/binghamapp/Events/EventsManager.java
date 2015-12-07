@@ -490,7 +490,7 @@ public class EventsManager {
         });
         actions.add(t3);
 
-        int imageDrawableId = -1;
+        int imageDrawableId = R.drawable.event_default;
 
         for (CountdownCard.CountdownTarget target : CountdownCard.CountdownTarget.values()) {
             if (event.getTitle().toLowerCase().contains(target.getValue())) {
@@ -499,12 +499,12 @@ public class EventsManager {
             }
         }
 
-        final int finalImageDrawableId = imageDrawableId;
         return MaterialLargeImageCard.with(fragment.getActivity())
                 .setTextOverImage(event.getTitle())
                 .setTitle(formatDateForCard(event))
                 .setSubTitle(event.getLocation())
-                .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
+                .useDrawableId(imageDrawableId)
+                /*.useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
                     @Override
                     public void setupInnerViewElements(ViewGroup parent, View viewImage) {
 
@@ -515,7 +515,7 @@ public class EventsManager {
                                 .into((ImageView) viewImage);
                         //((ImageView) viewImage).setImageResource(R.color.primary);
                     }
-                })
+                })*/
                 .setupSupplementalActions(R.layout.supplemental_actions_calendar_event, actions)
                 .build();
     }
