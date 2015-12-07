@@ -81,8 +81,7 @@ public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateLi
             if (getView() != null)
                 recyclerView = (RecyclerView) getView().findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
-            LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-            recyclerView.setLayoutManager(llm);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
             RVAdapter adapter = new RVAdapter(newsFeed.getArticlesList());
             recyclerView.setAdapter(adapter);

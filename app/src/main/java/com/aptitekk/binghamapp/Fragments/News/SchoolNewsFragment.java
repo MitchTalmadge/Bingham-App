@@ -57,7 +57,8 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         }
 
         // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles for the Tabs, and Number Of Tabs.
-        adapter = new ViewPagerAdapter(getFragmentManager(), titles);
+        adapter = new ViewPagerAdapter(this,
+                getFragmentManager(), titles);
 
         // Assigning ViewPager View and setting the adapter
         pager = (ViewPager) view.findViewById(R.id.pager);
@@ -102,17 +103,18 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
 
     public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-        CharSequence Titles[]; // This will Store the Titles of the Tabs which are Going to be passed when ViewPagerAdapter is created
+        CharSequence[] Titles; // This will Store the Titles of the Tabs which are Going to be passed when ViewPagerAdapter is created
         int NumbOfTabs; // Store the number of tabs, this will also be passed when the ViewPagerAdapter is created
+        private SchoolNewsFragment schoolNewsFragment;
 
 
         // Build a Constructor and assign the passed Values to appropriate values in the class
-        public ViewPagerAdapter(FragmentManager fm, CharSequence mTitles[]) {
+        public ViewPagerAdapter(SchoolNewsFragment schoolNewsFramgent, FragmentManager fm, CharSequence mTitles[]) {
             super(fm);
 
+            schoolNewsFragment = schoolNewsFramgent;
             this.Titles = mTitles;
             this.NumbOfTabs = mTitles.length;
-
         }
 
         @Override
@@ -122,6 +124,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
             Bundle bundle = new Bundle();
             bundle.putInt("NewsFeedType", position);
             fragment.setArguments(bundle);
+            fragment.setArticleListener(this.schoolNewsFragment);
 
             return fragment;
         }
