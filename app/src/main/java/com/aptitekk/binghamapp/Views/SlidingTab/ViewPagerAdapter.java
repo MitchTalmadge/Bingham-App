@@ -5,13 +5,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.Iterator;
-import java.util.TreeMap;
+import java.util.LinkedHashMap;
 
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-    TreeMap<CharSequence, Fragment> titleFragmentMap;
+    LinkedHashMap<CharSequence, Fragment> titleFragmentMap;
 
-    public ViewPagerAdapter(FragmentManager fragmentManager, TreeMap<CharSequence, Fragment> titleFragmentMap) {
+    public ViewPagerAdapter(FragmentManager fragmentManager, LinkedHashMap<CharSequence, Fragment> titleFragmentMap) {
         super(fragmentManager);
 
         this.titleFragmentMap = titleFragmentMap;

@@ -17,6 +17,7 @@ import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.Views.SlidingTab.SlidingTabLayout;
 import com.aptitekk.binghamapp.Views.SlidingTab.ViewPagerAdapter;
 
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 
@@ -48,7 +49,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TreeMap<CharSequence, Fragment> fragmentTitleMap = new TreeMap<>();
+        LinkedHashMap<CharSequence, Fragment> fragmentTitleMap = new LinkedHashMap<>();
 
         for (NewsFeed feed : ((MainActivity) getActivity()).getNewsFeedManager().getNewsFeeds()) {
             SchoolNewsListFragment fragment = new SchoolNewsListFragment();
