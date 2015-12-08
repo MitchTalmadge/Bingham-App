@@ -1,6 +1,7 @@
 package com.aptitekk.binghamapp.Fragments.News;
 
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -72,7 +73,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                return ContextCompat.getColor(getActivity(), R.color.primary_light);
+                return ContextCompat.getColor(getActivity(), Color.WHITE);
             }
         });
 
@@ -96,17 +97,17 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         setTabsVisible(false);
     }
 
-    private void setTabsVisible(boolean visible)
-    {
-        slidingTabLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
-        viewPager.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
     @Override
     public boolean onBackPressed() {
         if (!getChildFragmentManager().popBackStackImmediate())
             getFragmentManager().popBackStack();
         setTabsVisible(true);
         return false;
+    }
+
+    private void setTabsVisible(boolean visible)
+    {
+        slidingTabLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+        viewPager.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }
