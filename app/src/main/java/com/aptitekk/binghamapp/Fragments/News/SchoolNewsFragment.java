@@ -73,7 +73,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                return ContextCompat.getColor(getActivity(), Color.WHITE);
+                return Color.WHITE;
             }
         });
 
