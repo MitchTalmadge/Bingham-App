@@ -18,14 +18,13 @@ import com.aptitekk.binghamapp.Views.SlidingTab.SlidingTabLayout;
 import com.aptitekk.binghamapp.Views.SlidingTab.ViewPagerAdapter;
 
 import java.util.LinkedHashMap;
-import java.util.TreeMap;
 
 
 public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragment.ArticleClickedListener, MainActivity.BackButtonListener {
 
-    ViewPager pager;
-    ViewPagerAdapter adapter;
-    SlidingTabLayout tabs;
+    ViewPager viewPager;
+    ViewPagerAdapter viewPagerAdapter;
+    SlidingTabLayout slidingTabLayout;
 
     public SchoolNewsFragment() {
         // Required empty public constructor
@@ -61,16 +60,16 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
             fragmentTitleMap.put(feed.getFeedName(), fragment);
         }
 
-        adapter = new ViewPagerAdapter(getFragmentManager(), fragmentTitleMap);
+        this.viewPagerAdapter = new ViewPagerAdapter(getFragmentManager(), fragmentTitleMap);
 
-        pager = (ViewPager) view.findViewById(R.id.pager);
-        pager.setAdapter(adapter);
+        this.viewPager = (ViewPager) view.findViewById(R.id.newsViewPager);
+        viewPager.setAdapter(this.viewPagerAdapter);
 
-        tabs = (SlidingTabLayout) view.findViewById(R.id.tabs);
-        tabs.setDistributeEvenly(true); // To make the Tabs Fixed set this true, This makes the tabs Space Evenly in Available width
+        slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.newsSlidingTabs);
+        slidingTabLayout.setDistributeEvenly(true); // To make the Tabs Fixed set this true, This makes the tabs Space Evenly in Available width
 
         // Setting Custom Color for the Scroll bar indicator of the Tab View
-        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+        slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
                 return ContextCompat.getColor(getActivity(), R.color.primary_light);
@@ -78,7 +77,7 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
         });
 
         // Setting the ViewPager For the SlidingTabsLayout
-        tabs.setViewPager(pager);
+        slidingTabLayout.setViewPager(viewPager);
     }
 
     @Override
@@ -93,12 +92,21 @@ public class SchoolNewsFragment extends Fragment implements SchoolNewsListFragme
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("newsArticle")
                 .commit();
+
+        setTabsVisible(false);
+    }
+
+    private void setTabsVisible(boolean visible)
+    {
+        slidingTabLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+        viewPager.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public boolean onBackPressed() {
         if (!getChildFragmentManager().popBackStackImmediate())
             getFragmentManager().popBackStack();
+        setTabsVisible(true);
         return false;
     }
 }
