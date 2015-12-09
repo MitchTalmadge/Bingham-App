@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private NewsFeedManager newsFeedManager;
     private EventsManager eventsManager;
 
-    private Toolbar toolbar;
     private ArrayList<BackButtonListener> backButtonListeners = new ArrayList<>();
     private DrawerLayout drawer;
 
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Set up the toolbar
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Set up the NavigationDrawer
@@ -66,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
         // Download News & Events
         checkForNewsUpdates();
         checkForEventsUpdates();
+    }
+
+    public void setActionBarTitle(CharSequence title)
+    {
+        getSupportActionBar().setTitle(title);
     }
 
     public NewsFeedManager getNewsFeedManager() {

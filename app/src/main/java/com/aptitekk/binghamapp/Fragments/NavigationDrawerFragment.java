@@ -29,6 +29,9 @@ import com.aptitekk.binghamapp.Fragments.Skyward.SkywardFragment;
 import com.aptitekk.binghamapp.Fragments.GPACalculator.GPACalcFragment;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
+import com.aptitekk.binghamapp.Versioning;
+
+import junit.runner.Version;
 
 
 /**
@@ -41,6 +44,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
     private ListView drawerList;
 
     private NavigationDrawerAdapter adapter;
+    private String[] drawerListStrings;
     private int[] drawerListPositions;
 
     private boolean skipMainSelection = false;
@@ -68,7 +72,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
 
         //Set up drawer list
         this.drawerList = (ListView) getActivity().findViewById(R.id.listView);
-        String[] drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
+        this.drawerListStrings = getResources().getStringArray(R.array.drawer_list_strings);
         this.drawerListPositions = new int[drawerListStrings.length];
 
         for (int i = 0; i < drawerListStrings.length; i++) {
@@ -146,11 +150,6 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
                 break;
             case 6: //Skyward Access
                 newFragment = new SkywardFragment();
-                /*newFragment = new WebViewFragment();
-                bundle = new Bundle();
-                bundle.putString("URL", "https://skystu.jordan.k12.ut.us/scripts/wsisa.dll/WService=wsEAplus/mobilelogin.w");
-                bundle.putBoolean("useJavaScript", true);
-                newFragment.setArguments(bundle);*/
                 break;
             case 7: // GPA Calculator
                 newFragment = new GPACalcFragment();
@@ -175,6 +174,8 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
             fragmentTransaction.commit();
         }
 
+        ((MainActivity) getActivity()).setActionBarTitle(newFragment != null ? drawerListStrings[position] : Versioning.APP_NAME);
+
         MainActivity.closeDrawer(this.drawerLayout);
     }
 
@@ -187,6 +188,7 @@ public class NavigationDrawerFragment extends Fragment implements FragmentManage
         if (!skipMainSelection && getFragmentManager().getBackStackEntryCount() == 0) {
             this.adapter.setSelectedItem(0);
             this.adapter.notifyDataSetChanged();
+            ((MainActivity) getActivity()).setActionBarTitle(Versioning.APP_NAME);
         } else if (skipMainSelection)
             skipMainSelection = false;
     }
