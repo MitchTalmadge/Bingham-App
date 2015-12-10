@@ -34,9 +34,9 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
     CardViewNative countDownCardView;
 
     View latestNewsView;
-    TextView latestNews_title;
-    TextView latestNews_description;
-    TextView latestNews_pubDate;
+    TextView latestNewsViewTitle;
+    TextView latestNewsViewDescription;
+    TextView latestNewsViewPublishDate;
 
     Card nextEventCard;
     CardViewNative nextEventCardView;
@@ -73,21 +73,21 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
 
     @Override
     public void onNewsFeedUpdated(final NewsFeed feed) {
-        latestNews_title = (TextView) latestNewsView.findViewById(R.id.title);
-        latestNews_description = (TextView) latestNewsView.findViewById(R.id.description);
-        latestNews_pubDate = (TextView) latestNewsView.findViewById(R.id.pubDate);
+        latestNewsViewTitle = (TextView) latestNewsView.findViewById(R.id.title);
+        latestNewsViewPublishDate = (TextView) latestNewsView.findViewById(R.id.publishDate);
+        latestNewsViewDescription = (TextView) latestNewsView.findViewById(R.id.description);
 
         if (feed.getFeedType() == NewsFeedType.ANNOUNCEMENTS) {
 
-            latestNews_title.setText(feed.getArticlesList().get(0).getTitle());
-            latestNews_description.setText(feed.getArticlesList().get(0).getDescription());
-            latestNews_pubDate.setText(feed.getArticlesList().get(0).getPubDate());
+            latestNewsViewTitle.setText(feed.getArticlesList().get(0).getArticleTitle());
+            latestNewsViewPublishDate.setText(feed.getArticlesList().get(0).getArticlePublishDate());
+            latestNewsViewDescription.setText(feed.getArticlesList().get(0).getArticleDescription());
             latestNewsView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     WebViewFragment webViewFragment = new WebViewFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putString("URL", feed.getArticlesList().get(0).getLink());
+                    bundle.putString("URL", feed.getArticlesList().get(0).getArticleLink());
                     webViewFragment.setArguments(bundle);
 
                     getChildFragmentManager().beginTransaction()

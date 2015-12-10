@@ -92,18 +92,18 @@ public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateLi
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NewsArticleViewHolder> {
 
         public class NewsArticleViewHolder extends RecyclerView.ViewHolder {
-            CardView cv;
-            TextView title;
-            TextView description;
-            TextView pubDate;
+            CardView cardView;
+            TextView titleTextView;
+            TextView descriptionTextView;
+            TextView publishDateTextView;
             String url = "";
 
             NewsArticleViewHolder(View itemView) {
                 super(itemView);
-                cv = (CardView) itemView.findViewById(R.id.cv);
-                title = (TextView) itemView.findViewById(R.id.title);
-                description = (TextView) itemView.findViewById(R.id.description);
-                pubDate = (TextView) itemView.findViewById(R.id.pubDate);
+                cardView = (CardView) itemView.findViewById(R.id.cv);
+                titleTextView = (TextView) itemView.findViewById(R.id.title);
+                descriptionTextView = (TextView) itemView.findViewById(R.id.description);
+                publishDateTextView = (TextView) itemView.findViewById(R.id.publishDate);
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -114,15 +114,15 @@ public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateLi
             }
         }
 
-        List<NewsArticle> articles;
+        List<NewsArticle> articleList;
 
-        RVAdapter(List<NewsArticle> articles) {
-            this.articles = articles;
+        RVAdapter(List<NewsArticle> articleList) {
+            this.articleList = articleList;
         }
 
         @Override
         public int getItemCount() {
-            return articles.size();
+            return articleList.size();
         }
 
         @Override
@@ -133,10 +133,10 @@ public class SchoolNewsListFragment extends Fragment implements NewsFeedUpdateLi
 
         @Override
         public void onBindViewHolder(NewsArticleViewHolder newsarticleViewHolder, int i) {
-            newsarticleViewHolder.title.setText(articles.get(i).getTitle());
-            newsarticleViewHolder.description.setText(articles.get(i).getDescription());
-            newsarticleViewHolder.pubDate.setText(articles.get(i).getPubDate());
-            newsarticleViewHolder.url = articles.get(i).getLink();
+            newsarticleViewHolder.titleTextView.setText(articleList.get(i).getArticleTitle());
+            newsarticleViewHolder.descriptionTextView.setText(articleList.get(i).getArticleDescription());
+            newsarticleViewHolder.publishDateTextView.setText(articleList.get(i).getArticlePublishDate());
+            newsarticleViewHolder.url = articleList.get(i).getArticleLink();
         }
     }
 

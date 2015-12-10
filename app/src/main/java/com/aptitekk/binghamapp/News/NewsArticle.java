@@ -1,45 +1,52 @@
 package com.aptitekk.binghamapp.News;
 
-public class NewsArticle {
-	
-	String title;
-	String link;
-	String guid;
-	String description;
-	String pubDate;
-	
-	public NewsArticle(String title, String link, String guid, String description, String pubDate) {
-		if(title == null)
-			title = "N/A";
-		if(link == null)
-			link = "N/A";
-		if(guid == null)
-			guid = "N/A";
-		if(description == null)
-			description = "N/A";
-		if(pubDate == null)
-			pubDate = "N/A";
-		this.title = title;
-		this.link = link;
-		this.guid = guid;
-		this.description = description;
-		this.pubDate = pubDate;
-		
-	}
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
-	public String getTitle() {
-		return this.title;
-	}
-	public String getLink() {
-		return link;
-	}
-	public String getGUID() {
-        return guid;
+public class NewsArticle {
+
+    String articleTitle;
+    String articleLink;
+    String articleGuid;
+    String articleDescription;
+    String articlePublishDate;
+
+    public NewsArticle(String articleTitle, String articleLink, String articleGuid, String articleDescription, String articlePublishDate) {
+        this.articleTitle = articleTitle;
+        this.articleLink = articleLink;
+        this.articleGuid = articleGuid;
+        this.articleDescription = articleDescription;
+        if (this.articleDescription != null)
+            this.articleDescription = this.articleDescription.replaceAll("<br>", "\n");
+        this.articlePublishDate = articlePublishDate;
+        if (this.articlePublishDate != null) {
+            try {
+                Date date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).parse(this.articlePublishDate);
+                this.articlePublishDate = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US).format(date);
+            } catch (ParseException ignored) {
+            }
+        }
     }
-    public String getDescription() {
-        return description;
+
+    public String getArticleTitle() {
+        return this.articleTitle != null ? this.articleTitle : "(No Title)";
     }
-    public String getPubDate() {
-        return pubDate;
+
+    public String getArticleLink() {
+        return articleLink != null ? this.articleLink : "#";
+    }
+
+    public String getArticleGuid() {
+        return articleGuid;
+    }
+
+    public String getArticleDescription() {
+        return articleDescription != null ? this.articleDescription : "";
+    }
+
+    public String getArticlePublishDate() {
+        return articlePublishDate != null ? this.articlePublishDate : "Publish Date Unknown";
     }
 }
