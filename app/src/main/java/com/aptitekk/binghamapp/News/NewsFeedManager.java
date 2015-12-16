@@ -8,8 +8,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * News Feed Manager
@@ -25,6 +31,7 @@ public class NewsFeedManager {
         this.mainActivity = mainActivity;
 
         initializeFeeds();
+        loadSavedFeeds();
     }
 
     /**
@@ -36,6 +43,24 @@ public class NewsFeedManager {
 
         for (NewsFeedType feedType : NewsFeedType.values()) //Add all feed types from NewsFeedType enum.
             newsFeeds.add(new NewsFeed(this, feedType));
+    }
+
+    private void loadSavedFeeds() {
+        for(NewsFeed newsFeed : newsFeeds) {
+            File newsFeedFile = new File(getMainActivity().getFilesDir(), newsFeed.getFileName());
+
+            if (newsFeedFile.exists()) {
+                MainActivity.logVerbose("Restoring News Feed from file...");
+                try {
+                    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
+                    newsFeed.updateFeed(document);
+                } catch (SAXException | IOException | ParserConfigurationException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                MainActivity.logVerbose("Could not restore News Feed from file.");
+            }
+        }
     }
 
     /**

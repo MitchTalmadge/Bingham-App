@@ -56,13 +56,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         logInfo("Setting Up Managers...");
-
         this.newsFeedManager = new NewsFeedManager(this);
         this.eventsManager = new EventsManager(this);
 
         logInfo("Checking for Updates...");
-
-        // Download News & Events
         checkForNewsUpdates();
         checkForEventsUpdates();
     }

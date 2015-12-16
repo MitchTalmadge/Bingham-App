@@ -77,6 +77,35 @@ public class EventsManager {
 
     public EventsManager(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
+
+        loadSavedEvents();
+    }
+
+    private void loadSavedEvents()
+    {
+        File eventsFeedFile = new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME);
+
+        if (eventsFeedFile.exists()) {
+            MainActivity.logVerbose("Restoring Events Feed from file...");
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(eventsFeedFile));
+                String line;
+                StringBuilder stringBuilder = new StringBuilder();
+                String ls = System.getProperty("line.separator");
+
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                    stringBuilder.append(ls);
+                }
+
+                JSONObject jsonObject = new JSONObject(stringBuilder.toString());
+                updateEvents(jsonObject);
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            MainActivity.logVerbose("Could not restore Events Feed from file.");
+        }
     }
 
     /**
@@ -121,35 +150,11 @@ public class EventsManager {
         MainActivity.logVerbose("Last Events Feed Update Month: " + lastEventsFeedUpdateMonth);
 
         if (lastEventsFeedUpdateDay != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)) { // If the last time we updated was not today...
+                || lastEventsFeedUpdateMonth != Calendar.getInstance().get(Calendar.MONTH)
+                || !new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME).exists()) { // If the last time we updated was not today...
             MainActivity.logVerbose("Events Feed is out of date. Downloading Events...");
             sharedPreferences.edit().putInt("lastEventsFeedUpdateDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).putInt("lastEventsFeedUpdateMonth", Calendar.getInstance().get(Calendar.MONTH)).apply();
             downloadEventsFromWeb();
-        } else { // We have already downloaded the events today.. Lets retrieve the file and create a feed from it.
-            File eventsFeedFile = new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME);
-
-            if (eventsFeedFile.exists()) {
-                MainActivity.logVerbose("Restoring Events Feed from file...");
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(eventsFeedFile));
-                    String line;
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String ls = System.getProperty("line.separator");
-
-                    while ((line = reader.readLine()) != null) {
-                        stringBuilder.append(line);
-                        stringBuilder.append(ls);
-                    }
-
-                    JSONObject jsonObject = new JSONObject(stringBuilder.toString());
-                    updateEvents(jsonObject);
-                } catch (JSONException | IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                MainActivity.logVerbose("Could not restore Events Feed from file.");
-                downloadEventsFromWeb();
-            }
         }
     }
 

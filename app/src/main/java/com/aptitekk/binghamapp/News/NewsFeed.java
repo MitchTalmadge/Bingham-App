@@ -73,7 +73,7 @@ public class NewsFeed {
      * If the file size is not null and is consistent, the feed will be restored from a cached copy.
      */
     public void checkForUpdates() {
-        MainActivity.logVerbose("Checking for Updates for "+ feedName + " News Feed...");
+        MainActivity.logVerbose("Checking for Updates for " + feedName + " News Feed...");
         WebFileDownloader.getFileSizeFromURL(feedUrl, new WebFileDownloaderAdapter() {
             @Override
             public void fileSizeDetermined(URL url, int fileSizeInBytes) {
@@ -82,29 +82,16 @@ public class NewsFeed {
                 final SharedPreferences sharedPreferences = manager.getMainActivity().getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE);
                 int lastNewsFeedUpdateSize = sharedPreferences.getInt(getPreferencesTag(), 0);
 
-                MainActivity.logVerbose("File size determined for "+ feedName + " News Feed:");
+                MainActivity.logVerbose("File size determined for " + feedName + " News Feed:");
                 MainActivity.logVerbose("News Feed Size in Storage: " + lastNewsFeedUpdateSize);
                 MainActivity.logVerbose("News Feed Size on Web: " + fileSizeInBytes);
 
-                if (lastNewsFeedUpdateSize <= 0 || fileSizeInBytes != lastNewsFeedUpdateSize) { // If we have never downloaded the feed before or the feed on the website is a different size...
+                // If we have never downloaded the feed before or the feed on the website is a different size...
+                if (lastNewsFeedUpdateSize <= 0 ||
+                        fileSizeInBytes != lastNewsFeedUpdateSize ||
+                        !new File(manager.getMainActivity().getFilesDir(), getFileName()).exists()) {
                     MainActivity.logVerbose("News feed is out of date. Downloading Feed...");
-
                     downloadNewsFeedFromWeb();
-                } else { // We already have the latest news... Lets retrieve the file and create a feed from it.
-                    File newsFeedFile = new File(manager.getMainActivity().getFilesDir(), getFileName());
-
-                    if (newsFeedFile.exists()) {
-                        MainActivity.logVerbose("Restoring News Feed from file...");
-                        try {
-                            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(newsFeedFile);
-                            updateFeed(document);
-                        } catch (SAXException | IOException | ParserConfigurationException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        MainActivity.logVerbose("Could not restore News Feed from file. Downloading Feed...");
-                        downloadNewsFeedFromWeb();
-                    }
                 }
             }
         });
