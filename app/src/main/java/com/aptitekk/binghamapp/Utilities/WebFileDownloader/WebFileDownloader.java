@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -67,14 +68,14 @@ public class WebFileDownloader {
                 return dBuilder.parse(url.toString());
             } catch (ParserConfigurationException | SAXException | IOException e) {
                 e.printStackTrace();
+                return null;
             }
-
-            return null;
         }
 
         @Override
         protected void onPostExecute(Document document) {
-            listener.fileDownloadedAsDocument(url, document);
+            if (document != null)
+                listener.fileDownloadedAsDocument(url, document);
         }
     }
 
@@ -95,15 +96,16 @@ public class WebFileDownloader {
                 URLConnection urlConnection = url.openConnection();
                 urlConnection.setConnectTimeout(1000);
                 return new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }
 
         @Override
         protected void onPostExecute(BufferedReader bufferedReader) {
-            listener.fileDownloadedAsStream(url, bufferedReader);
+            if (bufferedReader != null)
+                listener.fileDownloadedAsStream(url, bufferedReader);
         }
     }
 
@@ -120,8 +122,9 @@ public class WebFileDownloader {
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
+            HttpURLConnection urlConnection = null;
             try {
-                URLConnection urlConnection = url.openConnection();
+                urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setConnectTimeout(1000);
                 BufferedReader streamReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 StringBuilder responseStrBuilder = new StringBuilder();
@@ -130,15 +133,20 @@ public class WebFileDownloader {
                 while ((inputStr = streamReader.readLine()) != null)
                     responseStrBuilder.append(inputStr);
                 return new JSONObject(responseStrBuilder.toString());
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
                 return null;
+            } finally {
+                if(urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
         }
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
-            listener.fileDownloadedAsJSONObject(url, jsonObject);
+            if (jsonObject != null)
+                listener.fileDownloadedAsJSONObject(url, jsonObject);
         }
     }
 
@@ -159,19 +167,20 @@ public class WebFileDownloader {
 
         @Override
         protected Integer doInBackground(Void... voids) {
-            HttpURLConnection conn = null;
+            HttpURLConnection urlConnection = null;
             try {
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("HEAD");
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-                conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
-                conn.getInputStream();
-                return conn.getContentLength();
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("HEAD");
+                urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+                urlConnection.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
+                urlConnection.getInputStream();
+                return urlConnection.getContentLength();
             } catch (IOException e) {
+                e.printStackTrace();
                 return 0;
             } finally {
-                if (conn != null)
-                    conn.disconnect();
+                if (urlConnection != null)
+                    urlConnection.disconnect();
             }
         }
 

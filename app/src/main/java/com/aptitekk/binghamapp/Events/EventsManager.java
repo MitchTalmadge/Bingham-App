@@ -102,6 +102,8 @@ public class EventsManager {
                 updateEvents(jsonObject);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
+                MainActivity.logVerbose("Could not restore Events Feed from file.");
+                eventsFeedFile.delete(); //Delete file so that it will be re-downloaded.
             }
         } else {
             MainActivity.logVerbose("Could not restore Events Feed from file.");

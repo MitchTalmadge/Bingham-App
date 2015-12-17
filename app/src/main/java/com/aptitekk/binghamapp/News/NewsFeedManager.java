@@ -56,6 +56,8 @@ public class NewsFeedManager {
                     newsFeed.updateFeed(document);
                 } catch (SAXException | IOException | ParserConfigurationException e) {
                     e.printStackTrace();
+                    MainActivity.logVerbose("Could not restore News Feed from file.");
+                    newsFeedFile.delete(); //Delete file so that it will be re-downloaded.
                 }
             } else {
                 MainActivity.logVerbose("Could not restore News Feed from file.");
