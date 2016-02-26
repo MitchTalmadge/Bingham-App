@@ -1,7 +1,6 @@
 package com.aptitekk.binghamapp.Fragments.BellSchedules;
 
-import android.util.Log;
-
+import com.aptitekk.binghamapp.Events.DayType;
 import com.aptitekk.binghamapp.MainActivity;
 
 import java.text.DateFormat;
@@ -35,7 +34,7 @@ public class BellSchedule {
         return NONE_DAY;
     }
 
-    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, char abday, Date dayToAssign) {
+    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, DayType dayType, Date dayToAssign) {
         DateFormat df = new SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.US);
         ArrayList<Subject> result = new ArrayList<>();
         for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
@@ -51,7 +50,7 @@ public class BellSchedule {
                 result.add(
                         new Subject(
                                 schedule.getSubjectNames()[i],
-                                abday,
+                                dayType,
                                 df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectStartTimes()[i]),
                                 df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectEndTimes()[i])));
             } catch (ParseException e) {
@@ -108,13 +107,13 @@ public class BellSchedule {
 
     public static class Subject {
         String name;
-        char abday;
+        DayType dayType;
         Date startTime;
         Date endTime;
 
-        public Subject(String name, char abday, Date start, Date end) {
+        public Subject(String name, DayType dayType, Date start, Date end) {
             this.name = name;
-            this.abday = abday;
+            this.dayType = dayType;
             startTime = start;
             endTime = end;
         }
@@ -123,8 +122,8 @@ public class BellSchedule {
             return name;
         }
 
-        public char getABDay() {
-            return abday;
+        public DayType getDayType() {
+            return dayType;
         }
 
         public Date getStartTime() {

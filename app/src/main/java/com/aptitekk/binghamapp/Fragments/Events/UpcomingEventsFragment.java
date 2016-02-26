@@ -128,12 +128,12 @@ public class UpcomingEventsFragment extends Fragment implements MainActivity.Bac
         for (int i = 0; i < eventsManager.getEventsList().size(); i++) {
 
             if (eventsManager.getEventsList().get(i).getTitle().equals("A Day") || this.eventsManager.getEventsList().get(i).getTitle().equals("B Day")) {
-                if (!(eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true).isEmpty())) {
+                if (!(eventsManager.getEventInfoHelper().getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true).isEmpty())) {
                     sectionQueue.put(SimpleDateFormat.getDateInstance().format(this.eventsManager.getEventsList().get(i).getEventDate().getTime())
                             + " (" + this.eventsManager.getEventsList().get(i).getTitle() + ")", sectionOffsetIndex);
                 }
-            } else if (!(eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate()).isEmpty())) {
-                for (Event e : eventsManager.getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true)) {
+            } else if (!(eventsManager.getEventInfoHelper().getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true).isEmpty())) {
+                for (Event e : eventsManager.getEventInfoHelper().getEventsForDay(this.eventsManager.getEventsList().get(i).getEventDate(), true)) {
                     MainActivity.logVerbose(e.getTitle());
                 }
                 try {

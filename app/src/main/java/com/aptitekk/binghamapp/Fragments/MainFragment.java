@@ -20,6 +20,7 @@ import com.aptitekk.binghamapp.News.NewsFeedUpdateListener;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.cards.CountdownCard;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -139,7 +140,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
         getView().findViewById(R.id.nextevent_progress_wheel).setVisibility(View.GONE);
 
         //find if event if has already happened today
-        Event trueNextEvent = eventsManager.getNextEvent(new Date(), true);
+        Event trueNextEvent = eventsManager.getEventInfoHelper().getNextEvent(Calendar.getInstance(), true);
 
         nextEventCard = EventsManager.makeCalendarCard(this, trueNextEvent);
         CardHeader nextEventHeader = new CardHeader(getActivity());

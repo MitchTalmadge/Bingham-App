@@ -1,9 +1,7 @@
 package com.aptitekk.binghamapp.Events;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 public class Event {
@@ -90,11 +88,42 @@ public class Event {
         return title + location + dateStamp;
     }
 
+    public DayType getDayType()
+    {
+        if(title.contains(DayType.A_DAY.getFriendlyName()))
+            return DayType.A_DAY;
+        else if(title.contains(DayType.B_DAY.getFriendlyName()))
+            return DayType.B_DAY;
+        return DayType.OTHER;
+    }
+
     public boolean isOnDate(Calendar date)
     {
         return eventDate.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH) &&
                 eventDate.get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
                 eventDate.get(Calendar.YEAR) == date.get(Calendar.YEAR);
+    }
+
+    public boolean isOnOrAfterDate(Calendar date)
+    {
+        if(!isOnDate(date)) //If it's not today
+        {
+            if(eventDate.get(Calendar.YEAR) < date.get(Calendar.YEAR) || //If previous year
+                    eventDate.get(Calendar.MONTH) < date.get(Calendar.MONTH) || //Or previous month
+                    eventDate.get(Calendar.MONTH) < date.get(Calendar.DAY_OF_MONTH)) //Or previous day
+                return false;
+
+            if(eventDate.get(Calendar.YEAR) > date.get(Calendar.YEAR) || //If next year
+                    eventDate.get(Calendar.MONTH) > date.get(Calendar.MONTH) || //Or next month
+                    eventDate.get(Calendar.MONTH) > date.get(Calendar.DAY_OF_MONTH)) //Or next day
+                return true;
+        }
+        return true;
+    }
+
+    public boolean isOnOrAfterTime(Calendar time)
+    {
+        return eventDate.getTime().getTime() >= time.getTime().getTime();
     }
 
 }

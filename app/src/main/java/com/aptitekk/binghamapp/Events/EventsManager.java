@@ -8,8 +8,6 @@ import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.aptitekk.binghamapp.Fragments.BellSchedules.BellSchedule;
 import com.aptitekk.binghamapp.Fragments.HelperFragments.WebViewFragment;
@@ -18,7 +16,6 @@ import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.Utilities.WebFileDownloader.WebFileDownloader;
 import com.aptitekk.binghamapp.Utilities.WebFileDownloader.WebFileDownloaderAdapter;
 import com.aptitekk.binghamapp.cards.CountdownCard;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,6 +69,8 @@ public class EventsManager {
     private ArrayList<EventsUpdateListener> eventsUpdateListeners = new ArrayList<>();
 
     private JSONObject jsonObject;
+
+    private EventInfoHelper eventInfoHelper;
 
     List<Event> eventsList;
 
@@ -220,233 +219,8 @@ public class EventsManager {
         return minDate;
     }
 
-    public static Date getNearestDate(List<Date> dates, Date currentDate, boolean skipPastEvents) {
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Date minDate = null;
-        for (Date date : dates) {
-            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                continue;
-            }
-            long diff = Math.abs(currentTime - date.getTime());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                minDate = date;
-            }
-        }
-        return minDate;
-    }
-
-    public static Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Date minDate = null;
-        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
-        for (Date date : times) {
-            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                MainActivity.logVerbose("Skipped event " + subject.getName() + " at " + subject.getStartTime());
-                continue;
-            }
-            long diff = Math.abs(currentTime - date.getTime());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                minDate = date;
-            }
-        }
-        return minDate;
-    }
-
-    public static MultipleReturn getNearestDateBySubjectIsEndTime(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
-        boolean endTimePointer = false;
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Date minDate = null;
-        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
-        for (Date date : times) {
-            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                continue;
-            }
-            long diff = Math.abs(currentTime - date.getTime());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                minDate = date;
-
-                endTimePointer = date.equals(times[1]);
-            }
-        }
-        return new MultipleReturn(minDate, endTimePointer);
-    }
-
-    public static class MultipleReturn {
-        Object first;
-        Object second;
-
-        public MultipleReturn(Object first, Object second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public Object getFirst() {
-            return first;
-        }
-
-        public Object getSecond() {
-            return second;
-        }
-    }
-
-    public Event getNextEvent(Date date, boolean excludeABDayLabel) {
-        long minDiff = -1, currentTime = date.getTime();
-        Event nextEvent = null;
-        for (Event event : eventsList) {
-            if (((event.getTitle().contains("A Day")) || (event.getTitle().contains("B Day"))) && excludeABDayLabel) {
-                continue; //Skip A and B day Events
-            }
-            if (currentTime > event.getEventDate().getTimeInMillis()) {
-                continue; // Skip any Events that have already passed
-            }
-            long diff = Math.abs(currentTime - event.getEventDate().getTimeInMillis());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                nextEvent = event;
-            }
-        }
-        return nextEvent;
-    }
-
-    public int findNextAorBDay() {
-        for (int i = 0; i < eventsList.size(); i++) {
-            if (eventsList.get(i).getTitle().contains("A Day") || eventsList.get(i).getTitle().contains("B Day"))
-                return i;
-        }
-        return -1;
-    }
-
-    public char isItAorBDay(Calendar date) {
-        for (Event event : eventsList) {
-            if (event.isOnDate(date)) {
-                if (event.getTitle().contains("A Day"))
-                    return BellSchedule.A_DAY;
-                else if (event.getTitle().contains("B Day"))
-                    return BellSchedule.B_DAY;
-            }
-        }
-        return BellSchedule.NONE_DAY;
-    }
-
-    public int findNextTargetByIndex(CountdownCard.CountdownTarget target) {
-        for (int i = 0; i < eventsList.size(); i++) {
-            if (eventsList.get(i).getTitle().toLowerCase().contains(target.getValue()))
-                return i;
-        }
-        return -1;
-    }
-
-    public BellSchedule determineSchedule(Calendar dateTime) {
-
-        ArrayList<Event> eventsOfDay = getEventsForDay(dateTime);
-
-        if (eventsOfDay.isEmpty())
-            return null;
-
-        Collections.rotate(eventsOfDay, -1); // move top A/B Day labels to bottom so potential assembly events may appear first.
-
-        for (Event e : eventsOfDay) {
-            if (e.getTitle().toLowerCase().contains("schedule") && e.getTitle().toLowerCase().contains("assembly")) { // Assembly Event Found!
-                String schedule = e.getTitle().toLowerCase().split("-")[1].split("assembly")[0].replaceFirst("\\s+$", "");
-
-                //DETERMINE MORNING/AFTERNOON
-                int timeOfDay = e.getEventDate().get(Calendar.HOUR_OF_DAY);
-                if ((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
-                    return new BellSchedule(mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[4], mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule4));
-                } else if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING
-                    schedule = "Morning (" + schedule.replace("AM", "") + ")";
-                } else if ((timeOfDay >= 12 && timeOfDay < 16) || schedule.contains("PM")) { // AFTERNOON
-                    schedule = "Afternoon (" + schedule.replace("PM", "") + ")";
-                } else {
-                    return null;
-                }
-                for (int i = 0; i < mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules).length; i++) {
-                    if (mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[i].split("_")[1].equalsIgnoreCase(schedule)) {// if string matches name
-                        String[] scheduleTimeArray = null;
-                        switch (i) {
-                            case 0:
-                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule0);
-                                break;
-                            case 1:
-                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule1);
-                                break;
-                            case 2:
-                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule2);
-                                break;
-                            case 3:
-                                scheduleTimeArray = mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule3);
-                                break;
-                        }
-                        return new BellSchedule(mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[i], scheduleTimeArray);
-                    }
-                }
-            } else if (e.getTitle().contains("A Day") || e.getTitle().contains("B Day")) { // Just a regular day
-                if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) { // Friday schedule
-                    return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[1], mainActivity.getResources().getStringArray(R.array.regularBellSchedule1));
-                } else if (dateTime.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) { //If after school on thursday
-                    try {
-                        if (!hasSchoolEndedForDay(new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0],
-                                        mainActivity.getResources().getStringArray(R.array.regularBellSchedule0)),
-                                dateTime)) {
-                            return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[1], mainActivity.getResources().getStringArray(R.array.regularBellSchedule1));
-                        }
-                    } catch (ParseException e1) {
-                        e1.printStackTrace();
-                        MainActivity.logVerbose("Reverting to regular schedule");
-                    }
-
-                }
-                return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
-            }
-
-        }
-        MainActivity.logVerbose("No schedule was determined, loading regular weekday schedule.");
-        return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
-    }
-
-    public static boolean hasSchoolStartedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
-        String rawStartDay = regularSchedule.getSubjectStartTimes()[0]; //GRAB Start TIME
-        Date startTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawStartDay + " MDT");
-        return !dateTime.getTime().before(startTime);
-    }
-
-    public static boolean hasSchoolEndedForDay(BellSchedule regularSchedule, Calendar dateTime) throws ParseException {
-        String rawEndDay = regularSchedule.getSubjectEndTimes()[regularSchedule.getSubjectEndTimes().length - 1]; //GRAB END TIME
-        Date endTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
-        return !dateTime.getTime().after(endTime);
-    }
-
-    public ArrayList<Event> getEventsForDay(Calendar dayToMatch) {
-        ArrayList<Event> result = new ArrayList<>();
-        for (Event e : eventsList) {
-            if (e.getEventDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
-                    e.getEventDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
-                    e.getEventDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
-                result.add(e);
-            }
-        }
-        return result;
-    }
-
-    public ArrayList<Event> getEventsForDay(Calendar dayToMatch, boolean excludeABDayLabel) {
-        ArrayList<Event> result = new ArrayList<>();
-        for (Event e : eventsList) {
-            if (e.getEventDate().get(Calendar.YEAR) == dayToMatch.get(Calendar.YEAR) &&
-                    e.getEventDate().get(Calendar.MONTH) == dayToMatch.get(Calendar.MONTH) &&
-                    e.getEventDate().get(Calendar.DAY_OF_MONTH) == dayToMatch.get(Calendar.DAY_OF_MONTH)) {
-                if (excludeABDayLabel) {
-                    if (!(e.getTitle().equalsIgnoreCase("A Day") || e.getTitle().equalsIgnoreCase("B Day"))) {
-                        result.add(e);
-                    }
-                } else {
-                    result.add(e);
-                }
-            }
-        }
-        return result;
+    public EventInfoHelper getEventInfoHelper() {
+        return eventInfoHelper;
     }
 
     public static MaterialLargeImageCard makeCalendarCard(final Fragment fragment, final Event event) {
@@ -586,6 +360,8 @@ public class EventsManager {
         }
 
         sortEvents();
+
+        eventInfoHelper = new EventInfoHelper(this, mainActivity);
     }
 
     private void sortEvents() {
