@@ -1,23 +1,21 @@
 package com.aptitekk.binghamapp.Fragments.BellSchedules;
 
 import com.aptitekk.binghamapp.Events.DayType;
+import com.aptitekk.binghamapp.Events.LunchType;
 import com.aptitekk.binghamapp.MainActivity;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BellSchedule {
-
-    public static final BellSchedule NONE = null;
-
-    public static final char A_DAY = 'A';
-    public static final char B_DAY = 'B';
-    public static final char NONE_DAY = '-';
 
     String scheduleName;
     private String[] subjectNames;
@@ -25,115 +23,7 @@ public class BellSchedule {
     private String[] subjectEndTimes;
     private int[] subjectLengths;
 
-    public static char toggleABDay(char abDay) {
-        if (abDay == A_DAY) {
-            return B_DAY;
-        } else if (abDay == B_DAY) {
-            return A_DAY;
-        }
-        return NONE_DAY;
-    }
-
-    public static ArrayList<Subject> parseScheduleTimes(final BellSchedule schedule, DayType dayType, Date dayToAssign) {
-        DateFormat df = new SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.US);
-        ArrayList<Subject> result = new ArrayList<>();
-        for (int i = 0; i < schedule.getSubjectStartTimes().length; i++) {
-            try {
-                if (schedule.getSubjectNames()[i].toLowerCase().contains("warning")) // warning bell doesnt need to be in there
-                    continue;
-                if ((schedule.getSubjectStartTimes()[i].contains("--")) || (schedule.getSubjectEndTimes()[i].contains("--")))
-                    continue; // dont need non-existent times
-                if (schedule.getSubjectNames()[i].toLowerCase().contains("conference")) // conference time removed for student's sake
-                    continue;
-                if (schedule.getSubjectNames()[i].toLowerCase().contains("announcements")) // conference time removed for student's sake
-                    continue;
-                result.add(
-                        new Subject(
-                                schedule.getSubjectNames()[i],
-                                dayType,
-                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectStartTimes()[i]),
-                                df.parse(SimpleDateFormat.getDateInstance().format(dayToAssign) + " " + schedule.getSubjectEndTimes()[i])));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    public static Subject getNextSubject(Date currentTime, List<Subject> subjects, boolean ignorePastSubjects) {
-        long minDiff = -1;
-        Subject minDate = null;
-        for (Subject subject : subjects) {
-            ArrayList<Date> dates = new ArrayList<>();
-            dates.add(subject.getStartTime());
-            dates.add(subject.getEndTime());
-            for (Date date : dates) {
-                if ((currentTime.getTime() > date.getTime()) && ignorePastSubjects) {
-                    continue;
-                }
-                long diff = Math.abs(currentTime.getTime() - date.getTime());
-                if ((minDiff == -1) || (diff < minDiff)) {
-                    MainActivity.logVerbose("Next determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
-                    minDiff = diff;
-                    minDate = subject;
-                }
-            }
-        }
-        return minDate;
-    }
-
-    public static Subject getPreviousSubject(Date currentTime, List<Subject> subjects) {
-        long minDiff = -1;
-        Subject minDate = null;
-        for (Subject subject : subjects) {
-            ArrayList<Date> dates = new ArrayList<>();
-            dates.add(subject.getStartTime());
-            dates.add(subject.getEndTime());
-            for (Date date : dates) {
-                if ((currentTime.getTime() < date.getTime())) { //If it is in the future, continue
-                    continue;
-                }
-                long diff = Math.abs(currentTime.getTime() - date.getTime());
-                if ((minDiff == -1) || (diff < minDiff)) {
-                    MainActivity.logVerbose("Previous determined subject: " + subject.getName() + " at " + SimpleDateFormat.getDateTimeInstance().format(date));
-                    minDiff = diff;
-                    minDate = subject;
-                }
-            }
-
-        }
-        return minDate;
-    }
-
-    public static class Subject {
-        String name;
-        DayType dayType;
-        Date startTime;
-        Date endTime;
-
-        public Subject(String name, DayType dayType, Date start, Date end) {
-            this.name = name;
-            this.dayType = dayType;
-            startTime = start;
-            endTime = end;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public DayType getDayType() {
-            return dayType;
-        }
-
-        public Date getStartTime() {
-            return startTime;
-        }
-
-        public Date getEndTime() {
-            return endTime;
-        }
-    }
+    private final DateFormat scheduleDateFormat = new SimpleDateFormat("hh:mm a", Locale.US);
 
     public BellSchedule(String scheduleName, String[] schedule) {
 
@@ -147,8 +37,6 @@ public class BellSchedule {
         subjectEndTimes = new String[schedule.length];
         subjectLengths = new int[schedule.length];
 
-        DateFormat df = new SimpleDateFormat("hh:mm a", Locale.US);
-
         for (int i = 0; i < schedule.length; i++) {
             String[] subjectSplit = schedule[i].split("_");
             subjectNames[i] = subjectSplit[0];
@@ -156,8 +44,8 @@ public class BellSchedule {
             subjectEndTimes[i] = subjectSplit[2];
             if (!subjectSplit[1].equals("--") && !subjectSplit[2].equals("--")) {
                 try {
-                    Date date1 = df.parse(subjectSplit[1]);
-                    Date date2 = df.parse(subjectSplit[2]);
+                    Date date1 = scheduleDateFormat.parse(subjectSplit[1]);
+                    Date date2 = scheduleDateFormat.parse(subjectSplit[2]);
                     int length = (int) ((date2.getTime() - date1.getTime()) / 1000) / 60;
                     subjectLengths[i] = length;
                 } catch (ParseException e) {
@@ -187,5 +75,121 @@ public class BellSchedule {
 
     public int[] getSubjectLengths() {
         return subjectLengths;
+    }
+
+    public List<Subject> getSubjects(DayType dayType, LunchType lunchType) {
+        List<Subject> subjects = new ArrayList<>();
+
+        for (int i = 0; i < getSubjectNames().length; i++) {
+            if (subjectNames[i].startsWith("*")) //Names with asterisks are meant to be ignored
+                continue;
+            if (subjectNames[i].contains("/")) { //Example: "1st/5th Period"
+                try {
+
+                    if (subjectNames[i].toLowerCase().contains("lunch")) {
+                        switch (dayType) {
+                            case A_DAY:
+                                switch (lunchType) {
+                                    case AA_AB: //A Lunch on A Days
+                                    case AA_BB:
+                                        if (subjectNames[i].toLowerCase().contains("b lunch"))
+                                            continue; //They have A lunch, not B, so skip this subject.
+                                        break;
+                                    case BA_AB: //B Lunch on A Days
+                                    case BA_BB:
+                                        if (subjectNames[i].toLowerCase().contains("a lunch"))
+                                            continue; //They have B Lunch, not A, so skip this subject.
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case B_DAY:
+                                switch (lunchType) {
+                                    case AA_AB: //A Lunch on B Days
+                                    case BA_AB:
+                                        if (subjectNames[i].toLowerCase().contains("b lunch"))
+                                            continue; //They have A lunch, not B, so skip this subject.
+                                        break;
+                                    case AA_BB: //B Lunch on B Days
+                                    case BA_BB:
+                                        if (subjectNames[i].toLowerCase().contains("a lunch"))
+                                            continue; //They have B Lunch, not A, so skip this subject.
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    StringBuilder newName = new StringBuilder();
+                    switch (dayType) {
+                        case A_DAY:
+                            newName.append(subjectNames[i].substring(0, 3)).append(subjectNames[i].substring(7));
+                            break; //Example: 1st Period
+                        case B_DAY:
+                            newName.append(subjectNames[i].substring(4));
+                            break; //Example: 5th Period
+                        default:
+                            newName.append(subjectNames[i]);
+                            break; //Example: 1st/5th Period
+                    }
+
+                    //Remove e.x.: "(B Lunchers)" from name
+                    String name = newName.toString();
+                    Pattern pattern = Pattern.compile("(.*)\\s\\([ab] lunchers\\)", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(name);
+                    if(matcher.find())
+                    {
+                        name = matcher.group(1);
+                    }
+
+                    Calendar startTime = Calendar.getInstance();
+                    startTime.setTime(scheduleDateFormat.parse(subjectStartTimes[i]));
+
+                    Calendar endTime = Calendar.getInstance();
+                    endTime.setTime(scheduleDateFormat.parse(subjectStartTimes[i]));
+
+                    subjects.add(new Subject(name, dayType, startTime, endTime));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return subjects;
+    }
+
+    public static class Subject {
+        String name;
+        DayType dayType;
+        Calendar startTime;
+        Calendar endTime;
+
+        public Subject(String name, DayType dayType, Calendar start, Calendar end) {
+            this.name = name;
+            this.dayType = dayType;
+            startTime = start;
+            endTime = end;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public DayType getDayType() {
+            return dayType;
+        }
+
+        public Calendar getStartTime() {
+            return startTime;
+        }
+
+        public Calendar getEndTime() {
+            return endTime;
+        }
     }
 }

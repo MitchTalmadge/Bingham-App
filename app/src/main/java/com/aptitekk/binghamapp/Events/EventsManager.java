@@ -9,13 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 
-import com.aptitekk.binghamapp.Fragments.BellSchedules.BellSchedule;
 import com.aptitekk.binghamapp.Fragments.HelperFragments.WebViewFragment;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.Utilities.WebFileDownloader.WebFileDownloader;
 import com.aptitekk.binghamapp.Utilities.WebFileDownloader.WebFileDownloaderAdapter;
-import com.aptitekk.binghamapp.cards.CountdownCard;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -273,9 +271,9 @@ public class EventsManager {
 
         int imageDrawableId = R.drawable.event_default;
 
-        for (CountdownCard.CountdownTarget target : CountdownCard.CountdownTarget.values()) {
-            if (event.getTitle().toLowerCase().contains(target.getValue())) {
-                imageDrawableId = target.getImageDrawableId();
+        for (EventBackground background : EventBackground.values()) {
+            if (event.getTitle().toLowerCase().contains(background.getValue())) {
+                imageDrawableId = background.getImageDrawableId();
                 break;
             }
         }

@@ -8,8 +8,8 @@
 
     <!-- Format: Subject Name_TimeStart_TimeEnd ... Put two dashes for no time specified -->
     <string-array name="regularBellSchedule0">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_9:05 AM</item>
         <item>2nd/6th Period_9:10 AM_10:40 AM</item>
         <item>A Lunch_10:40 AM_11:15 AM</item>
@@ -20,9 +20,8 @@
     </string-array>
 
     <string-array name="regularBellSchedule1">
-        <item>Conference Time_7:00 AM_8:25 AM</item>
-        <item>Warning Bell_8:25 AM_--</item>
-        <item>Announcements_8:30 AM_8:35 AM</item>
+        <item>*Warning Bell_8:25 AM_--</item>
+        <item>*Announcements_8:30 AM_8:35 AM</item>
         <item>1st/5th Period_8:30 AM_9:50 AM</item>
         <item>2nd/6th Period_9:55 AM_11:10 AM</item>
         <item>A Lunch_11:10 AM_11:45 AM</item>
@@ -41,8 +40,8 @@
     </string-array>
 
     <string-array name="assemblyBellSchedule0">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_8:48 AM</item>
         <item>Assembly_8:53 AM_9:53 AM</item>
         <item>2nd/6th Period_9:58 AM_11:12 AM</item>
@@ -54,8 +53,8 @@
     </string-array>
 
     <string-array name="assemblyBellSchedule1">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_8:40 AM</item>
         <item>Assembly_8:45 AM_10:15 AM</item>
         <item>2nd/6th Period_10:20 AM_11:27 AM</item>
@@ -67,8 +66,8 @@
     </string-array>
 
     <string-array name="assemblyBellSchedule2">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_8:45 AM</item>
         <item>2nd/6th Period_8:50 AM_10:05 AM</item>
         <item>A Lunch_10:05 AM_10:40 AM</item>
@@ -80,8 +79,8 @@
     </string-array>
 
     <string-array name="assemblyBellSchedule3">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_8:50 AM</item>
         <item>2nd/6th Period_8:55 AM_10:10 AM</item>
         <item>A Lunch_10:10 AM_10:45 AM</item>
@@ -93,8 +92,8 @@
     </string-array>
 
     <string-array name="assemblyBellSchedule4">
-        <item>Warning Bell_7:25 AM_--</item>
-        <item>Announcements_7:30 AM_7:35 AM</item>
+        <item>*Warning Bell_7:25 AM_--</item>
+        <item>*Announcements_7:30 AM_7:35 AM</item>
         <item>1st/5th Period_7:30 AM_8:50 AM</item>
         <item>A Assembly_8:55 AM_9:55 AM</item>
         <item>2nd/6th Period (B Assembly)_8:55 AM_10:10 AM</item>

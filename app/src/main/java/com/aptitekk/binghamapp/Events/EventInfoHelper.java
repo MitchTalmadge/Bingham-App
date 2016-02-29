@@ -80,6 +80,7 @@ public class EventInfoHelper {
     }
 
     public BellSchedule getBellScheduleForDay(Calendar date) {
+        //TODO: redo this
         List<Event> eventsOfDay = getEventsForDay(date, false);
 
         if (eventsOfDay.isEmpty())
@@ -144,61 +145,4 @@ public class EventInfoHelper {
         MainActivity.logVerbose("No schedule was determined, loading regular weekday schedule.");
         return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
     }
-
-    public Date getNearestDateBySubject(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Date minDate = null;
-        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
-        for (Date date : times) {
-            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                MainActivity.logVerbose("Skipped event " + subject.getName() + " at " + subject.getStartTime());
-                continue;
-            }
-            long diff = Math.abs(currentTime - date.getTime());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                minDate = date;
-            }
-        }
-        return minDate;
-    }
-
-    public MultipleReturn getNearestDateBySubjectIsEndTime(BellSchedule.Subject subject, Date currentDate, boolean skipPastEvents) {
-        boolean endTimePointer = false;
-        long minDiff = -1, currentTime = currentDate.getTime();
-        Date minDate = null;
-        Date[] times = new Date[]{subject.getStartTime(), subject.getEndTime()};
-        for (Date date : times) {
-            if ((currentTime > date.getTime()) && skipPastEvents) { // Skip any Dates that have already past
-                continue;
-            }
-            long diff = Math.abs(currentTime - date.getTime());
-            if ((minDiff == -1) || (diff < minDiff)) {
-                minDiff = diff;
-                minDate = date;
-
-                endTimePointer = date.equals(times[1]);
-            }
-        }
-        return new MultipleReturn(minDate, endTimePointer);
-    }
-
-    public class MultipleReturn {
-        Object first;
-        Object second;
-
-        public MultipleReturn(Object first, Object second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public Object getFirst() {
-            return first;
-        }
-
-        public Object getSecond() {
-            return second;
-        }
-    }
-
 }

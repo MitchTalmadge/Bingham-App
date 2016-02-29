@@ -11,6 +11,7 @@ import com.aptitekk.binghamapp.Events.DayType;
 import com.aptitekk.binghamapp.Events.Event;
 import com.aptitekk.binghamapp.Events.EventInfoHelper;
 import com.aptitekk.binghamapp.Events.EventsManager;
+import com.aptitekk.binghamapp.Events.LunchType;
 import com.aptitekk.binghamapp.Fragments.BellSchedules.BellSchedule;
 import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
@@ -20,63 +21,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 public class CountdownCard extends Card {
-
-    public enum CountdownTarget {
-        FOOTBALL("football", R.drawable.event_football),
-        TENNIS("tennis", R.drawable.event_tennis),
-        DANCE("dance", R.drawable.event_dance),
-        MINERETTES("minerette", R.drawable.event_dance),
-        VOLLEYBALL("volleyball", R.drawable.event_volleyball),
-        BASKETBALL("basketball", R.drawable.event_basketball),
-        BASKETBALL2("bball", R.drawable.event_basketball),
-        BASEBALL("baseball", R.drawable.event_baseball),
-        SOCCER("soccer", R.drawable.event_soccer),
-        WRESTLING("wrestling", R.drawable.event_wrestling),
-        SWIMMING("swimming", R.drawable.event_swimming),
-        TRACK("track", R.drawable.event_track),
-        CHOIR("choir", R.drawable.event_choir),
-        SYMPHONY("symphony", R.drawable.event_symphony),
-        CONCERT("concerto", R.drawable.event_symphony),
-        ORCHESTRA("orchestra", R.drawable.event_symphony),
-        BAND("band", R.drawable.event_symphony),
-        JAZZ("jazz", R.drawable.event_jazz),
-        CANDLE("candle", R.drawable.event_candle),
-        PLAY("play", R.drawable.event_play),
-        COUNCIL("council", R.drawable.event_council),
-        ZEROFATALITIES("fatalities", R.drawable.event_zerofatalities),
-        PTC("parent teacher conference", R.drawable.event_grades),
-        SPIRIT("spirit", R.drawable.event_spirit),
-        TEST("test", R.drawable.event_test),
-        FCCLA("fccla", R.drawable.event_fccla),
-        ART("art show", R.drawable.event_art),
-        ASSEMBLY("assembly", R.drawable.event_assembly),
-        TALENT_SHOW("talent show", R.drawable.event_assembly),
-        HOLIDAY("no school", R.drawable.event_noschool),
-        HOLIDAY2("no students attend", R.drawable.event_noschool),
-        LAST_DAY("last day of school", R.drawable.event_lastday);
-
-        String value;
-        int drawableId;
-
-        CountdownTarget(String value, int drawableId) {
-            this.value = value;
-            this.drawableId = drawableId;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public int getImageDrawableId() {
-            return drawableId;
-        }
-    }
 
     TextView timeRemaining;
     TextView currentPeriod;
@@ -97,119 +48,6 @@ public class CountdownCard extends Card {
         this.setTitle("Time Remaining");
     }
 
-    public void refresh(final EventsManager eventsManager, final Fragment context, final CardViewNative cardHolder) {
-        //DETERMINE TIME
-        final Date currentDateTime = new Date();
-        Calendar targetDateTime = Calendar.getInstance(); // by default, todays datetime
-        //DETERMINE A/B DAY
-        DayType currentDayType = eventsManager.getEventInfoHelper().getDayType(targetDateTime);
-        //CREATE POINTER IF IT IS THE END OF PERIOD
-        boolean isTimeEndTime;
-        boolean tomorrowClosest = false;
-        boolean schoolStartedForDay = false;
-
-        if (targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && targetDateTime.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-            //PARSE ALL SCHEDULE TIMES
-            BellSchedule schedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(targetDateTime);
-            BellSchedule todaySchedule = schedule;
-            // IS SCHOOL OUT THOUGH?
-            try {
-                if (!eventsManager.getEventInfoHelper().hasSchoolEndedForDay(schedule, targetDateTime)) {
-                    Calendar tomorrow = targetDateTime;
-                    tomorrow.add(Calendar.DATE, 1);
-                    schedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(tomorrow);
-                    currentDayType = eventsManager.getEventInfoHelper().getDayType(tomorrow);
-                    targetDateTime = tomorrow;
-                    tomorrowClosest = true;
-                }
-                if (eventsManager.getEventInfoHelper().hasSchoolStartedForDay(schedule, targetDateTime)) {
-                    schoolStartedForDay = true;
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            if (schedule != null) {
-                MainActivity.logVerbose("Schedule determined for day: " + schedule.getScheduleName());
-                ArrayList<BellSchedule.Subject> timeTable = BellSchedule.parseScheduleTimes(schedule, currentDayType, targetDateTime.getTime());
-                BellSchedule.Subject closest = BellSchedule.getNextSubject(currentDateTime, timeTable, true);
-                EventInfoHelper.MultipleReturn response = eventsManager.getEventInfoHelper().getNearestDateBySubjectIsEndTime(closest, currentDateTime, true);
-                final Date closestTime = (Date) response.getFirst();
-                isTimeEndTime = (boolean) response.getSecond();
-
-                Date closestPastTime;
-                if (tomorrowClosest) { // The previous end time may have been from today if school ended
-                    MainActivity.logVerbose("Today is the closest previous schedule");
-                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(todaySchedule,
-                            currentDayType, Calendar.getInstance().getTime()));
-                    closestPastTime = eventsManager.getEventInfoHelper().getNearestDateBySubject(closestPast, currentDateTime, false);
-                } else if (schoolStartedForDay) { // if school has started
-                    MainActivity.logVerbose("Earlier class periods of today is the closest previous schedule");
-                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, timeTable);
-                    closestPastTime = eventsManager.getEventInfoHelper().getNearestDateBySubject(closestPast, currentDateTime, false);
-                } else { // pull yesterdays schedule
-                    MainActivity.logVerbose("Yesterday is the closest previous schedule");
-                    targetDateTime.add(Calendar.DATE, -1); //Yesterday
-                    MainActivity.logVerbose("Yesterday is " + targetDateTime.getTime().toString());
-                    BellSchedule yesterdaySchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(targetDateTime);
-                    BellSchedule.Subject closestPast = BellSchedule.getPreviousSubject(currentDateTime, BellSchedule.parseScheduleTimes(yesterdaySchedule,
-                            currentDayType, targetDateTime.getTime()));
-                    closestPastTime = eventsManager.getEventInfoHelper().getNearestDateBySubject(closestPast, currentDateTime, false); // TODO: Have getPreviousSubject return closest date to resolve redundancy
-                }
-                final Date finalClosestPastTime = closestPastTime;
-                if (finalClosestPastTime.getTime() == 0) {
-                    MainActivity.logVerbose("closestPastTime is 0!!!");
-                }
-                new CountDownTimer(closestTime.getTime() - currentDateTime.getTime(), 1000) { // adjust the milli seconds here
-                    public void onTick(long millisUntilFinished) {
-                        long top = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime() - millisUntilFinished);
-                        long bottom = Math.abs(closestTime.getTime() - finalClosestPastTime.getTime());
-                        int percent = (int) Math.round(((double) top / bottom) * 100);
-                        MainActivity.logVerbose(top + "/" + bottom + " *100 = " + percent + "%");
-                        progress.setProgress(percent);
-                        timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
-                    }
-
-                    public void onFinish() {
-                        refresh(eventsManager, context, cardHolder);
-                    }
-                }.start();
-                currentPeriod.setText(formatCurrentPeriod(closest.getName(), closest.getDayType(), isTimeEndTime, tomorrowClosest));
-                abDayLabel.setText(currentDayType.getFriendlyName());
-                cardHolder.setVisibility(View.VISIBLE);
-                cardHolder.refreshCard(this);
-                return;
-            }
-        }
-
-        //IF ITS BEFORE/AFTER SCHOOL YEAR OR WEEKENDS
-        try {
-            Event nextABDay = eventsManager.getEventInfoHelper().getNextABDayEvent(Calendar.getInstance());
-
-            MainActivity.logVerbose(nextABDay.toString() + " of " + nextABDay.getEventDate().get(Calendar.YEAR));
-
-            new CountDownTimer(nextABDay.getEventDate().getTimeInMillis() - targetDateTime.getTimeInMillis(), 1000) { // adjust the milli seconds here
-
-                public void onTick(long millisUntilFinished) {
-
-                    timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
-                }
-
-                public void onFinish() {
-                    refresh(eventsManager, context, cardHolder);
-                }
-            }.start();
-            currentPeriod.setText("To Next " + nextABDay.getTitle());
-            abDayLabel.setText(currentDayType.getFriendlyName());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            abDayLabel.setText(":(");
-            currentPeriod.setText("Check if you can see the calendar events!");
-            timeRemaining.setText("Whoops!");
-        }
-        cardHolder.setVisibility(View.VISIBLE);
-        cardHolder.refreshCard(this);
-    }
-
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         //Retrieve elements
@@ -219,23 +57,95 @@ public class CountdownCard extends Card {
         abDayLabel = ((TextView) parent.findViewById(R.id.abdayLabel));
     }
 
-    private String formatCurrentPeriod(String rawName, DayType dayType, boolean isEndTime, boolean tomorrow) {
-        MainActivity.logVerbose("rawName: " + rawName);
-        if (rawName.equals("Announcements"))
-            rawName = "1st/5th Period";
-        if (rawName.contains("/")) {
-            String[] words = rawName.split(" "); // 1st/5th --- Period
-            String[] abdayLabels = words[0].split("/");
-            switch (dayType) {
-                case A_DAY:
-                    return "To " + ((isEndTime) ? "end of " : "") + abdayLabels[0] + " " + words[1] + ((tomorrow) ? " tomorrow" : "");
-                case B_DAY:
-                    return "To " + ((isEndTime) ? "end of " : "") + abdayLabels[1] + " " + words[1] + ((tomorrow) ? " tomorrow" : "");
-                default:
-                    return "To " + ((isEndTime) ? "end of " : "") + rawName + ((tomorrow) ? " tomorrow" : "");
+    public void refresh(final EventsManager eventsManager, final Fragment context, final CardViewNative cardHolder) {
+        final Calendar todayCalendar = Calendar.getInstance();
+        final DayType todayDayType = eventsManager.getEventInfoHelper().getDayType(todayCalendar);
+        final BellSchedule todayBellSchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(todayCalendar);
+        final List<Event> todayEvents = eventsManager.getEventInfoHelper().getEventsForDay(todayCalendar, true);
+
+        Calendar timeToCountdownTo = null;
+        String descriptionText = "";
+
+        if (todayBellSchedule != null) {
+            List<BellSchedule.Subject> subjects = todayBellSchedule.getSubjects(todayDayType, LunchType.AA_AB); //TODO: Get from student
+
+            BellSchedule.Subject currentSubject = null;
+            boolean beforeSchool = true;
+            boolean afterSchool = true;
+
+            for (BellSchedule.Subject subject : subjects) {
+                //Check if the current time is in between this subject's start and end times
+                if (subject.getStartTime().compareTo(todayCalendar) <= 0) { //A subject has passed, so we're not before school.
+                    beforeSchool = false;
+                    if (subject.getEndTime().compareTo(todayCalendar) >= 0) {
+                        currentSubject = subject;
+                    }
+                } else //A subject is coming up, so we're not after school.
+                {
+                    afterSchool = false;
+                }
             }
+
+            if (currentSubject == null) //We are either before or after school, or there are no subjects today.
+            {
+                if (beforeSchool) {
+                    timeToCountdownTo = subjects.get(0).getStartTime();
+                    descriptionText = "To the beginning of " + subjects.get(0).getName();
+                } else if (afterSchool) {
+                    for (Event event : todayEvents) { //Countdown to next event today (if exists)
+                        if (event.getEventDate().compareTo(todayCalendar) >= 0) {
+                            timeToCountdownTo = event.getEventDate();
+                            descriptionText = "To the beginning of the event: " + event.getTitle();
+                            break;
+                        }
+                    }
+                    //TODO: Countdown to next event OR first subject of next school day
+                } else { //Time between subjects (5 minute hallway time)
+                    for (BellSchedule.Subject subject : subjects) { //Countdown to next subject.
+                        if (subject.getStartTime().compareTo(todayCalendar) > 0) {
+                            timeToCountdownTo = subject.getStartTime();
+                            descriptionText = "To the beginning of " + subject.getName();
+                            break;
+                        }
+                    }
+                }
+            } else {
+                timeToCountdownTo = currentSubject.getEndTime(); //Countdown to end of current subject
+                descriptionText = "To the end of " + currentSubject.getName();
+            }
+        } else {
+            for (Event event : todayEvents) {
+                if (event.getEventDate().compareTo(todayCalendar) >= 0) {
+                    timeToCountdownTo = event.getEventDate();
+                    descriptionText = "To the beginning of the event: " + event.getTitle();
+                    break;
+                }
+            }
+            //TODO: Countdown to next event OR first subject of next school day
         }
-        return "To " + ((isEndTime) ? "end of " : "") + rawName + ((tomorrow) ? " tomorrow" : "");
+
+        if (timeToCountdownTo != null) {
+            final Calendar finalTimeToCountdownTo = timeToCountdownTo;
+            new CountDownTimer(finalTimeToCountdownTo.getTime().getTime() - todayCalendar.getTime().getTime(), 1000) { // adjust the milli seconds here
+                public void onTick(long millisUntilFinished) {
+                    long current = Math.abs(finalTimeToCountdownTo.getTime().getTime() - millisUntilFinished);
+                    long end = Math.abs(finalTimeToCountdownTo.getTime().getTime());
+                    int percent = (int) Math.round(((double) current / end) * 100);
+                    MainActivity.logVerbose(current + "/" + end + " *100 = " + percent + "% (Millis until finished = " + millisUntilFinished + ")");
+                    progress.setProgress(percent);
+                    timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
+                }
+
+                public void onFinish() {
+                    refresh(eventsManager, context, cardHolder);
+                }
+            }.start();
+            currentPeriod.setText(descriptionText);
+            abDayLabel.setText(todayDayType.getFriendlyName());
+            cardHolder.setVisibility(View.VISIBLE);
+            cardHolder.refreshCard(this);
+        }
+        return;
     }
 
     public static String formatLongToReadableTime(long millis) {
