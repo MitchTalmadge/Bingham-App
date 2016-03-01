@@ -131,7 +131,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
                         .setupView(countDownCardView);
         baseCountDownCard.setViewToClickToExpand(viewToClickToExpand);
 
-        baseCountDownCard.refresh(eventsManager, this, countDownCardView);
+        baseCountDownCard.refresh(eventsManager, countDownCardView);
 
         baseCountDownCard.notifyDataSetChanged();
 
@@ -147,5 +147,13 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
         nextEventHeader.setTitle("Next Event");
         nextEventCard.addCardHeader(nextEventHeader);
         nextEventCardView.setCard(nextEventCard);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if(baseCountDownCard != null)
+            baseCountDownCard.cancel();
     }
 }

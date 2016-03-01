@@ -208,7 +208,7 @@ public class EventsManager {
         long minDiff = -1, currentTime = date.getTime();
         int minDate = 0;
         for (int i = 0; i < eventsList.size(); i++) {
-            long diff = Math.abs(currentTime - eventsList.get(i).getEventDate().getTime().getTime());
+            long diff = Math.abs(currentTime - eventsList.get(i).getStartTime().getTime().getTime());
             if ((minDiff == -1) || (diff < minDiff)) {
                 minDiff = diff;
                 minDate = i;
@@ -232,7 +232,7 @@ public class EventsManager {
                 calIntent.putExtra(CalendarContract.Events.TITLE, event.getTitle());
                 calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
                 calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                        event.getEventDate().getTimeInMillis());
+                        event.getStartTime().getTimeInMillis());
                 calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
                         event.getEndTime().getTimeInMillis());
                 fragment.getActivity().startActivity(calIntent);
@@ -303,7 +303,7 @@ public class EventsManager {
         String result;
         SimpleDateFormat headerFormat = new SimpleDateFormat("EEE hh:mmaa", Locale.US);
         SimpleDateFormat footerFormat = new SimpleDateFormat("hh:mmaa zzz", Locale.US);
-        result = (headerFormat.format(event.getEventDate().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
+        result = (headerFormat.format(event.getStartTime().getTime()) + " - " + footerFormat.format(event.getEndTime().getTime())).replace("PM", "pm").replace("AM", "am");
         String[] resultSplit = result.split(" ");
         if (result.split(" ")[1].equalsIgnoreCase(result.split(" ")[3]))
             result = resultSplit[0] + " " + resultSplit[1] + " " + resultSplit[4];
@@ -371,17 +371,17 @@ public class EventsManager {
         public int compare(Event event1, Event event2) {
             //Put A/B Day Labels at the top of each day.
             if (event1.getTitle().equalsIgnoreCase("A Day") || event1.getTitle().equalsIgnoreCase("B Day")) {
-                if (event1.isOnDate(event2.getEventDate())) {
+                if (event1.isOnDate(event2.getStartTime())) {
                     return -1;
                 }
             }
             if (event2.getTitle().equalsIgnoreCase("A Day") || event2.getTitle().equalsIgnoreCase("B Day")) {
-                if (event2.isOnDate(event1.getEventDate())) {
+                if (event2.isOnDate(event1.getStartTime())) {
                     return 1;
                 }
             }
 
-            return event1.getEventDate().compareTo(event2.getEventDate());
+            return event1.getStartTime().compareTo(event2.getStartTime());
         }
     }
 

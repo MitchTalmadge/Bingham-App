@@ -2,14 +2,12 @@ package com.aptitekk.binghamapp.cards;
 
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.aptitekk.binghamapp.Events.DayType;
 import com.aptitekk.binghamapp.Events.Event;
-import com.aptitekk.binghamapp.Events.EventInfoHelper;
 import com.aptitekk.binghamapp.Events.EventsManager;
 import com.aptitekk.binghamapp.Events.LunchType;
 import com.aptitekk.binghamapp.Fragments.BellSchedules.BellSchedule;
@@ -17,10 +15,7 @@ import com.aptitekk.binghamapp.MainActivity;
 import com.aptitekk.binghamapp.R;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,11 +24,13 @@ import it.gmariotti.cardslib.library.view.CardViewNative;
 
 public class CountdownCard extends Card {
 
-    TextView timeRemaining;
-    TextView currentPeriod;
-    TextView abDayLabel;
+    private TextView timeRemaining;
+    private TextView currentPeriod;
+    private TextView abDayLabel;
 
-    ArcProgress progress;
+    private ArcProgress progress;
+
+    private CountDownTimer timer;
 
     public CountdownCard(Context context) {
         this(context, R.layout.widget_countdown);
@@ -57,17 +54,26 @@ public class CountdownCard extends Card {
         abDayLabel = ((TextView) parent.findViewById(R.id.abdayLabel));
     }
 
-    public void refresh(final EventsManager eventsManager, final Fragment context, final CardViewNative cardHolder) {
+    public void cancel() {
+        MainActivity.logVerbose("Cancelling Countdown Card");
+        if (this.timer != null)
+            timer.cancel();
+
+        timer = null;
+    }
+
+    public void refresh(final EventsManager eventsManager, final CardViewNative cardHolder) {
         final Calendar todayCalendar = Calendar.getInstance();
         final DayType todayDayType = eventsManager.getEventInfoHelper().getDayType(todayCalendar);
         final BellSchedule todayBellSchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(todayCalendar);
         final List<Event> todayEvents = eventsManager.getEventInfoHelper().getEventsForDay(todayCalendar, true);
 
+        Calendar timeToCountdownFrom = null;
         Calendar timeToCountdownTo = null;
         String descriptionText = "";
 
         if (todayBellSchedule != null) {
-            List<BellSchedule.Subject> subjects = todayBellSchedule.getSubjects(todayDayType, LunchType.AA_AB); //TODO: Get from student
+            List<BellSchedule.Subject> subjects = todayBellSchedule.getSubjects(todayDayType, LunchType.AA_AB, todayCalendar); //TODO: Get LunchType from student
 
             BellSchedule.Subject currentSubject = null;
             boolean beforeSchool = true;
@@ -75,7 +81,7 @@ public class CountdownCard extends Card {
 
             for (BellSchedule.Subject subject : subjects) {
                 //Check if the current time is in between this subject's start and end times
-                if (subject.getStartTime().compareTo(todayCalendar) <= 0) { //A subject has passed, so we're not before school.
+                if (subject.getStartTime().compareTo(todayCalendar) <= 0) { //A subject has started, so we're not before school.
                     beforeSchool = false;
                     if (subject.getEndTime().compareTo(todayCalendar) >= 0) {
                         currentSubject = subject;
@@ -86,37 +92,55 @@ public class CountdownCard extends Card {
                 }
             }
 
-            if (currentSubject == null) //We are either before or after school, or there are no subjects today.
+            MainActivity.logVerbose("Before School? " + beforeSchool);
+            MainActivity.logVerbose("After School? " + afterSchool);
+            MainActivity.logVerbose("Current Subject: " + (currentSubject != null ? currentSubject.getName() : "None."));
+
+            if (currentSubject == null) //We are not currently in a subject, or there are none today.
             {
                 if (beforeSchool) {
+                    MainActivity.logVerbose("(Before School) Counting down to " + subjects.get(0).getName());
+
+                    timeToCountdownFrom = Calendar.getInstance(); //Countdown from 12 AM of same day.
+                    timeToCountdownFrom.set(Calendar.HOUR_OF_DAY, 0);
+                    timeToCountdownFrom.set(Calendar.MINUTE, 0);
+                    timeToCountdownFrom.set(Calendar.SECOND, 0);
+
                     timeToCountdownTo = subjects.get(0).getStartTime();
                     descriptionText = "To the beginning of " + subjects.get(0).getName();
                 } else if (afterSchool) {
                     for (Event event : todayEvents) { //Countdown to next event today (if exists)
-                        if (event.getEventDate().compareTo(todayCalendar) >= 0) {
-                            timeToCountdownTo = event.getEventDate();
+                        if (event.getStartTime().compareTo(todayCalendar) >= 0) {
+                            MainActivity.logVerbose("(After School) Counting down to " + event.getTitle());
+                            timeToCountdownFrom = subjects.get(subjects.size() - 1).getEndTime(); //Countdown from end of school
+                            timeToCountdownTo = event.getStartTime(); //Countdown to beginning of event
                             descriptionText = "To the beginning of the event: " + event.getTitle();
                             break;
                         }
                     }
                     //TODO: Countdown to next event OR first subject of next school day
                 } else { //Time between subjects (5 minute hallway time)
-                    for (BellSchedule.Subject subject : subjects) { //Countdown to next subject.
+                    for (int i = 0; i < subjects.size(); i++) { //Countdown to next subject.
+                        BellSchedule.Subject subject = subjects.get(i);
                         if (subject.getStartTime().compareTo(todayCalendar) > 0) {
-                            timeToCountdownTo = subject.getStartTime();
+                            MainActivity.logVerbose("(Between Subjects) Counting down to " + subject.getName());
+                            timeToCountdownFrom = subjects.get(i - 1).getEndTime(); //Countdown from end of last subject
+                            timeToCountdownTo = subject.getStartTime(); //Countdown to beginning of next subject
                             descriptionText = "To the beginning of " + subject.getName();
                             break;
                         }
                     }
                 }
             } else {
+                MainActivity.logVerbose("(During Subject) Counting down to end of " + currentSubject.getName());
+                timeToCountdownFrom = currentSubject.getStartTime(); //Countdown from beginning of current subject
                 timeToCountdownTo = currentSubject.getEndTime(); //Countdown to end of current subject
                 descriptionText = "To the end of " + currentSubject.getName();
             }
         } else {
             for (Event event : todayEvents) {
-                if (event.getEventDate().compareTo(todayCalendar) >= 0) {
-                    timeToCountdownTo = event.getEventDate();
+                if (event.getStartTime().compareTo(todayCalendar) >= 0) {
+                    timeToCountdownTo = event.getStartTime();
                     descriptionText = "To the beginning of the event: " + event.getTitle();
                     break;
                 }
@@ -125,19 +149,21 @@ public class CountdownCard extends Card {
         }
 
         if (timeToCountdownTo != null) {
+            final Calendar finalTimeToCountdownFrom = timeToCountdownFrom;
             final Calendar finalTimeToCountdownTo = timeToCountdownTo;
-            new CountDownTimer(finalTimeToCountdownTo.getTime().getTime() - todayCalendar.getTime().getTime(), 1000) { // adjust the milli seconds here
+            if (this.timer != null)
+                timer.cancel();
+            this.timer = new CountDownTimer(finalTimeToCountdownTo.getTime().getTime() - todayCalendar.getTime().getTime(), 1000) {
                 public void onTick(long millisUntilFinished) {
-                    long current = Math.abs(finalTimeToCountdownTo.getTime().getTime() - millisUntilFinished);
-                    long end = Math.abs(finalTimeToCountdownTo.getTime().getTime());
+                    long current = Math.abs(finalTimeToCountdownTo.getTime().getTime() - millisUntilFinished - finalTimeToCountdownFrom.getTime().getTime());
+                    long end = Math.abs(finalTimeToCountdownTo.getTime().getTime() - finalTimeToCountdownFrom.getTime().getTime());
                     int percent = (int) Math.round(((double) current / end) * 100);
-                    MainActivity.logVerbose(current + "/" + end + " *100 = " + percent + "% (Millis until finished = " + millisUntilFinished + ")");
                     progress.setProgress(percent);
                     timeRemaining.setText(formatLongToReadableTime(millisUntilFinished));
                 }
 
                 public void onFinish() {
-                    refresh(eventsManager, context, cardHolder);
+                    refresh(eventsManager, cardHolder);
                 }
             }.start();
             currentPeriod.setText(descriptionText);
@@ -145,7 +171,6 @@ public class CountdownCard extends Card {
             cardHolder.setVisibility(View.VISIBLE);
             cardHolder.refreshCard(this);
         }
-        return;
     }
 
     public static String formatLongToReadableTime(long millis) {

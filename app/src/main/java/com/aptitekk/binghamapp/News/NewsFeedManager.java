@@ -116,8 +116,6 @@ public class NewsFeedManager {
 
             Node nNode = nList.item(temp);
 
-            MainActivity.logVerbose("Current Element : " + nNode.getNodeName());
-
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
                 Element eElement = (Element) nNode;

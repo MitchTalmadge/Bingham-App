@@ -93,7 +93,7 @@ public class EventInfoHelper {
                 String schedule = e.getTitle().toLowerCase().split("-")[1].split("assembly")[0].replaceFirst("\\s+$", "");
 
                 //DETERMINE MORNING/AFTERNOON
-                int timeOfDay = e.getEventDate().get(Calendar.HOUR_OF_DAY);
+                int timeOfDay = e.getStartTime().get(Calendar.HOUR_OF_DAY);
                 if ((timeOfDay >= 0 && timeOfDay < 12) && schedule.contains("A/B")) { // IF A/B is detected, theres only one type of "A/B" assembly in the mornings
                     return new BellSchedule(mainActivity.getResources().getStringArray(R.array.assemblyBellSchedules)[4], mainActivity.getResources().getStringArray(R.array.assemblyBellSchedule4));
                 } else if ((timeOfDay >= 0 && timeOfDay < 12) || schedule.contains("AM")) { // MORNING

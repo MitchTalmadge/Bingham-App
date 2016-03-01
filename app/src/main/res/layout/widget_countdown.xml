@@ -41,7 +41,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="\?"
             android:textIsSelectable="false"
-            android:textSize="100dp"
+            android:textSize="60dp"
             android:textColor="@color/primary_light"
             android:layout_centerHorizontal="true"/>
 

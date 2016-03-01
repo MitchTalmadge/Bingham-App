@@ -77,86 +77,98 @@ public class BellSchedule {
         return subjectLengths;
     }
 
-    public List<Subject> getSubjects(DayType dayType, LunchType lunchType) {
+    /**
+     * Returns a list of subjects with times formatted for the given day, pruned only to include subjects valid for the given student info.
+     *
+     * @param dayType   The DayType, specifying A or B Day.
+     * @param lunchType The LunchType, specifying which lunch-dependent subjects to include.
+     * @param day       The day to format the subject dates for.
+     * @return List of Subjects
+     */
+    public List<Subject> getSubjects(DayType dayType, LunchType lunchType, Calendar day) {
         List<Subject> subjects = new ArrayList<>();
 
-        for (int i = 0; i < getSubjectNames().length; i++) {
-            if (subjectNames[i].startsWith("*")) //Names with asterisks are meant to be ignored
-                continue;
-            if (subjectNames[i].contains("/")) { //Example: "1st/5th Period"
-                try {
+        for (int i = 0; i < subjectNames.length; i++) {
+            String subjectName = subjectNames[i];
 
-                    if (subjectNames[i].toLowerCase().contains("lunch")) {
-                        switch (dayType) {
-                            case A_DAY:
-                                switch (lunchType) {
-                                    case AA_AB: //A Lunch on A Days
-                                    case AA_BB:
-                                        if (subjectNames[i].toLowerCase().contains("b lunch"))
-                                            continue; //They have A lunch, not B, so skip this subject.
-                                        break;
-                                    case BA_AB: //B Lunch on A Days
-                                    case BA_BB:
-                                        if (subjectNames[i].toLowerCase().contains("a lunch"))
-                                            continue; //They have B Lunch, not A, so skip this subject.
-                                        break;
-                                    default:
-                                        break;
-                                }
+            if (subjectName.startsWith("*")) //Names with asterisks are meant to be ignored
+                continue;
+
+            if (subjectName.toLowerCase().contains("lunch")) { //Prune lunch-dependent periods
+                switch (dayType) {
+                    case A_DAY:
+                        switch (lunchType) {
+                            case AA_AB: //A Lunch on A Days
+                            case AA_BB:
+                                if (subjectNames[i].toLowerCase().contains("b lunch"))
+                                    continue; //They have A lunch, not B, so skip this subject.
                                 break;
-                            case B_DAY:
-                                switch (lunchType) {
-                                    case AA_AB: //A Lunch on B Days
-                                    case BA_AB:
-                                        if (subjectNames[i].toLowerCase().contains("b lunch"))
-                                            continue; //They have A lunch, not B, so skip this subject.
-                                        break;
-                                    case AA_BB: //B Lunch on B Days
-                                    case BA_BB:
-                                        if (subjectNames[i].toLowerCase().contains("a lunch"))
-                                            continue; //They have B Lunch, not A, so skip this subject.
-                                        break;
-                                    default:
-                                        break;
-                                }
+                            case BA_AB: //B Lunch on A Days
+                            case BA_BB:
+                                if (subjectNames[i].toLowerCase().contains("a lunch"))
+                                    continue; //They have B Lunch, not A, so skip this subject.
                                 break;
                             default:
                                 break;
                         }
-                    }
-
-                    StringBuilder newName = new StringBuilder();
-                    switch (dayType) {
-                        case A_DAY:
-                            newName.append(subjectNames[i].substring(0, 3)).append(subjectNames[i].substring(7));
-                            break; //Example: 1st Period
-                        case B_DAY:
-                            newName.append(subjectNames[i].substring(4));
-                            break; //Example: 5th Period
-                        default:
-                            newName.append(subjectNames[i]);
-                            break; //Example: 1st/5th Period
-                    }
-
-                    //Remove e.x.: "(B Lunchers)" from name
-                    String name = newName.toString();
-                    Pattern pattern = Pattern.compile("(.*)\\s\\([ab] lunchers\\)", Pattern.CASE_INSENSITIVE);
-                    Matcher matcher = pattern.matcher(name);
-                    if(matcher.find())
-                    {
-                        name = matcher.group(1);
-                    }
-
-                    Calendar startTime = Calendar.getInstance();
-                    startTime.setTime(scheduleDateFormat.parse(subjectStartTimes[i]));
-
-                    Calendar endTime = Calendar.getInstance();
-                    endTime.setTime(scheduleDateFormat.parse(subjectStartTimes[i]));
-
-                    subjects.add(new Subject(name, dayType, startTime, endTime));
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                        break;
+                    case B_DAY:
+                        switch (lunchType) {
+                            case AA_AB: //A Lunch on B Days
+                            case BA_AB:
+                                if (subjectNames[i].toLowerCase().contains("b lunch"))
+                                    continue; //They have A lunch, not B, so skip this subject.
+                                break;
+                            case AA_BB: //B Lunch on B Days
+                            case BA_BB:
+                                if (subjectNames[i].toLowerCase().contains("a lunch"))
+                                    continue; //They have B Lunch, not A, so skip this subject.
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
                 }
+
+                //Remove e.x.: "(B Lunchers)" from name
+                Pattern pattern = Pattern.compile("(.*)\\s\\([ab] lunchers\\)", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(subjectName);
+                if (matcher.find()) {
+                    subjectName = matcher.group(1);
+                }
+            }
+
+            if (subjectName.contains("/")) { //Remove incorrect period numbers for DayType - Example: "1st/5th Period" on A Day -> "1st Period"
+                StringBuilder newName = new StringBuilder();
+                switch (dayType) {
+                    case A_DAY:
+                        newName.append(subjectName.substring(0, 3)).append(subjectName.substring(7));
+                        break; //Example: 1st Period
+                    case B_DAY:
+                        newName.append(subjectName.substring(4));
+                        break; //Example: 5th Period
+                    default:
+                        newName.append(subjectName);
+                        break; //Example: 1st/5th Period
+                }
+                subjectName = newName.toString();
+            }
+
+            try {
+                Calendar startTime = Calendar.getInstance();
+                startTime.setTime(scheduleDateFormat.parse(subjectStartTimes[i]));
+                startTime.set(day.get(Calendar.YEAR), day.get(Calendar.MONTH), day.get(Calendar.DAY_OF_MONTH));
+
+                Calendar endTime = Calendar.getInstance();
+                endTime.setTime(scheduleDateFormat.parse(subjectEndTimes[i]));
+                endTime.set(day.get(Calendar.YEAR), day.get(Calendar.MONTH), day.get(Calendar.DAY_OF_MONTH));
+
+                MainActivity.logVerbose("Adding Subject: " + subjectName + " - Start Time: " + subjectStartTimes[i] + " - End Time: " + subjectEndTimes[i]);
+                subjects.add(new Subject(subjectName, dayType, startTime, endTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
 

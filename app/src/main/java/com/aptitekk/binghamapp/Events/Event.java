@@ -24,7 +24,7 @@ public class Event {
         return title;
     }
 
-    public Calendar getEventDate() {
+    public Calendar getStartTime() {
         return eventDate;
     }
 
@@ -47,20 +47,20 @@ public class Event {
         String title = this.getTitle();
 
         //Format Date
-        if (SimpleDateFormat.getDateTimeInstance().format(this.getEventDate().getTime()).equalsIgnoreCase(
+        if (SimpleDateFormat.getDateTimeInstance().format(this.getStartTime().getTime()).equalsIgnoreCase(
                 SimpleDateFormat.getDateTimeInstance().format(this.getEndTime().getTime()))) {
-            dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " at " +
-                    new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase());
+            dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getStartTime().getTime()) + " at " +
+                    new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getStartTime().getTime()).toLowerCase());
 
         } else {
-            if (new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()).equalsIgnoreCase(
+            if (new SimpleDateFormat("MMM dd", Locale.US).format(this.getStartTime().getTime()).equalsIgnoreCase(
                     new SimpleDateFormat("MMM dd", Locale.US).format(this.getEndTime().getTime()))) {
-                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " from " +
-                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase() + " to " +
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getStartTime().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getStartTime().getTime()).toLowerCase() + " to " +
                         new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEndTime().getTime()).toLowerCase());
             } else {
-                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getEventDate().getTime()) + " from " +
-                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEventDate().getTime()).toLowerCase() + " to " +
+                dateStamp = (" on " + new SimpleDateFormat("MMM dd", Locale.US).format(this.getStartTime().getTime()) + " from " +
+                        new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getStartTime().getTime()).toLowerCase() + " to " +
                         new SimpleDateFormat("MMM dd", Locale.US).format(this.getEndTime().getTime()) + " " +
                         new SimpleDateFormat("hh:mmaa", Locale.US).format(this.getEndTime().getTime()).toLowerCase());
             }
