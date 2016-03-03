@@ -21,7 +21,6 @@ import com.aptitekk.binghamapp.R;
 import com.aptitekk.binghamapp.cards.CountdownCard;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -106,7 +105,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
         /////////////////// COUNTDOWN ////////////////////////
 
         //Create a Card
-        baseCountDownCard = new CountdownCard(getActivity());
+        baseCountDownCard = new CountdownCard(getActivity(), eventsManager, countDownCardView);
         //Set the card inner text
         CardHeader header = new CardHeader(getActivity());
         header.setTitle("Countdown");
@@ -131,7 +130,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
                         .setupView(countDownCardView);
         baseCountDownCard.setViewToClickToExpand(viewToClickToExpand);
 
-        baseCountDownCard.refresh(eventsManager, countDownCardView);
+        baseCountDownCard.refresh();
 
         baseCountDownCard.notifyDataSetChanged();
 
@@ -153,7 +152,7 @@ public class MainFragment extends Fragment implements MainActivity.BackButtonLis
     public void onDestroyView() {
         super.onDestroyView();
 
-        if(baseCountDownCard != null)
+        if (baseCountDownCard != null)
             baseCountDownCard.cancel();
     }
 }

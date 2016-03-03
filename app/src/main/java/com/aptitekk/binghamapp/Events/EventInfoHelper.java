@@ -67,16 +67,16 @@ public class EventInfoHelper {
         return results;
     }
 
-    public boolean hasSchoolStartedForDay(BellSchedule schedule, Calendar dateTime) throws ParseException {
+    public boolean hasSchoolStartedForDay(BellSchedule schedule, Calendar currentTime) throws ParseException {
         String rawStartDay = schedule.getSubjectStartTimes()[0]; //GET START TIME
-        Date startTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawStartDay + " MDT");
-        return !dateTime.getTime().before(startTime);
+        Date startTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(currentTime.getTime()) + " " + rawStartDay + " MDT");
+        return !currentTime.getTime().before(startTime);
     }
 
-    public boolean hasSchoolEndedForDay(BellSchedule schedule, Calendar dateTime) throws ParseException {
+    public boolean hasSchoolEndedForDay(BellSchedule schedule, Calendar currentTime) throws ParseException {
         String rawEndDay = schedule.getSubjectEndTimes()[schedule.getSubjectEndTimes().length - 1]; //GET END TIME
-        Date endTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(dateTime.getTime()) + " " + rawEndDay + " MDT");
-        return !dateTime.getTime().after(endTime);
+        Date endTime = new SimpleDateFormat("dd MMM yyyy hh:mm aa z", Locale.US).parse(SimpleDateFormat.getDateInstance().format(currentTime.getTime()) + " " + rawEndDay + " MDT");
+        return !currentTime.getTime().after(endTime);
     }
 
     public BellSchedule getBellScheduleForDay(Calendar date) {
@@ -142,7 +142,7 @@ public class EventInfoHelper {
             }
 
         }
-        MainActivity.logVerbose("No schedule was determined, loading regular weekday schedule.");
-        return new BellSchedule(mainActivity.getResources().getStringArray(R.array.regularBellSchedules)[0], mainActivity.getResources().getStringArray(R.array.regularBellSchedule0));
+        MainActivity.logVerbose("No Schedule Found For Day.");
+        return null;
     }
 }

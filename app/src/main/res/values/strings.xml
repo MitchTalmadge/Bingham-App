@@ -13,6 +13,7 @@
     <string name="create_pin_label">Please create a 4 digit PIN to secure your login details:</string>
     <string name="login_button_label">Login</string>
     <string name="secure_login_details_label">Secure your Login Details</string>
+    <string name="countdown_no_events">There are no Events to Countdown To.</string>
 
     <string-array name="drawer_list_strings">
         <item>0_Main</item>
