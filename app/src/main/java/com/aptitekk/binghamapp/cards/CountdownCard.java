@@ -134,7 +134,42 @@ public class CountdownCard extends Card {
                             break;
                         }
                     }
-                    //TODO: Countdown to next event OR first subject of next school day
+
+                    if (timeToCountdownTo == null) {
+                        Calendar dayCalendar = Calendar.getInstance();
+                        for (int i = 0; i < 7; i++) {
+                            if (timeToCountdownTo != null)
+                                break;
+
+                            dayCalendar.add(Calendar.DATE, 1); //Next day
+                            DayType dayType = eventsManager.getEventInfoHelper().getDayType(dayCalendar);
+
+                            switch (dayType) {
+                                case A_DAY:
+                                case B_DAY:
+                                    BellSchedule bellSchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(dayCalendar);
+                                    List<BellSchedule.Subject> daySubjects = bellSchedule.getSubjects(dayType, LunchType.AA_AB, dayCalendar);
+
+                                    MainActivity.logVerbose("(After School) Counting down to " + daySubjects.get(0).getName() + " of another day...");
+                                    timeToCountdownFrom = subjects.get(subjects.size() - 1).getEndTime(); //Countdown from 12 AM of same day.
+                                    timeToCountdownTo = daySubjects.get(0).getStartTime();
+                                    descriptionText = "To the beginning of " + daySubjects.get(0).getName() + (i == 0 ? " tomorrow." : " on the next school day.");
+                                    //TODO: Say the date rather than "next school day"
+                                    break;
+                                default:
+                                    List<Event> events = eventsManager.getEventInfoHelper().getEventsForDay(dayCalendar, true);
+                                    Event event = events.get(0);
+                                    if (event != null) {
+                                        MainActivity.logVerbose("(After School) Counting down to beginning of " + event.getTitle());
+                                        timeToCountdownFrom = subjects.get(subjects.size() - 1).getEndTime();
+                                        timeToCountdownTo = event.getStartTime();
+                                        descriptionText = "To the beginning of the event: " + event.getTitle();
+                                        break;
+                                    }
+                            }
+                        }
+                    }
+
                     if (timeToCountdownTo == null)
                         setDisabled(true); //Last resort, disable countdown.
                 } else { //Time between subjects (5 minute hallway time)
@@ -183,7 +218,41 @@ public class CountdownCard extends Card {
                     }
                 }
             }
-            //TODO: Countdown to next event OR first subject of next school day
+
+            if (timeToCountdownTo == null) {
+                Calendar dayCalendar = Calendar.getInstance();
+                for (int i = 0; i < 7; i++) {
+                    if (timeToCountdownTo != null)
+                        break;
+
+                    dayCalendar.add(Calendar.DATE, 1); //Next day
+                    DayType dayType = eventsManager.getEventInfoHelper().getDayType(dayCalendar);
+
+                    switch (dayType) {
+                        case A_DAY:
+                        case B_DAY:
+                            BellSchedule bellSchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(dayCalendar);
+                            List<BellSchedule.Subject> subjects = bellSchedule.getSubjects(dayType, LunchType.AA_AB, dayCalendar);
+
+                            MainActivity.logVerbose("(No School) Counting down to " + subjects.get(0).getName() + " of another day...");
+                            timeToCountdownFrom = twelveAMCalendar; //Countdown from 12 AM of same day.
+                            timeToCountdownTo = subjects.get(0).getStartTime();
+                            descriptionText = "To the beginning of " + subjects.get(0).getName() + (i == 0 ? " tomorrow." : " on the next school day.");
+                            //TODO: Say the date rather than "next school day"
+                            break;
+                        default:
+                            List<Event> events = eventsManager.getEventInfoHelper().getEventsForDay(dayCalendar, true);
+                            Event event = events.get(0);
+                            if (event != null) {
+                                MainActivity.logVerbose("(No School) Counting down to beginning of " + event.getTitle());
+                                timeToCountdownFrom = twelveAMCalendar;
+                                timeToCountdownTo = event.getStartTime();
+                                descriptionText = "To the beginning of the event: " + event.getTitle();
+                                break;
+                            }
+                    }
+                }
+            }
 
             if (timeToCountdownTo == null)
                 setDisabled(true); //Last resort, disable countdown.
@@ -192,7 +261,7 @@ public class CountdownCard extends Card {
         if (timeToCountdownTo != null) {
             final Calendar finalTimeToCountdownFrom = timeToCountdownFrom;
             final Calendar finalTimeToCountdownTo = timeToCountdownTo;
-            MainActivity.logVerbose("Counting Down From: " + finalTimeToCountdownFrom.getTime().getTime() + " - To: " + finalTimeToCountdownTo.getTime().getTime() + " - Current Time: "+todayCalendar.getTime().getTime());
+            MainActivity.logVerbose("Counting Down From: " + finalTimeToCountdownFrom.getTime().getTime() + " - To: " + finalTimeToCountdownTo.getTime().getTime() + " - Current Time: " + todayCalendar.getTime().getTime());
             if (this.timer != null)
                 timer.cancel();
             this.timer = new CountDownTimer(finalTimeToCountdownTo.getTime().getTime() - todayCalendar.getTime().getTime(), 1000) {
