@@ -49,12 +49,12 @@ public class EventsManager {
     public static URL EVENTS_CALENDAR_URL;
 
     static {
-        Calendar c = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
         String timeZone = TimeZone.getDefault().getID();
         try {
             EVENTS_CALENDAR_URL = new URL("https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
-                    "timeMin=" + format.format(c.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk");
+                    "timeMin=" + format.format(calendar.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -78,8 +78,7 @@ public class EventsManager {
         loadSavedEvents();
     }
 
-    private void loadSavedEvents()
-    {
+    private void loadSavedEvents() {
         File eventsFeedFile = new File(mainActivity.getFilesDir(), EVENTS_FILE_NAME);
 
         if (eventsFeedFile.exists()) {
@@ -330,7 +329,7 @@ public class EventsManager {
 
                 try {
                     location = arr.getJSONObject(i).getString("location");
-                } catch (JSONException e) { // A/B days dont have locations x)
+                } catch (JSONException e) { // A/B days don't have locations
                     location = "";
                 }
                 try {

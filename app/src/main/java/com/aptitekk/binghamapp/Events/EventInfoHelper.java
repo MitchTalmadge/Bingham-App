@@ -38,19 +38,21 @@ public class EventInfoHelper {
 
     public Event getNextABDayEvent(Calendar date) {
         for (Event event : eventsManager.getEventsList()) {
-            if (event.isOnOrAfterDate(date))
+            if (event.isOnOrAfterDate(date)) {
                 if (event.getDayType() == DayType.A_DAY || event.getDayType() == DayType.B_DAY)
                     return event;
+            }
         }
         return null;
     }
 
     public Event getNextEvent(Calendar time, boolean excludeABDayEvents) {
         for (Event event : eventsManager.getEventsList()) {
-            if (event.isOnOrAfterTime(time))
+            if (event.isOnOrAfterTime(time)) {
                 if (excludeABDayEvents && (event.getDayType() == DayType.A_DAY || event.getDayType() == DayType.B_DAY))
                     continue;
-            return event;
+                return event;
+            }
         }
         return null;
     }
