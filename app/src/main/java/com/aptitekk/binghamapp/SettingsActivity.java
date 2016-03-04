@@ -29,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.aptitekk.binghamapp.Events.LunchType;
+
 import java.util.List;
 
 
@@ -286,11 +288,25 @@ public class SettingsActivity extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
 
+            //Populate lunch period list with values from LunchType enum
+            ListPreference listPreference = (ListPreference)findPreference("lunch_periods_list");
+
+            CharSequence[] entries = new CharSequence[LunchType.values().length];
+            CharSequence[] values = new CharSequence[entries.length];
+            for(int i = 0; i < entries.length; i++)
+            {
+                entries[i] = LunchType.values()[i].getDescription();
+                values[i] = LunchType.values()[i].name();
+            }
+
+            listPreference.setEntries(entries);
+            listPreference.setEntryValues(values);
+
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
+            bindPreferenceSummaryToValue(findPreference("lunch_periods_list"));
         }
     }
     /**
