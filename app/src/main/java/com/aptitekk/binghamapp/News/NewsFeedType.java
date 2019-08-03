@@ -5,8 +5,8 @@ import java.net.URL;
 
 public enum NewsFeedType {
 
-    ANNOUNCEMENTS("Announcements", "http://www.binghamminers.org/apps/news/news_rss.jsp"),
-    PROSPECTOR("Prospector", "http://binghamprospector.org/feed");
+    ANNOUNCEMENTS("Announcements", "https://www.binghamminers.org/apps/news/news_rss.jsp"),
+    PROSPECTOR("Prospector", "https://binghamprospector.org/feed");
 
     private String feedName;
     private URL feedUrl;

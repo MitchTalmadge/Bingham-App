@@ -53,8 +53,8 @@ public class EventsManager {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.US);
         String timeZone = TimeZone.getDefault().getID();
         try {
-            EVENTS_CALENDAR_URL = new URL("https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=2500&" +
-                    "timeMin=" + format.format(calendar.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyBYdbs9jPSdqJRASyjEC7E6JjRTp20UxQk");
+            EVENTS_CALENDAR_URL = new URL("https://www.googleapis.com/calendar/v3/calendars/jordandistrict.org_o4d9atn49tbcvmc29451bailf0@group.calendar.google.com/events?maxResults=250&" +
+                    "timeMin=" + format.format(calendar.getTime()).replace(" ", "T") + "Z" + "&timeZone=" + timeZone + "&singleEvents=true&key=AIzaSyArfueMwkIotSWFNNjg0kC_3Zkdg5NbKM8&orderBy=startTime");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -332,12 +332,13 @@ public class EventsManager {
                 } catch (JSONException e) { // A/B days don't have locations
                     location = "";
                 }
-                try {
+                if( arr.getJSONObject(i).getJSONObject("start").has("dateTime") ) {
+//                    arr.getJSONObject(i).getJSONObject("start").ha
                     rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("dateTime");
                     rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("dateTime");
                     format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ", Locale.US);
                     endTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZZZZZZ", Locale.US);
-                } catch (JSONException e) { //Date not DateTime
+                } else { //Date not DateTime
                     rawStartTime = arr.getJSONObject(i).getJSONObject("start").getString("date");
                     rawEndTime = arr.getJSONObject(i).getJSONObject("end").getString("date");
                     format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);

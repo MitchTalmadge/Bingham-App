@@ -1,11 +1,14 @@
 package com.aptitekk.binghamapp.Fragments.Maps;
 
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -80,6 +83,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback/*, Goog
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        if (PackageManager.PERMISSION_GRANTED == this.getContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+//            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1337);
+//        }
+
+        ActivityCompat.requestPermissions(this.getActivity(), new String[] {
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION },
+                13);
+
         setHasOptionsMenu(true);
     }
 

@@ -81,7 +81,9 @@ public class CountdownCard extends Card {
         final Calendar todayCalendar = Calendar.getInstance();
         final DayType todayDayType = eventsManager.getEventInfoHelper().getDayType(todayCalendar);
         final BellSchedule todayBellSchedule = eventsManager.getEventInfoHelper().getBellScheduleForDay(todayCalendar);
-        final List<Event> todayEvents = eventsManager.getEventInfoHelper().getEventsForDay(todayCalendar, true);
+        final List<Event> todayEvents = eventsManager.getEventInfoHelper().getEventsForDay(todayCalendar, false);
+
+//        MainActivity.logVerbose(EventsManager.EVENTS_CALENDAR_URL.toString());
 
         final Calendar twelveAMCalendar = Calendar.getInstance();
         twelveAMCalendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -242,8 +244,8 @@ public class CountdownCard extends Card {
                             break;
                         default:
                             List<Event> events = eventsManager.getEventInfoHelper().getEventsForDay(dayCalendar, true);
-                            Event event = events.get(0);
-                            if (event != null) {
+                            if (events.size() > 0) {
+                                Event event = events.get(0);
                                 MainActivity.logVerbose("(No School) Counting down to beginning of " + event.getTitle());
                                 timeToCountdownFrom = twelveAMCalendar;
                                 timeToCountdownTo = event.getStartTime();
